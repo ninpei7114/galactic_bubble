@@ -5,7 +5,7 @@ Single Shot MultiBox Detectorにおける赤外線リング構造の同定に用
 
 
 explain directory(ディレクトリの説明)
-
+<pre>
 galactic_bubble
  |
  |
@@ -17,3 +17,4 @@ galactic_bubble
  |
  |----------play_with_data（the coord to process data：データ加工のためのコード）
  |
+</pre>
