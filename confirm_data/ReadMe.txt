@@ -1,1 +1,4 @@
-spitzer_06300+0000_rgbは検証データとして扱う
+spitzer_06300+0000_rgbは検証データとして扱
+
+選定する際のデータは、all_ring_mwp_pytorch_remove_cygnus.pdfを使った。
+選定する際のデータのカタログは、all_ring_mwp_pytorch_remove_cygnus_catalogue.csv
