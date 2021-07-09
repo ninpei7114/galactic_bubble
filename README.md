@@ -13,7 +13,7 @@ galactic_bubble
  |                |
  |                |-------vgg_ver(the CNN part is VGG16：CNN部分がVGG16にしたSSDのコード)
  |                |
- |                |-------original(the CNN part is original : CNN部分がオリジナ)
+ |                |-------original(the CNN part is original : CNN部分がオリジナル)
  |
  |----------play_with_data（the coord to process data：データ加工のためのコード）
  |
