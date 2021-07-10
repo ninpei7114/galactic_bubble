@@ -30,144 +30,9 @@ from utils.data_augumentation import Compose, ConvertFromInts, ToAbsoluteCoords,
 from utils.match import match
 
 
-# 学習、検証の画像データとアノテーションデータへのファイルパスリストを作成する
-
-def make_datapath_list(rootpath):
-    """
-    （現在は、この関数は使っていない）
-    データへのパスを格納したリストを作成する。
-
-    Parameters
-    ----------
-    rootpath : str
-        データフォルダへのパス
-
-    Returns
-    -------
-    ret : train_img_list, train_anno_list, val_img_list, val_anno_list
-        データへのパスを格納したリスト
-    """
-
-    # 画像ファイルとアノテーションファイルへのパスのテンプレートを作成
-    imgpath_template = osp.join(rootpath, 'ImageSets', '%s.npy')
-    annopath_template = osp.join(rootpath, 'Annotations', '%s.xml')
-
-    # 訓練と検証、それぞれのファイルのID（ファイル名）を取得する
-    train_id_names = osp.join(rootpath + 'ImageSets/train.txt')
-    val_id_names = osp.join(rootpath + 'ImageSets/val.txt')
-
-    # 訓練データの画像ファイルとアノテーションファイルへのパスリストを作成
-    train_img_list = list()
-    train_anno_list = list()
-
-    for line in open(train_id_names):
-        file_id = line.strip()  # 空白スペースと改行を除去
-        img_path = (imgpath_template % file_id)  # 画像のパス
-        anno_path = (annopath_template % file_id)  # アノテーションのパス
-        train_img_list.append(img_path)  # リストに追加
-        train_anno_list.append(anno_path)  # リストに追加
-
-    # 検証データの画像ファイルとアノテーションファイルへのパスリストを作成
-    val_img_list = list()
-    val_anno_list = list()
-
-    for line in open(val_id_names):
-        file_id = line.strip()  # 空白スペースと改行を除去
-        img_path = (imgpath_template % file_id)  # 画像のパス
-        anno_path = (annopath_template % file_id)  # アノテーションのパス
-        val_img_list.append(img_path)  # リストに追加
-        val_anno_list.append(anno_path)  # リストに追加
-
-    return train_img_list, train_anno_list, val_img_list, val_anno_list
-
-
-# 「XML形式のアノテーション」を、リスト形式に変換するクラス
-
-
-class Anno_xml2list(object):
-    """
-    （現在は、この関数は使っていない）
-    1枚の画像に対する「XML形式のアノテーションデータ」を、画像サイズで規格化してからリスト形式に変換する。
-
-    Attributes
-    ----------
-    classes : リスト
-        VOCのクラス名を格納したリスト
-    """
-
-    def __init__(self, classes):
-
-        self.classes = classes
-
-    def __call__(self, xml_path, width, height):
-        """
-        1枚の画像に対する「XML形式のアノテーションデータ」を、画像サイズで規格化してからリスト形式に変換する。
-
-        Parameters
-        ----------
-        xml_path : str
-            xmlファイルへのパス。
-        width : int
-            対象画像の幅。
-        height : int
-            対象画像の高さ。
-
-        Returns
-        -------
-        ret : [[xmin, ymin, xmax, ymax, label_ind], ... ]
-            物体のアノテーションデータを格納したリスト。画像内に存在する物体数分のだけ要素を持つ。
-        """
-
-        # 画像内の全ての物体のアノテーションをこのリストに格納します
-        ret = []
-
-        # xmlファイルを読み込む
-        xml = ET.parse(xml_path).getroot()
-
-
-        # 画像内にある物体（object）の数だけループする
-        for obj in xml.iter('object'):
-
-            # アノテーションで検知がdifficultに設定されているものは除外
-            difficult = int(obj.find('difficult').text)
-            if difficult == 1:
-                continue
-
-            # 1つの物体に対するアノテーションを格納するリスト
-            bndbox = []
-
-            name = obj.find('name').text.lower().strip()  # 物体名
-            bbox = obj.find('bndbox')  # バウンディングボックスの情報
-            # アノテーションの xmin, ymin, xmax, ymaxを取得し、0～1に規格化
-            pts = ['xmin', 'ymin', 'xmax', 'ymax']
-
-            for pt in (pts):
-                # VOCは原点が(1,1)なので1を引き算して（0, 0）に
-                cur_pixel = int(bbox.find(pt).text) - 1
-
-                # 幅、高さで規格化
-                if pt == 'xmin' or pt == 'xmax':  # x方向のときは幅で割算
-                    cur_pixel /= width
-                else:  # y方向のときは高さで割算
-                    cur_pixel /= height
-
-                bndbox.append(cur_pixel)
-
-            # アノテーションのクラス名のindexを取得して追加
-            label_idx = self.classes.index(name)
-            bndbox.append(label_idx)
-
-            # retに[xmin, ymin, xmax, ymax, label_ind]を足す
-            ret += [bndbox]
-        return np.array(ret)  # [[xmin, ymin, xmax, ymax, label_ind], ... ]
-
-
-# 入力画像の前処理をするクラス
-
 
 class DataTransform():
     """
-    （現在は、この関数は使っていない）
 
     画像とアノテーションの前処理クラス。訓練と推論で異なる動作をする。
     画像のサイズを300x300にする。
@@ -213,71 +78,6 @@ class DataTransform():
         return self.data_transform[phase](img, boxes, labels)
 
 
-class VOCDataset(data.Dataset):
-    """
-    （現在は、この関数は使っていない）
-    VOC2012のDatasetを作成するクラス。PyTorchのDatasetクラスを継承。
-
-    Attributes
-    ----------
-    img_list : リスト
-        画像のパスを格納したリスト
-    anno_list : リスト
-        アノテーションへのパスを格納したリスト
-    phase : 'train' or 'test'
-        学習か訓練かを設定する。
-    transform : object
-        前処理クラスのインスタンス
-    transform_anno : object
-        xmlのアノテーションをリストに変換するインスタンス
-    """
-
-    def __init__(self, img_list, anno_list, phase, transform, transform_anno):
-        self.img_list = img_list
-        self.anno_list = anno_list
-        self.phase = phase  # train もしくは valを指定
-        self.transform = transform  # 画像の変形
-        self.transform_anno = transform_anno  # アノテーションデータをxmlからリストへ
-
-    def __len__(self):
-        '''画像の枚数を返す'''
-        return len(self.img_list)
-
-    def __getitem__(self, index):
-        '''
-        前処理をした画像のテンソル形式のデータとアノテーションを取得
-        '''
-        im, gt, h, w = self.pull_item(index)
-        return im, gt
-
-    def pull_item(self, index):
-        '''前処理をした画像のテンソル形式のデータ、アノテーション、画像の高さ、幅を取得する'''
-
-        # 1. 画像読み込み
-        image_file_path = self.img_list[index]
-#         img = cv2.imread(image_file_path)  # [高さ][幅][色BGR]
-        img = np.load(image_file_path)
-
-        width, height, channels = img.shape  # 画像のサイズを取得
-
-        # 2. xml形式のアノテーション情報をリストに
-        anno_file_path = self.anno_list[index]
-        anno_list = self.transform_anno(anno_file_path, width, height)
-
-        # 3. 前処理を実施
-        img, boxes, labels = self.transform(
-            img, self.phase, anno_list[:, :4], anno_list[:, 4])
-#         print(labels)
-        # 色チャネルの順番がBGRになっているので、RGBに順番変更
-        # さらに（高さ、幅、色チャネル）の順を（色チャネル、高さ、幅）に変換
-#         img = torch.from_numpy(img[:, :, (2, 1, 0)]).permute(2, 0, 1)
-        img = torch.from_numpy(img)
-        # BBoxとラベルをセットにしたnp.arrayを作成、変数名「gt」はground truth（答え）の略称
-        gt = np.hstack((boxes, np.expand_dims(labels, axis=1)))
-
-        return img, gt, height, width
-
-
 def od_collate_fn(batch):
     """
     Datasetから取り出すアノテーションデータのサイズが画像ごとに異なります。
@@ -309,7 +109,7 @@ def od_collate_fn(batch):
     return imgs, targets
 
 
-# 34層にわたる、vggモジュールを作成
+# 19層にわたる、vggモジュールを作成
 
 def make_vgg():
     """
@@ -363,6 +163,8 @@ def make_extras():
 # デフォルトボックスに対する各クラスの確率を出力するconf_layersを作成
 
 
+## bbox_aspect_numがデフォルトで、[4, 6, 6, 6, 4, 4]になっていることに注意
+
 def make_loc_conf(num_classes=2, bbox_aspect_num=[4, 6, 6, 6, 4, 4]):
 
     loc_layers = []
@@ -408,6 +210,9 @@ def make_loc_conf(num_classes=2, bbox_aspect_num=[4, 6, 6, 6, 4, 4]):
 
 
 # convC4_3からの出力をscale=20のL2Normで正規化する層
+# scale20はpascalvocを使う時に、20になっていた。
+# 20クラスの20なのか、たまたま20なのかわからない
+
 class L2Norm(nn.Module):
     def __init__(self, input_channels=32, scale=20):
         super(L2Norm, self).__init__()  # 親クラスのコンストラクタ実行
@@ -421,7 +226,7 @@ class L2Norm(nn.Module):
         init.constant_(self.weight, self.scale)  # weightの値がすべてscale（=20）になる
 
     def forward(self, x):
-        '''38×38の特徴量に対して、100チャネルにわたって2乗和のルートを求めた
+        '''38×38の特徴量に対して、32チャネルにわたって2乗和のルートを求めた
         38×38個の値を使用し、各特徴量を正規化してから係数をかけ算する層'''
 
         # 各チャネルにおける38×38個の特徴量のチャネル方向の2乗和を計算し、
@@ -430,9 +235,9 @@ class L2Norm(nn.Module):
         norm = x.pow(2).sum(dim=1, keepdim=True).sqrt()+self.eps
         x = torch.div(x, norm)
 
-        # 係数をかける。係数はチャネルごとに1つで、512個の係数を持つ
-        # self.weightのテンソルサイズはtorch.Size([512])なので
-        # torch.Size([batch_num, 512, 38, 38])まで変形します
+        # 係数をかける。係数はチャネルごとに1つで、32個の係数を持つ
+        # self.weightのテンソルサイズはtorch.Size([32])なので
+        # torch.Size([batch_num, 32, 38, 38])まで変形します
         weights = self.weight.unsqueeze(
             0).unsqueeze(2).unsqueeze(3).expand_as(x)
         out = weights * x
@@ -662,7 +467,7 @@ class Detect(Function):
         Returns
         -------
         output : torch.Size([batch_num, 2, 200, 5])
-            （batch_num、クラス、confのtop200、BBoxの情報）
+            （batch_num、クラス(ring or noring)、confのtop200、BBoxの情報）
         """
 
 #         # 各サイズを取得
@@ -700,7 +505,7 @@ class Detect(Function):
                 # 閾値を超えたconfのインデックスをc_maskとして取得
                 c_mask = conf_scores[cl].gt(self.conf_thresh)
                 # gtはGreater thanのこと。gtにより閾値を超えたものが1に、以下が0になる
-                # conf_scores:torch.Size([21, 8732])
+                # conf_scores:torch.Size([2, 8732])
                 # c_mask:torch.Size([8732])
 
                 # scoresはtorch.Size([閾値を超えたBBox数])
@@ -729,7 +534,7 @@ class Detect(Function):
                 output[i, cl, :count] = torch.cat((scores[ids[:count]].unsqueeze(1),
                                                    boxes[ids[:count]]), 1)
 
-        return output  # torch.Size([1, 21, 200, 5])
+        return output  # torch.Size([1, 2, 200, 5])
 
 # SSDクラスを作成する
 
@@ -740,7 +545,7 @@ class SSD(nn.Module):
         super(SSD, self).__init__()
 
         self.phase = phase  # train or inferenceを指定
-        self.num_classes = cfg["num_classes"]  # クラス数=21
+        self.num_classes = cfg["num_classes"]  # クラス数=2
 
         # SSDのネットワークを作る
         self.vgg = make_vgg()
@@ -816,7 +621,7 @@ class SSD(nn.Module):
 
         # さらにlocとconfの形を整える
         # locのサイズは、torch.Size([batch_num, 8732, 4])
-        # confのサイズは、torch.Size([batch_num, 8732, 21])
+        # confのサイズは、torch.Size([batch_num, 8732, 2])
         loc = loc.view(loc.size(0), -1, 4)
         conf = conf.view(conf.size(0), -1, self.num_classes)
 #         print(conf[:,:,1])
@@ -825,7 +630,7 @@ class SSD(nn.Module):
 
         if self.phase == "inference":  # 推論時
             # クラス「Detect」のforwardを実行
-            # 返り値のサイズは torch.Size([batch_num, 21, 200, 5])
+            # 返り値のサイズは torch.Size([batch_num, 2, 200, 5])
             with torch.no_grad():
                 return self.detect(output[0], output[1], output[2])
 
@@ -870,7 +675,7 @@ class MultiBoxLoss(nn.Module):
         # 要素数を把握
         num_batch = loc_data.size(0)  # ミニバッチのサイズ
         num_dbox = loc_data.size(1)  # DBoxの数 = 8732
-        num_classes = conf_data.size(2)  # クラス数 = 21
+        num_classes = conf_data.size(2)  # クラス数 = 2
 #         print(num_classes)
         # 損失の計算に使用するものを格納する変数を作成
         # conf_t_label：各DBoxに一番近い正解のBBoxのラベルを格納させる
@@ -990,11 +795,11 @@ class MultiBoxLoss(nn.Module):
         # マスクの形を整形し、conf_dataに合わせる
         # pos_idx_maskはPositive DBoxのconfを取り出すマスクです
         # neg_idx_maskはHard Negative Miningで抽出したNegative DBoxのconfを取り出すマスクです
-        # pos_mask：torch.Size([num_batch, 8732])→pos_idx_mask：torch.Size([num_batch, 8732, 21])
+        # pos_mask：torch.Size([num_batch, 8732])→pos_idx_mask：torch.Size([num_batch, 8732, 2])
         pos_idx_mask = pos_mask.unsqueeze(2).expand_as(conf_data)
         neg_idx_mask = neg_mask.unsqueeze(2).expand_as(conf_data)
 
-        # conf_dataからposとnegだけを取り出してconf_hnmにする。形はtorch.Size([num_pos+num_neg, 21])
+        # conf_dataからposとnegだけを取り出してconf_hnmにする。形はtorch.Size([num_pos+num_neg, 2])
         conf_hnm = conf_data[(pos_idx_mask+neg_idx_mask).gt(0)
                              ].view(-1, num_classes)
         # （注釈）gtは greater than (>)の略称。これでmaskが1のindexを取り出す。
