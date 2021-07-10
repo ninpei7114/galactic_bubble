@@ -34,6 +34,7 @@ from utils.match import match
 
 def make_datapath_list(rootpath):
     """
+    （現在は、この関数は使っていない）
     データへのパスを格納したリストを作成する。
 
     Parameters
@@ -85,6 +86,7 @@ def make_datapath_list(rootpath):
 
 class Anno_xml2list(object):
     """
+    （現在は、この関数は使っていない）
     1枚の画像に対する「XML形式のアノテーションデータ」を、画像サイズで規格化してからリスト形式に変換する。
 
     Attributes
@@ -121,7 +123,7 @@ class Anno_xml2list(object):
 
         # xmlファイルを読み込む
         xml = ET.parse(xml_path).getroot()
-        
+
 
         # 画像内にある物体（object）の数だけループする
         for obj in xml.iter('object'):
@@ -142,7 +144,7 @@ class Anno_xml2list(object):
             for pt in (pts):
                 # VOCは原点が(1,1)なので1を引き算して（0, 0）に
                 cur_pixel = int(bbox.find(pt).text) - 1
-                
+
                 # 幅、高さで規格化
                 if pt == 'xmin' or pt == 'xmax':  # x方向のときは幅で割算
                     cur_pixel /= width
@@ -165,6 +167,8 @@ class Anno_xml2list(object):
 
 class DataTransform():
     """
+    （現在は、この関数は使っていない）
+
     画像とアノテーションの前処理クラス。訓練と推論で異なる動作をする。
     画像のサイズを300x300にする。
     学習時はデータオーギュメンテーションする。
@@ -211,6 +215,7 @@ class DataTransform():
 
 class VOCDataset(data.Dataset):
     """
+    （現在は、この関数は使っていない）
     VOC2012のDatasetを作成するクラス。PyTorchのDatasetクラスを継承。
 
     Attributes
@@ -252,7 +257,7 @@ class VOCDataset(data.Dataset):
         image_file_path = self.img_list[index]
 #         img = cv2.imread(image_file_path)  # [高さ][幅][色BGR]
         img = np.load(image_file_path)
-        
+
         width, height, channels = img.shape  # 画像のサイズを取得
 
         # 2. xml形式のアノテーション情報をリストに
@@ -307,6 +312,9 @@ def od_collate_fn(batch):
 # 34層にわたる、vggモジュールを作成
 
 def make_vgg():
+    """
+    SSDのCNN部分、make_vggという名前だが、vggではない
+    """
     layers = []
     in_channels = 2  # 色チャネル数
 
@@ -314,19 +322,19 @@ def make_vgg():
     Maxpool_1 = nn.MaxPool2d(kernel_size=3, padding=0, dilation=1, ceil_mode=False)
     Conv2_3 = nn.Conv2d(8, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_2 = nn.MaxPool2d(kernel_size=2, padding=0, dilation=1, ceil_mode=False)
-    
+
     Conv2_5 = nn.Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1))
     Conv2_6 = nn.Conv2d(32, 32, kernel_size=(5, 5), stride=(1, 1))
     Conv2_7 = nn.Conv2d(32, 32, kernel_size=(5, 5), stride=(1, 1))
     #source1
-    
+
     Maxpool_3 = nn.MaxPool2d(kernel_size=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_8 = nn.Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Conv2_9 = nn.Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     #source2
-    
+
     layers += [Conv2_1, nn.ReLU(inplace=True), Maxpool_1, Conv2_3, nn.ReLU(inplace=True), Maxpool_2, Conv2_5, nn.ReLU(inplace=True), Conv2_6, nn.ReLU(inplace=True), Conv2_7, nn.ReLU(inplace=True), Maxpool_3, Conv2_8, nn.ReLU(inplace=True), Conv2_9, nn.ReLU(inplace=True)]
-    
+
     return nn.ModuleList(layers)
 
 # 8層にわたる、extrasモジュールを作成
@@ -342,7 +350,7 @@ def make_extras():
 #     layers += [nn.MaxPool2d(kernel_size=2)]  #Maxpoolは自分で付け足した   #2
     layers += [nn.Conv2d(cfg[1], cfg[2], kernel_size=(1))] #2
     layers += [nn.Conv2d(cfg[2], cfg[3], kernel_size=(3), stride=2, padding=1)]  #  #3
-#     layers += [nn.MaxPool2d(kernel_size=2)]  #Maxpoolは自分で付け足した #5 
+#     layers += [nn.MaxPool2d(kernel_size=2)]  #Maxpoolは自分で付け足した #5
     layers += [nn.Conv2d(cfg[3], cfg[4], kernel_size=(1))]  #4
     layers += [nn.Conv2d(cfg[4], cfg[5], kernel_size=(3))]  #5
     layers += [nn.Conv2d(cfg[5], cfg[6], kernel_size=(1))]  #6
@@ -413,7 +421,7 @@ class L2Norm(nn.Module):
         init.constant_(self.weight, self.scale)  # weightの値がすべてscale（=20）になる
 
     def forward(self, x):
-        '''38×38の特徴量に対して、512チャネルにわたって2乗和のルートを求めた
+        '''38×38の特徴量に対して、100チャネルにわたって2乗和のルートを求めた
         38×38個の値を使用し、各特徴量を正規化してから係数をかけ算する層'''
 
         # 各チャネルにおける38×38個の特徴量のチャネル方向の2乗和を計算し、
@@ -653,7 +661,7 @@ class Detect(Function):
 
         Returns
         -------
-        output : torch.Size([batch_num, 21, 200, 5])
+        output : torch.Size([batch_num, 2, 200, 5])
             （batch_num、クラス、confのtop200、BBoxの情報）
         """
 
@@ -664,8 +672,8 @@ class Detect(Function):
 #         ctx.nms_thresh = 0.45
         num_batch = loc_data.size(0)  # ミニバッチのサイズ
         num_dbox = loc_data.size(1)  # DBoxの数 = 8732
-        num_classes = conf_data.size(2)  # クラス数 = 21
-  
+        num_classes = conf_data.size(2)  # クラス数 = 2(ring, noring)
+
         # confはソフトマックスを適用して正規化する
         conf_data = self.softmax(conf_data)
 
@@ -773,14 +781,14 @@ class SSD(nn.Module):
 
         # extrasのconvとReLUを計算
         # source3～6を、sourcesに追加
-        
+
         for k, v in enumerate(self.extras):
             x = F.relu(v(x), inplace=True)
 
             if k % 2 == 1:  # conv→ReLU→cov→ReLUをしたらsourceに入れる
                 sources.append(x)
-#             
-                
+#
+
 
         # source1～6に、それぞれ対応する畳み込みを1回ずつ適用する
         # zipでforループの複数のリストの要素を取得
@@ -910,7 +918,7 @@ class MultiBoxLoss(nn.Module):
         loc_t = loc_t[pos_idx].view(-1, 4)
 #         print('locp', loc_p)
 #         print(torch.isnan(loc_p).to('cpu').detach().numpy().any())
-       
+
         # 物体を発見したPositive DBoxのオフセット情報loc_tの損失（誤差）を計算
         loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
 
@@ -1006,4 +1014,3 @@ class MultiBoxLoss(nn.Module):
         loss_c /= N
 
         return loss_l, loss_c
-
