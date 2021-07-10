@@ -30,7 +30,7 @@ def data_view_rectangl(col, imgs, infos=None, moji_size=100):
 
 
 
-def data_view_id(col, imgs, infos=None, moji_size=100):
+def data_view(col, imgs, infos=None, moji_size=100):
     '''
     col: number of columns
     imgs: tensor or nparray with a shape of (?, y, x, 1) or (?, y, x, 3)
