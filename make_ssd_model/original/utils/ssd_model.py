@@ -400,10 +400,14 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         # これからkeepに格納したBBoxと被りの大きいBBoxを抽出して除去する
         # -------------------
         # ひとつ減らしたidxまでのBBoxを、outに指定した変数として作成する
-        torch.index_select(x1, 0, idx, out=tmp_x1)
-        torch.index_select(y1, 0, idx, out=tmp_y1)
-        torch.index_select(x2, 0, idx, out=tmp_x2)
-        torch.index_select(y2, 0, idx, out=tmp_y2)
+        tmp_x1 = x1[idx]
+        tmp_y1 = y1[idx]
+        tmp_x2 = x2[idx]
+        tmp_y2 = y2[idx]
+        # torch.index_select(x1, 0, idx, out=tmp_x1)
+        # torch.index_select(y1, 0, idx, out=tmp_y1)
+        # torch.index_select(x2, 0, idx, out=tmp_x2)
+        # torch.index_select(y2, 0, idx, out=tmp_y2)
 
         # すべてのBBoxに対して、現在のBBox=indexがiと被っている値までに設定(clamp)
         tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
