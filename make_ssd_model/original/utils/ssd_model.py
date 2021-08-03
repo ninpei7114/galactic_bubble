@@ -360,19 +360,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     # keep：torch.Size([確信度閾値を超えたBBox数])、要素は全部0
 
     # 各BBoxの面積areaを計算
-    x1 = boxes[:, 0]
-    y1 = boxes[:, 1]
-    x2 = boxes[:, 2]
-    y2 = boxes[:, 3]
-    area = torch.mul(x2 - x1, y2 - y1)
-
-    # boxesをコピーする。後で、BBoxの被り度合いIOUの計算に使用する際のひな形として用意
-    tmp_x1 = boxes.new()
-    tmp_y1 = boxes.new()
-    tmp_x2 = boxes.new()
-    tmp_y2 = boxes.new()
-    tmp_w = boxes.new()
-    tmp_h = boxes.new()
+    area = (boxes[:,2] - boxes[:,0]) * (boxes[:,3] - boxes[:,1])
 
     # socreを昇順に並び変える
     v, idx = scores.sort(0)
@@ -399,36 +387,12 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         # -------------------
         # これからkeepに格納したBBoxと被りの大きいBBoxを抽出して除去する
         # -------------------
-        # ひとつ減らしたidxまでのBBoxを、outに指定した変数として作成する
-        tmp_x1 = x1[idx]
-        tmp_y1 = y1[idx]
-        tmp_x2 = x2[idx]
-        tmp_y2 = y2[idx]
-        # torch.index_select(x1, 0, idx, out=tmp_x1)
-        # torch.index_select(y1, 0, idx, out=tmp_y1)
-        # torch.index_select(x2, 0, idx, out=tmp_x2)
-        # torch.index_select(y2, 0, idx, out=tmp_y2)
-
-        # すべてのBBoxに対して、現在のBBox=indexがiと被っている値までに設定(clamp)
-        tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
-        tmp_y1 = torch.clamp(tmp_y1, min=y1[i])
-        tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
-        tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
-
-        # wとhのテンソルサイズをindexを1つ減らしたものにする
-        tmp_w.resize_as_(tmp_x2)
-        tmp_h.resize_as_(tmp_y2)
-
-        # clampした状態でのBBoxの幅と高さを求める
-        tmp_w = tmp_x2 - tmp_x1
-        tmp_h = tmp_y2 - tmp_y1
-
-        # 幅や高さが負になっているものは0にする
-        tmp_w = torch.clamp(tmp_w, min=0.0)
-        tmp_h = torch.clamp(tmp_h, min=0.0)
-
-        # clampされた状態での面積を求める
-        inter = tmp_w*tmp_h
+        # idxのmin, maxを出す
+#         print(idx)
+        minxy = boxes[i, 0:2].repeat (2)
+        maxxy = boxes[i, 2:4].repeat(2)
+        clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
+        inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
 
         # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
         rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
