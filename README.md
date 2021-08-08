@@ -15,6 +15,17 @@ galactic_bubble
  |                |
  |                |-------original(the CNN part is original : CNN部分がオリジナル)
  |
+ |
+ |----------make_tarin_data(学習データを作成するためのnotebook、選定をした時のbubbleのカタログ、選定した結果のcsv、)
+ |
+ |
  |----------play_with_data（the coord to process data：データ加工のためのコード）
  |
+ |
+ |----------spitzer-bubble
+ |
+ |
+ |
+ |
+
 </pre>
