@@ -85,7 +85,7 @@ def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
     overlap, encode the bounding boxes, then return the matched indices
     corresponding to both confidence and location preds.
     訳）最もIoUの高い答えと、それぞれのbounding_boxをマッチさせる。bounding_boxをエンコードし、位置と確信度を合わせ、マッチさせたインデックスを返す
-    
+
     Args:
         threshold: (float) The overlap threshold used when mathing boxes.
         truths: (tensor) Ground truth boxes, Shape: [num_obj, num_priors].
@@ -106,14 +106,10 @@ def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
     )
     # (Bipartite Matching)
     # [1,num_objects] best prior for each ground truth　それぞれの正解で最も良い default_box
-    best_prior_overlap, best_prior_idx = overlaps.max(1, keepdim=True)
+
     # [1,num_priors] best ground truth for each prior
-    best_truth_overlap, best_truth_idx = overlaps.max(0, keepdim=True)
-    best_truth_idx.squeeze_(0)
-    best_truth_overlap.squeeze_(0)
-    best_prior_idx.squeeze_(1)
-    best_prior_overlap.squeeze_(1)
-    best_truth_overlap.index_fill_(0, best_prior_idx, 2)  # ensure best prior
+    best_prior_overlap, best_prior_idx = overlaps.max(1)
+    best_truth_overlap, best_truth_idx = overlaps.max(0) # ensure best prior
     # TODO refactor: index  best_prior_idx with long tensor
     # ensure every gt matches with its prior of max overlap
     for j in range(best_prior_idx.size(0)):
@@ -135,7 +131,7 @@ def encode(matched, priors, variances):
     """Encode the variances from the priorbox layers into the ground truth boxes
     we have matched (based on jaccard overlap) with the prior boxes.
     訳）default_boxから正解へのずれを変換し、default_boxをマッチさせる
-    
+
     Args:
         matched: (tensor) Coords of ground truth for each prior in point-form
             Shape: [num_priors, 4].
