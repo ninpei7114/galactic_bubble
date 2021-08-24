@@ -328,25 +328,31 @@ def make_vgg():
 #     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
 #     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
     Conv2_1 = nn.Conv2d(2, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    Conv2_2 = nn.Sequential(nn.BatchNorm2d(64),
+              nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Maxpool_1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_3 = nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_4 = nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    Conv2_4 = nn.Sequential(nn.BatchNorm2d(128),
+              nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Maxpool_2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_5 = nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_6 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    Conv2_6 = nn.Sequential(nn.BatchNorm2d(256),
+              nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Conv2_7 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_3 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=True)
     Conv2_8 = nn.Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_9 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    Conv2_9 = nn.Sequential(nn.BatchNorm2d(512),
+              nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Conv2_10 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_4 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_11 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_12 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    Conv2_12 = nn.Sequential(nn.BatchNorm2d(512),
+              nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Conv2_13 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1, dilation=1, ceil_mode=False)
     Conv2_14 = nn.Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(6, 6), dilation=(6, 6))
-    Conv2_15 = nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1))
+    Conv2_15 = nn.Sequential(nn.BatchNorm2d(1024),
+              nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1)))
 
 
     layers += [Conv2_1, nn.ReLU(inplace=True), Conv2_2, nn.ReLU(inplace=True), Maxpool_1, Conv2_3,
