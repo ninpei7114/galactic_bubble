@@ -1,6 +1,10 @@
+# 画像をタイル状に並べるためのコード
+# data_view_rectangleは、画像一枚一枚にリングを囲む長方形を描くことを目的としている
+
+
 from PIL import Image, ImageDraw, ImageFont
 
-def data_view_rectangl(col, imgs, infos=None, moji_size=100):
+def data_view_rectangle(col, imgs, infos=None, moji_size=100):
     '''
     col: number of columns
     imgs: tensor or nparray with a shape of (?, y, x, 1) or (?, y, x, 3)
