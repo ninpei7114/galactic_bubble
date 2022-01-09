@@ -17,8 +17,6 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from torchinfo import summary
 
-import sys
-sys.path.append('../deepcluster/')
 import clustering
 from util import AverageMeter, Logger, UnifLabelSampler
 
