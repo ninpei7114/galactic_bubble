@@ -47,12 +47,12 @@ def parse_args():
     #                     reassignments of clusters (default: 1)""")
     # parser.add_argument('--workers', default=4, type=int,
     #                     help='number of data loading workers (default: 4)')
-    # parser.add_argument('--epochs', type=int, default=200,
-    #                     help='number of total epochs to run (default: 200)')
+    parser.add_argument('--epochs', type=int, default=100,
+                        help='number of total epochs to run (default: 100)')
     # parser.add_argument('--start_epoch', default=0, type=int,
     #                     help='manual epoch number (useful on restarts) (default: 0)')
     parser.add_argument('--batch', default=16, type=int,
-                        help='mini-batch size (default: 256)')
+                        help='mini-batch size (default: 16)')
     # parser.add_argument('--momentum', default=0.9, type=float, help='momentum (default: 0.9)')
     # parser.add_argument('--resume', default='', type=str, metavar='PATH',
     #                     help='path to checkpoint (default: None)')
@@ -70,13 +70,13 @@ class new_vgg(nn.Module):
         
         self.features = features
         self.classifier =  nn.Sequential(
-            nn.Linear(512 * 9 * 9, 4096),
+            nn.Linear(1024 * 9 * 9, 6000),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(4096, 3000),
+            nn.Linear(6000, 1500),
             nn.ReLU()
         )
-        self.top_layer = nn.Linear(3000, 2)
+        self.top_layer = nn.Linear(1500, 2)
         
     def forward(self, x):
 
@@ -166,6 +166,7 @@ def compute_features(dataloader, model, N):
         # torch.autograd.Variableで計算グラフの構築を行ってくれる
         # 計算グラフの構築、バックプロぱゲーションに必要な情報の取り扱い
 #         input_var = torch.autograd.Variable(input_tensor.to(device))#input_tensor.cuda() #, volatile=True
+        #input_tensor = input_tensor.cuda()
         input_tensor = input_tensor.to(args.device)
 #         print(input_tensor.shape)
         with torch.no_grad():
@@ -233,6 +234,7 @@ def train(loader, model, crit, opt, epoch):
     for i, (input_tensor, target) in enumerate(loader):
 #         print('input_tensor', input_tensor.shape)
         input_tensor = input_tensor.permute(0, 2, 1, 3).to(args.device)
+        #input_tensor = input_tensor.permute(0, 2, 1, 3).cuda()
 #         data_time.update(time.time() - end)
 
         # save checkpoint
@@ -253,9 +255,8 @@ def train(loader, model, crit, opt, epoch):
         #     }, path)
 
         target = target.to(args.device)
-        
+
         with torch.set_grad_enabled(True):
-            model.train()
 
             output = model(input_tensor)
             loss = crit(output, target)
@@ -299,12 +300,13 @@ def main(args):
     )
     
     criterion = nn.CrossEntropyLoss().to(args.device)
-    
+
     deepcluster = clustering.Kmeans(2)
 
     dataloader, dataset = deepcluster_data(args.path)
 
-    for epoch in range(1, 10):
+    for epoch in range(1, args.epochs):
+        print(epoch)
     #     model.top_layer = None ## vggの全結合層部分を消している？
     #     model_ = model
         torch.manual_seed(31)
