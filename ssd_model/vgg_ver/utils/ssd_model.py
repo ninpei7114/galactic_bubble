@@ -119,7 +119,7 @@ class Anno_xml2list(object):
 
         # xmlファイルを読み込む
         xml = ET.parse(xml_path).getroot()
-
+        
 
         # 画像内にある物体（object）の数だけループする
         for obj in xml.iter('object'):
@@ -140,7 +140,7 @@ class Anno_xml2list(object):
             for pt in (pts):
                 # VOCは原点が(1,1)なので1を引き算して（0, 0）に
                 cur_pixel = int(bbox.find(pt).text) - 1
-
+                
                 # 幅、高さで規格化
                 if pt == 'xmin' or pt == 'xmax':  # x方向のときは幅で割算
                     cur_pixel /= width
@@ -250,7 +250,7 @@ class VOCDataset(data.Dataset):
         image_file_path = self.img_list[index]
 #         img = cv2.imread(image_file_path)  # [高さ][幅][色BGR]
         img = np.load(image_file_path)
-
+        
         width, height, channels = img.shape  # 画像のサイズを取得
 
         # 2. xml形式のアノテーション情報をリストに
@@ -328,34 +328,41 @@ def make_vgg():
 #     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
 #     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
     Conv2_1 = nn.Conv2d(2, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     Conv2_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    Conv2_2 = nn.Sequential(nn.BatchNorm2d(64),
+              nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Maxpool_1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_3 = nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Conv2_4 = nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     Conv2_4 = nn.Sequential(nn.BatchNorm2d(128),
+#               nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Maxpool_2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_5 = nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Conv2_6 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     Conv2_6 = nn.Sequential(nn.BatchNorm2d(256),
+#               nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Conv2_7 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_3 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=True)
     Conv2_8 = nn.Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Conv2_9 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     Conv2_9 = nn.Sequential(nn.BatchNorm2d(512),
+#               nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Conv2_10 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_4 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_11 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Conv2_12 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     Conv2_12 = nn.Sequential(nn.BatchNorm2d(512),
+#               nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
     Conv2_13 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1, dilation=1, ceil_mode=False)
     Conv2_14 = nn.Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(6, 6), dilation=(6, 6))
     Conv2_15 = nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1))
-
-
-    layers += [Conv2_1, nn.ReLU(inplace=True), Conv2_2, nn.ReLU(inplace=True), Maxpool_1, Conv2_3,
-    nn.ReLU(inplace=True), Conv2_4, nn.ReLU(inplace=True), Maxpool_2, Conv2_5, nn.ReLU(inplace=True),
-    Conv2_6, nn.ReLU(inplace=True), Conv2_7, nn.ReLU(inplace=True), Maxpool_3, Conv2_8,
-    nn.ReLU(inplace=True), Conv2_9, nn.ReLU(inplace=True), Conv2_10, nn.ReLU(inplace=True), Maxpool_4,
-    Conv2_11, nn.ReLU(inplace=True), Conv2_12, nn.ReLU(inplace=True), Conv2_13, nn.ReLU(inplace=True),
-    Maxpool_5, Conv2_14, nn.ReLU(inplace=True), Conv2_15, nn.ReLU(inplace=True)]
-
+#     Conv2_15 = nn.Sequential(nn.BatchNorm2d(1024),
+#               nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1)))
+    
+    
+    layers += [Conv2_1, nn.ReLU(inplace=True), Conv2_2, nn.ReLU(inplace=True), Maxpool_1, Conv2_3, nn.ReLU(inplace=True), Conv2_4, nn.ReLU(inplace=True), Maxpool_2, Conv2_5, nn.ReLU(inplace=True), Conv2_6, nn.ReLU(inplace=True), Conv2_7, nn.ReLU(inplace=True), Maxpool_3, Conv2_8, nn.ReLU(inplace=True), Conv2_9, nn.ReLU(inplace=True), Conv2_10, nn.ReLU(inplace=True), Maxpool_4, Conv2_11, nn.ReLU(inplace=True), Conv2_12, nn.ReLU(inplace=True), Conv2_13, nn.ReLU(inplace=True), Maxpool_5, Conv2_14, nn.ReLU(inplace=True), Conv2_15, nn.ReLU(inplace=True)]
+    
     return nn.ModuleList(layers)
 
 # 8層にわたる、extrasモジュールを作成
@@ -371,7 +378,7 @@ def make_extras():
 #     layers += [nn.MaxPool2d(kernel_size=2)]  #Maxpoolは自分で付け足した   #2
     layers += [nn.Conv2d(cfg[1], cfg[2], kernel_size=(1))] #2
     layers += [nn.Conv2d(cfg[2], cfg[3], kernel_size=(3), stride=2, padding=1)]  #  #3
-#     layers += [nn.MaxPool2d(kernel_size=2)]  #Maxpoolは自分で付け足した #5
+#     layers += [nn.MaxPool2d(kernel_size=2)]  #Maxpoolは自分で付け足した #5 
     layers += [nn.Conv2d(cfg[3], cfg[4], kernel_size=(1))]  #4
     layers += [nn.Conv2d(cfg[4], cfg[5], kernel_size=(3))]  #5
     layers += [nn.Conv2d(cfg[5], cfg[6], kernel_size=(1))]  #6
@@ -384,7 +391,7 @@ def make_extras():
 # デフォルトボックスに対する各クラスの確率を出力するconf_layersを作成
 
 
-def make_loc_conf(num_classes=2, bbox_aspect_num=[4, 6, 6, 6, 4, 4]):
+def make_loc_conf(num_classes=2, bbox_aspect_num=[4, 4, 4, 4, 4, 4]):
 
     loc_layers = []
     conf_layers = []
@@ -576,14 +583,25 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     # keep：torch.Size([確信度閾値を超えたBBox数])、要素は全部0
 
     # 各BBoxの面積areaを計算
-    area = (boxes[:,2] - boxes[:,0]) * (boxes[:,3] - boxes[:,1])
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+    area = torch.mul(x2 - x1, y2 - y1)
+
+    # boxesをコピーする。後で、BBoxの被り度合いIOUの計算に使用する際のひな形として用意
+    tmp_x1 = boxes.new()
+    tmp_y1 = boxes.new()
+    tmp_x2 = boxes.new()
+    tmp_y2 = boxes.new()
+    tmp_w = boxes.new()
+    tmp_h = boxes.new()
 
     # socreを昇順に並び変える
     v, idx = scores.sort(0)
 
     # 上位top_k個（200個）のBBoxのindexを取り出す（200個存在しない場合もある）
     idx = idx[-top_k:]
-
     # idxの要素数が0でない限りループする
     while idx.numel() > 0:
         i = idx[-1]  # 現在のconf最大のindexをiに
@@ -603,12 +621,32 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         # -------------------
         # これからkeepに格納したBBoxと被りの大きいBBoxを抽出して除去する
         # -------------------
-        # idxのmin, maxを出す
-#         print(idx)
-        minxy = boxes[i, 0:2].repeat (2)
-        maxxy = boxes[i, 2:4].repeat(2)
-        clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
-        inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
+        # ひとつ減らしたidxまでのBBoxを、outに指定した変数として作成する
+        torch.index_select(x1, 0, idx, out=tmp_x1)
+        torch.index_select(y1, 0, idx, out=tmp_y1)
+        torch.index_select(x2, 0, idx, out=tmp_x2)
+        torch.index_select(y2, 0, idx, out=tmp_y2)
+
+        # すべてのBBoxに対して、現在のBBox=indexがiと被っている値までに設定(clamp)
+        tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
+        tmp_y1 = torch.clamp(tmp_y1, min=y1[i])
+        tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
+        tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
+
+        # wとhのテンソルサイズをindexを1つ減らしたものにする
+        tmp_w.resize_as_(tmp_x2)
+        tmp_h.resize_as_(tmp_y2)
+
+        # clampした状態でのBBoxの幅と高さを求める
+        tmp_w = tmp_x2 - tmp_x1
+        tmp_h = tmp_y2 - tmp_y1
+
+        # 幅や高さが負になっているものは0にする
+        tmp_w = torch.clamp(tmp_w, min=0.0)
+        tmp_h = torch.clamp(tmp_h, min=0.0)
+
+        # clampされた状態での面積を求める
+        inter = tmp_w*tmp_h
 
         # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
         rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
@@ -616,7 +654,23 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         IoU = inter/union
 
         # IoUがoverlapより小さいidxのみを残す
-        idx = idx[IoU.le(overlap)]  # leはLess than or Equal toの処理をする演算です
+        idx = idx[IoU.le(overlap)] 
+#         minxy = boxes[i, 0:2].repeat(2)
+#         maxxy = boxes[i, 2:4].repeat(2)
+#         print(boxes[idx].shape)
+#         print(minxy)
+#         print(maxxy)
+# #         print(minxy)
+#         clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
+#         inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
+
+#         # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
+#         rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
+#         union = (rem_areas - inter) + area[i]  # 2つのエリアのANDの面積
+#         IoU = inter/union
+
+#         # IoUがoverlapより小さいidxのみを残す
+#         idx = idx[IoU.le(overlap)]  # leはLess than or Equal toの処理をする演算です
         # IoUがoverlapより大きいidxは、最初に選んでkeepに格納したidxと同じ物体に対してBBoxを囲んでいるため消去
 
     # whileのループが抜けたら終了
@@ -662,7 +716,7 @@ class Detect(Function):
         num_batch = loc_data.size(0)  # ミニバッチのサイズ
         num_dbox = loc_data.size(1)  # DBoxの数 = 8732
         num_classes = conf_data.size(2)  # クラス数 = 21
-
+  
         # confはソフトマックスを適用して正規化する
         conf_data = self.softmax(conf_data)
 
@@ -718,7 +772,7 @@ class Detect(Function):
                 output[i, cl, :count] = torch.cat((scores[ids[:count]].unsqueeze(1),
                                                    boxes[ids[:count]]), 1)
 
-        return output  # torch.Size([1, 21, 200, 5])
+        return output  # torch.Size([1, 2, 200, 5])
 
 # SSDクラスを作成する
 
@@ -727,7 +781,7 @@ class SSD(nn.Module):
 
     def __init__(self, phase, cfg):
         super(SSD, self).__init__()
-
+#         self.softmax = nn.Softmax(dim=-1)
         self.phase = phase  # train or inferenceを指定
         self.num_classes = cfg["num_classes"]  # クラス数=21
 
@@ -768,14 +822,14 @@ class SSD(nn.Module):
 
         # extrasのconvとReLUを計算
         # source3～6を、sourcesに追加
-
+        
         for k, v in enumerate(self.extras):
             x = F.relu(v(x), inplace=True)
 
             if k % 2 == 1:  # conv→ReLU→cov→ReLUをしたらsourceに入れる
                 sources.append(x)
-#
-
+#             
+                
 
         # source1～6に、それぞれ対応する畳み込みを1回ずつ適用する
         # zipでforループの複数のリストの要素を取得
@@ -803,7 +857,7 @@ class SSD(nn.Module):
 
         # さらにlocとconfの形を整える
         # locのサイズは、torch.Size([batch_num, 8732, 4])
-        # confのサイズは、torch.Size([batch_num, 8732, 21])
+        # confのサイズは、torch.Size([batch_num, 8732, 2])
         loc = loc.view(loc.size(0), -1, 4)
         conf = conf.view(conf.size(0), -1, self.num_classes)
 #         print(conf[:,:,1])
@@ -814,17 +868,18 @@ class SSD(nn.Module):
             # クラス「Detect」のforwardを実行
             # 返り値のサイズは torch.Size([batch_num, 21, 200, 5])
             with torch.no_grad():
-                return self.detect(output[0], output[1], output[2])
+                return self.detect(output[0], output[1], output[2])#, decode(loc[0], self.dbox_list), self.softmax(conf)
 
         else:  # 学習時
-            return output
+        
+            return output, torch.cat([decode(loc[rr].to('cpu'), self.dbox_list)[None] for rr in range(loc.shape[0])], axis=0)
             # 返り値は(loc, conf, dbox_list)のタプル
 
 
 class MultiBoxLoss(nn.Module):
     """SSDの損失関数のクラスです。"""
 
-    def __init__(self, jaccard_thresh=0.5, neg_pos=3, device='cpu'):
+    def __init__(self, jaccard_thresh=0.7, neg_pos=1, device='cpu'):
         super(MultiBoxLoss, self).__init__()
         self.jaccard_thresh = jaccard_thresh  # 0.5 関数matchのjaccard係数の閾値
         self.negpos_ratio = neg_pos  # 3:1 Hard Negative Miningの負と正の比率
@@ -837,7 +892,7 @@ class MultiBoxLoss(nn.Module):
         Parameters
         ----------
         predictions : SSD netの訓練時の出力(tuple)
-            (loc=torch.Size([num_batch, 8732, 4]), conf=torch.Size([num_batch, 8732, 21]), dbox_list=torch.Size [8732,4])。
+            (loc=torch.Size([num_batch, 8732, 4]), conf=torch.Size([num_batch, 8732, 2]), dbox_list=torch.Size [8732,4])。
 
         targets : [num_batch, num_objs, 5]
             5は正解のアノテーション情報[xmin, ymin, xmax, ymax, label_ind]を示す
@@ -857,57 +912,133 @@ class MultiBoxLoss(nn.Module):
         # 要素数を把握
         num_batch = loc_data.size(0)  # ミニバッチのサイズ
         num_dbox = loc_data.size(1)  # DBoxの数 = 8732
-        num_classes = conf_data.size(2)  # クラス数 = 21
-#         print(num_classes)
-        # 損失の計算に使用するものを格納する変数を作成
-        # conf_t_label：各DBoxに一番近い正解のBBoxのラベルを格納させる
-        # loc_t:各DBoxに一番近い正解のBBoxの位置情報を格納させる
-        conf_t_label = torch.LongTensor(num_batch, num_dbox).to(self.device)
-        loc_t = torch.Tensor(num_batch, num_dbox, 4).to(self.device)
-
-        # loc_tとconf_t_labelに、
-        # DBoxと正解アノテーションtargetsをmatchさせた結果を上書きする
+        num_classes = conf_data.size(2)  # クラス数 = 2
+        conf_t_label = torch.zeros(num_batch, num_dbox).to(self.device, dtype=torch.long)
+        loc_t = torch.zeros(num_batch, num_dbox, 4).to(self.device)
+            
         for idx in range(num_batch):  # ミニバッチでループ
 
             # 現在のミニバッチの正解アノテーションのBBoxとラベルを取得
-            truths = targets[idx][:, :-1].to(self.device)  # BBox
-            # ラベル [物体1のラベル, 物体2のラベル, …]
-            labels = targets[idx][:, -1].to(self.device)
+            if len(targets[idx]) == 0:
+                pass
+            else:
+                truths = targets[idx][:, :-1].to(self.device)  # BBox
+                # ラベル [物体1のラベル, 物体2のラベル, …]
+                labels = targets[idx][:, -1].to(self.device)
 
-            # デフォルトボックスを新たな変数で用意
-            dbox = dbox_list.to(self.device)
+                # デフォルトボックスを新たな変数で用意
+                dbox = dbox_list.to(self.device)
+                variance = [0.1, 0.2]
+                # このvarianceはDBoxからBBoxに補正計算する際に使用する式の係数です
+                match(self.jaccard_thresh, truths, dbox,
+                      variance, labels, loc_t, conf_t_label, idx)
 
-            # 関数matchを実行し、loc_tとconf_t_labelの内容を更新する
-            # （詳細）
-            # loc_t:各DBoxに一番近い正解のBBoxの位置情報が上書きされる
-            # conf_t_label：各DBoxに一番近いBBoxのラベルが上書きされる
-            # ただし、一番近いBBoxとのjaccard overlapが0.5より小さい場合は
-            # 正解BBoxのラベルconf_t_labelは背景クラスの0とする
-            variance = [0.1, 0.2]
-            # このvarianceはDBoxからBBoxに補正計算する際に使用する式の係数です
-            match(self.jaccard_thresh, truths, dbox,
-                  variance, labels, loc_t, conf_t_label, idx)
-
-        # ----------
-        # 位置の損失：loss_lを計算
-        # Smooth L1関数で損失を計算する。ただし、物体を発見したDBoxのオフセットのみを計算する
-        # ----------
-        # 物体を検出したBBoxを取り出すマスクを作成
         pos_mask = conf_t_label > 0  # torch.Size([num_batch, 8732])
 
-        log_conf = -F.log_softmax(conf_data, dim=2) # 負の対数尤度
-        loss_c_posi = log_conf[:,:,1][pos_mask] # ←このコードは多クラスに対応しない
+        # pos_maskをloc_dataのサイズに変形
+        pos_idx = pos_mask.unsqueeze(pos_mask.dim()).expand_as(loc_data)
+#         print('pos_idx', pos_idx)
+        # Positive DBoxのloc_dataと、教師データloc_tを取得
+        loc_p = loc_data[pos_idx].view(-1, 4)
+        loc_t = loc_t[pos_idx].view(-1, 4)
+       
+        # 物体を発見したPositive DBoxのオフセット情報loc_tの損失（誤差）を計算
+        loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
 
-        log_conf_nega = log_conf[:,:,0] # クラス0(背景)の信頼度
-        log_conf_nega[pos_mask] = 0
-        _, loss_idx = log_conf_nega.sort(1, descending=True)
-        _, idx_rank = loss_idx.sort(1) # 各ボックスの順位 (e.g. idx_rank[n] はボックス #n の順位)
-        neg_idx = idx_rank < pos_mask.sum(1)[:,None] * self.negpos_ratio
-        loss_c_nega = log_conf_nega[neg_idx]
-        loss_c_avg = torch.cat((loss_c_posi, loss_c_nega)).mean()
 
-        loc_p = loc_data[pos_mask]
-        loc_t = loc_t[pos_mask]
-        loss_l_avg = F.smooth_l1_loss(loc_p, loc_t)
+        # ----------
+        # クラス予測の損失：loss_cを計算
+        # 交差エントロピー誤差関数で損失を計算する。ただし、背景クラスが正解であるDBoxが圧倒的に多いので、
+        # Hard Negative Miningを実施し、物体発見DBoxと背景クラスDBoxの比が1:3になるようにする。
+        # そこで背景クラスDBoxと予想したもののうち、損失が小さいものは、クラス予測の損失から除く
+        # ----------
+        batch_conf = conf_data.view(-1, num_classes)
 
-        return loss_c_avg, loss_l_avg
+        # クラス予測の損失を関数を計算(reduction='none'にして、和をとらず、次元をつぶさない)
+        loss_c = F.cross_entropy(
+            batch_conf, conf_t_label.view(-1), reduction='none')
+
+        # -----------------
+        # これからNegative DBoxのうち、Hard Negative Miningで抽出するものを求めるマスクを作成します
+        # -----------------
+
+        # 物体発見したPositive DBoxの損失を0にする
+        # （注意）物体はlabelが1以上になっている。ラベル0は背景。
+        num_pos = pos_mask.long().sum(1, keepdim=True)  # ミニバッチごとの物体クラス予測の数
+        loss_c = loss_c.view(num_batch, -1)  # torch.Size([num_batch, 8732])
+        loss_c[pos_mask] = 0  # 物体を発見したDBoxは損失0とする
+
+        # Hard Negative Miningを実施する
+        # 各DBoxの損失の大きさloss_cの順位であるidx_rankを求める
+        _, loss_idx = loss_c.sort(1, descending=True)
+#         print(loss_idx.shape)
+        _, idx_rank = loss_idx.sort(1)
+        # ここのmin = 2は重要！
+        # これはNon-Ringを学習させれるときに必要となる
+        num_neg = torch.clamp(num_pos*self.negpos_ratio, max=num_dbox, min=2)
+
+        # idx_rankは各DBoxの損失の大きさが上から何番目なのかが入っている
+        # 背景のDBoxの数num_negよりも、順位が低い（すなわち損失が大きい）DBoxを取るマスク作成
+        # torch.Size([num_batch, 8732])
+        neg_mask = idx_rank < (num_neg).expand_as(idx_rank)
+
+        # -----------------
+        # （終了）これからNegative DBoxのうち、Hard Negative Miningで抽出するものを求めるマスクを作成します
+        # -----------------
+
+        # マスクの形を整形し、conf_dataに合わせる
+        # pos_idx_maskはPositive DBoxのconfを取り出すマスクです
+        # neg_idx_maskはHard Negative Miningで抽出したNegative DBoxのconfを取り出すマスクです
+        # pos_mask：torch.Size([num_batch, 8732])→pos_idx_mask：torch.Size([num_batch, 8732, 21])
+        pos_idx_mask = pos_mask.unsqueeze(2).expand_as(conf_data)
+        neg_idx_mask = neg_mask.unsqueeze(2).expand_as(conf_data)
+
+        # conf_dataからposとnegだけを取り出してconf_hnmにする。形はtorch.Size([num_pos+num_neg, 21])
+        conf_hnm = conf_data[(pos_idx_mask+neg_idx_mask).gt(0)
+                             ].view(-1, num_classes)
+        # （注釈）gtは greater than (>)の略称。これでmaskが1のindexを取り出す。
+        # pos_idx_mask+neg_idx_maskは足し算だが、indexへのmaskをまとめているだけである。
+        # つまり、posであろうがnegであろうが、マスクが1のものを足し算で一つのリストにし、それをgtで取得
+
+        # 同様に教師データであるconf_t_labelからposとnegだけを取り出してconf_t_label_hnmに
+        # 形はtorch.Size([pos+neg])になる
+        conf_t_label_hnm = conf_t_label[(pos_mask+neg_mask).gt(0)]
+
+        # confidenceの損失関数を計算（要素の合計=sumを求める）
+        loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
+        loss_c_pos = F.cross_entropy( conf_data[(pos_idx_mask).gt(0)].view(-1, num_classes), 
+                                      conf_t_label[(pos_mask).gt(0)], reduction='sum')
+        loss_c_neg = F.cross_entropy( conf_data[(neg_idx_mask).gt(0)].view(-1, num_classes), 
+                                      conf_t_label[(neg_mask).gt(0)], reduction='sum')
+        # 物体を発見したBBoxの数N（全ミニバッチの合計）で損失を割り算
+        N = num_pos.sum()
+        loss_l /= N
+
+        loss_c /= N
+#         loss_c = 2*loss_c_pos/N + loss_c_neg/N
+        return loss_l, loss_c, loss_c_pos/N, loss_c_neg/N
+
+
+        # # ----------
+        # # 位置の損失：loss_lを計算
+        # # Smooth L1関数で損失を計算する。ただし、物体を発見したDBoxのオフセットのみを計算する
+        # # ----------
+        # # 物体を検出したBBoxを取り出すマスクを作成
+        # pos_mask = conf_t_label > 0  # torch.Size([num_batch, 8732])
+
+        # log_conf = -F.log_softmax(conf_data, dim=2) # 負の対数尤度
+        # loss_c_posi = log_conf[:,:,1][pos_mask] # ←このコードは多クラスに対応しない
+
+        # log_conf_nega = log_conf[:,:,0] # クラス0(背景)の信頼度
+        # log_conf_nega[pos_mask] = 0
+        # _, loss_idx = log_conf_nega.sort(1, descending=True)
+        # _, idx_rank = loss_idx.sort(1) # 各ボックスの順位 (e.g. idx_rank[n] はボックス #n の順位)
+        # neg_idx = idx_rank < pos_mask.sum(1)[:,None] * self.negpos_ratio
+        # loss_c_nega = log_conf_nega[neg_idx]
+        # loss_c_avg = torch.cat((loss_c_posi, loss_c_nega)).mean()
+
+        # loc_p = loc_data[pos_mask]
+        # loc_t = loc_t[pos_mask]
+        # loss_l_avg = F.smooth_l1_loss(loc_p, loc_t)
+
+        # return loss_c_avg, loss_l_avg
