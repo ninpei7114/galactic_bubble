@@ -84,9 +84,10 @@ def main(args):
     }
 
     flip_list = [False, True]
-    rotate_list = [False, True]
-    scale_list = [False, 1.5, 2]
-    # scale_list = [1.5, 2]
+    rotate_list = [True]
+    # rotate_list = [False, True]
+    # scale_list = [False, 1.5, 2]
+    scale_list = [False]
 
     for flip, rotate, scale in itertools.product(flip_list, rotate_list, scale_list):
         train_cfg = {
@@ -96,6 +97,7 @@ def main(args):
         }
 
         name = []
+        print('flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
         for k, v in zip(list(train_cfg.keys()), list(train_cfg.values())):
             name.append(k)
             name.append('_')

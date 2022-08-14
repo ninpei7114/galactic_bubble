@@ -157,7 +157,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                         if np.isnan(res_data.sum()):
                                             pass
                                         else:
-                                            mwp_ring_list_train.append(rotate_cut_data)
+                                            mwp_ring_list_train.append(res_data)
                                             frame_mwp_train = pd.concat([frame_mwp_train, p_data])
                                         
                                         if flip:
@@ -255,6 +255,8 @@ def make_ring(spitzer_path, name, train_cfg):
     print('val_count  ',  val_count)
     print('train_nan_count  ',  train_nan_count)
     print('val_nan_count  ',  val_nan_count)
+    # for mm in mwp_ring_list_train:
+    #     print(mm.shape)
 
     mwp_ring_list_train = np.array(mwp_ring_list_train).astype(np.float32)
     mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
