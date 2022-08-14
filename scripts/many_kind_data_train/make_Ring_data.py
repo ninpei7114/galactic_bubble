@@ -17,7 +17,7 @@ import ring_sub
 
 
 
-def make_ring(spitzer_path, name, pattern):
+def make_ring(spitzer_path, name, train_cfg):
 
     val_l = ['spitzer_00900+0000_rgb','spitzer_03900+0000_rgb','spitzer_31200+0000_rgb','spitzer_34200+0000_rgb',
          'spitzer_33900+0000_rgb',]
@@ -106,19 +106,18 @@ def make_ring(spitzer_path, name, pattern):
 
             for _, row in mwp.iterrows():    
 
-                rev = pattern[0]
-                rot = pattern[1]
+                flip = train_cfg['flip']
+                rot = train_cfg['rotate']
+                scale = train_cfg['scale']
 
                 x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, hight, flag = label_caliculator.calc_pix(row, w,GLON_new_min,GLON_new_max,
-                                                                                    GLAT_min,GLAT_max, mode)
+                                                                                    GLAT_min, GLAT_max, mode, 1/0.89)
 
 
-                if flag: #calc_pix時に100回試行してもできなかった場合の場合分け
-                        
+                if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
                     cover_star_position, cover_star_name = label_caliculator.find_cover(star_dic, x_pix_min, y_pix_min, x_pix_max, y_pix_max)
 
                     if x_pix_min<0 or y_pix_min<0:
-
                         pass
 
                     else:
@@ -138,33 +137,30 @@ def make_ring(spitzer_path, name, pattern):
                             res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                             res_data = proceesing.normalize(res_data)
                             res_data = proceesing.resize(res_data, 300)
+                            xmin_list, ymin_list, xmax_list, ymax_list = label_caliculator.check_list(xmin_list, ymin_list, 
+                                                                                                      xmax_list, ymax_list)
                             info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
                             p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
 
                             if mode == 'train':
-                                mwp_ring_list_train.append(res_data)
-                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-
-
+                                if np.isnan(res_data.sum()):
+                                    pass
+                                else:
+                                    mwp_ring_list_train.append(res_data)
+                                    frame_mwp_train = pd.concat([frame_mwp_train, p_data])
 
                                 if rot:
                                     # deg = np.random.randint(0, 359)
                                     for deg in [90, 180, 270, 360]:
-                                        
                                         res_data, rotate_cut_data, p_data = ring_sub.rotate_data(
                                             pi, deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list, fits_path)
-
                                         if np.isnan(res_data.sum()):
                                             pass
                                         else:
-                                            mwp_ring_list_train.append(res_data)
+                                            mwp_ring_list_train.append(rotate_cut_data)
                                             frame_mwp_train = pd.concat([frame_mwp_train, p_data])
                                         
-                                        if rev:
-                                            xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_caliculator.make_label(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
-                                                                                                                cover_star_position, cover_star_name,
-                                                                                                                width, hight, MWP)
-                                            
+                                        if flip:
                                             ud_res_data, lr_res_data = ring_sub.flip_data(rotate_cut_data)
                                             info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
                                             p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
@@ -181,17 +177,33 @@ def make_ring(spitzer_path, name, pattern):
                                                 frame_mwp_train = pd.concat([frame_mwp_train, p_data])
                                                 mwp_ring_list_train.append(lr_res_data)
                                             
-                                
+                                            if type(scale) == bool:
+                                                pass
+                                            else:
+                                                fl, scale_data, p_data = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
+                                                                                    GLAT_min, GLAT_max, scale, star_dic, 
+                                                                                    mode, MWP, data, fits_path)
+                                                
+                                                if fl:
+                                                    frame_mwp_train = pd.concat([frame_mwp_train, p_data])
+                                                    mwp_ring_list_train.append(scale_data)
+                                        else:
+                                            if type(scale) == bool:
+                                                pass
+                                            else:
+                                                fl, scale_data, p_data = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
+                                                                                    GLAT_min, GLAT_max, scale, star_dic, 
+                                                                                    mode, MWP, data, fits_path)
+                                                
+                                                if fl:
+                                                    frame_mwp_train = pd.concat([frame_mwp_train, p_data])
+                                                    mwp_ring_list_train.append(scale_data)
+
+                                            
                                 else:
-                                    if rev:
-                                        xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_caliculator.make_label(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
-                                                                                                                cover_star_position, cover_star_name,
-                                                                                                                width, hight, MWP)
+                                    if flip:
                                             
                                         ud_res_data, lr_res_data = ring_sub.flip_data(pi)
-                                        info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
-                                        p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
-
                                         if np.isnan(ud_res_data.sum()):
                                             pass
                                         else:
@@ -203,6 +215,28 @@ def make_ring(spitzer_path, name, pattern):
                                         else:
                                             frame_mwp_train = pd.concat([frame_mwp_train, p_data])
                                             mwp_ring_list_train.append(lr_res_data)
+                                        
+                                        if type(scale) == bool:
+                                            pass
+                                        else:
+                                            fl, scale_data, p_data = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
+                                                                                GLAT_min, GLAT_max, scale, star_dic, 
+                                                                                mode, MWP, data, fits_path)
+                                            
+                                            if fl:
+                                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
+                                                mwp_ring_list_train.append(scale_data)
+                                    else:
+                                        if type(scale) == bool:
+                                            pass
+                                        else:
+                                            fl, scale_data, p_data = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
+                                                                                GLAT_min, GLAT_max, scale, star_dic, 
+                                                                                mode, MWP, data, fits_path)
+                                            
+                                            if fl:
+                                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
+                                                mwp_ring_list_train.append(scale_data)
 
 
                             if mode == 'val':
@@ -210,7 +244,6 @@ def make_ring(spitzer_path, name, pattern):
                                 if np.isnan(res_data.sum()):
                                     pass
                                 else:
-                                    
                                     mwp_ring_list_val.append(res_data)
                                     frame_mwp_val = pd.concat([frame_mwp_val, p_data])
 
@@ -236,7 +269,7 @@ def make_ring(spitzer_path, name, pattern):
     # mwp_ring_list_train_ = np.array(mwp_ring_list_train)
     mwp_ring_list_train_ = mwp_ring_list_train*255
     mwp_ring_list_train_ = np.uint8(mwp_ring_list_train_)
-    proceesing.data_view_rectangl(25, mwp_ring_list_train_[::10], frame_mwp_train[::10]).save(savedir_name + '/train_ring.pdf')
+    proceesing.data_view_rectangl(25, mwp_ring_list_train_, frame_mwp_train).save(savedir_name + '/train_ring.pdf')
 
     mwp_ring_list_val_ = mwp_ring_list_val*255
     mwp_ring_list_val_ = np.uint8(mwp_ring_list_val_)

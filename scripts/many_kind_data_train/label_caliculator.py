@@ -80,7 +80,7 @@ def all_star(dataframe, world):
 
 
 
-def calc_pix(row, world, GLON_min,GLON_max,GLAT_min,GLAT_max, mode):
+def calc_pix(row, world, GLON_min,GLON_max,GLAT_min,GLAT_max, mode, scale):
     """
     切り出す画像の範囲をここで決める
 
@@ -94,7 +94,7 @@ def calc_pix(row, world, GLON_min,GLON_max,GLAT_min,GLAT_max, mode):
     while ok:
         if mode=='train':
             # random_num = 1/np.random.uniform(0.3, 0.89) #サイズが一様ver
-            random_num = 1/0.89
+            random_num = scale
         else:
             random_num = 1/0.89
         lmax = row['GLON'] + random_num*1.5*row['Rout']/60
@@ -186,6 +186,24 @@ def make_label(x_pix_min, y_pix_min,x_pix_max, y_pix_max, cover_star_position, c
                 named_list.append(n)
             
     return xmin_list, ymin_list, xmax_list, ymax_list, named_list
+
+
+def check_list(xmin_list, ymin_list, xmax_list, ymax_list):
+    xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
+    for xy_num in range(len(xmin_list)):
+        if ((xmax_list[xy_num] - xmin_list[xy_num])==0 or
+            (ymax_list[xy_num] - ymin_list[xy_num])==0):
+            pass
+        else:
+            xmin_list_.append(xmin_list[xy_num])
+            ymin_list_.append(ymin_list[xy_num])
+            xmax_list_.append(xmax_list[xy_num])
+            ymax_list_.append(ymax_list[xy_num])
+    
+    return xmin_list_, ymin_list_, xmax_list_, ymax_list_
+
+
+
 
 
 

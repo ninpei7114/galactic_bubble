@@ -37,6 +37,8 @@ from make_data import make_data
 from make_figure import make_figure
 from train_model import train_model
 
+import itertools
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of DeepCluster')
@@ -75,26 +77,36 @@ def main(args):
         'bbox_aspect_num': [4, 6, 6, 6, 4, 4],  # 出力するDBoxのアスペクト比の種類
     #     'bbox_aspect_num': [4, 4, 4, 4, 4, 4],
         'feature_maps': [38, 19, 10, 5, 3, 1],  # 各sourceの画像サイズ   
-    #     'feature_maps': [38, 19, 10, 5, 3, 1],  # 各sourceの画像サイズ
         'steps': [8, 16, 32, 64, 100, 300],  # DBOXの大きさを決める
         'min_sizes': [30, 60, 111, 162, 213, 264],  # DBOXの大きさを決める
         'max_sizes': [60, 111, 162, 213, 264, 315],  # DBOXの大きさを決める
         'aspect_ratios': [[2], [2,3], [2,3], [2,3], [2], [2]],
     }
 
-    pattern = [[True, False], [False, True], [True, True]]
-    
-    for p in pattern:
-        name = []
-        for n, pp in zip(['flip', 'rotate'], p):
-            if pp:
-                name.append(n)
-        name = '_'.join(name)
-        os.mkdir(name)
+    flip_list = [False, True]
+    rotate_list = [False, True]
+    scale_list = [False, 1.5, 2]
+    # scale_list = [1.5, 2]
 
+    for flip, rotate, scale in itertools.product(flip_list, rotate_list, scale_list):
+        train_cfg = {
+            "flip": flip,
+            "rotate": rotate,
+            "scale": scale
+        }
+
+        name = []
+        for k, v in zip(list(train_cfg.keys()), list(train_cfg.values())):
+            name.append(k)
+            name.append('_')
+            name.append(str(v))
+            name.append('__')
+        
+        name = ''.join(name)
+        os.mkdir(name)
         f_log = open(name+'/log.txt', 'w')
 
-        train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(args.spitzer_path, name, pattern, f_log)
+        train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(args.spitzer_path, name, train_cfg, f_log)
 
 
         # print('Ring_num : ', args.Train_Ring_num)

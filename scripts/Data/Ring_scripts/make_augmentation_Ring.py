@@ -75,9 +75,6 @@ def main(args):
 
         frame_mwp_val = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'])
         mwp_ring_list_val = []
-
-        Cutting_range_train = pd.DataFrame(columns=['fits', 'x_pix_min', 'x_pix_max', 'y_pix_min', 'y_pix_max'])
-        Cutting_range_val = pd.DataFrame(columns=['fits', 'x_pix_min', 'x_pix_max', 'y_pix_min', 'y_pix_max'])
         
         for mode in ['train', 'val']:
             if mode == 'train':
@@ -165,19 +162,14 @@ def main(args):
                                         res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                                         res_data = proceesing.normalize(res_data)
                                         res_data = proceesing.resize(res_data, 300)
-                                        
                                         if np.isnan(res_data.sum()):
                                             pass
                                         else:
                                             info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
                                             p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
+                                            
                                             mwp_ring_list_train.append(res_data)
                                             frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-
-                                            saigenn = [[fits_path, xmin_list, xmax_list, ymin_list, ymax_list]]
-                                            p_data = pd.DataFrame(columns=['fits', 'x_pix_min', 'x_pix_max', 'y_pix_min', 'y_pix_max'],
-                                                                  data=saigenn)
-                                            Cutting_range_train = pd.concat([Cutting_range_train, p_data])
     
                                     
                                     if mode == 'val':
@@ -194,10 +186,6 @@ def main(args):
                                             
                                             mwp_ring_list_val.append(res_data)
                                             frame_mwp_val = pd.concat([frame_mwp_val, p_data])
-                                            saigenn = [[fits_path, xmin_list, xmax_list, ymin_list, ymax_list]]
-                                            p_data = pd.DataFrame(columns=['fits', 'x_pix_min', 'x_pix_max', 'y_pix_min', 'y_pix_max'],
-                                                                  data=saigenn)
-                                            Cutting_range_val = pd.concat([Cutting_range_val, p_data])
         
 
 
@@ -224,9 +212,6 @@ def main(args):
         frame_mwp_train.to_csv(savedir_name + '/ring/train_ring_label.csv')
         np.save(savedir_name + '/ring/val_ring_data.npy', mwp_ring_list_val)
         frame_mwp_val.to_csv(savedir_name + '/ring/val_ring_label.csv')
-
-        Cutting_range_train.to_csv(savedir_name + '/ring/train_cutting_range.csv')
-        Cutting_range_val.to_csv(savedir_name + '/ring/val_cutting_range.csv')
 
         # mwp_ring_list_train_ = np.array(mwp_ring_list_train)
         mwp_ring_list_train_ = mwp_ring_list_train*255

@@ -32,7 +32,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='make data for deepcluster')
 
     parser.add_argument('fits_path', metavar='DIR', help='path to dataset')
-    # parser.add_argument('ring_sentei_path', metavar='DIR', help='path to ring setntei file')
+    parser.add_argument('train_aug_num', type=int, help='train augmentation number')
+    parser.add_argument('val_aug_num', type=int, help='val augmentation number')
     # parser.add_argument('mwp_catalogu_path', metavar='DIR', help='path to mwp catalogue')
     # # parser.add_argument('augmentation_num', metavar='DIR', help='the number of augmentation')
     # parser.add_argument('savedir_format', metavar='DIR', help='data save dir name format')
@@ -78,11 +79,11 @@ def main(args):
     for mode in ['train', 'val']:
 
         if mode == 'train':
-            epoch = 200
+            epoch = args.train_aug_num
             ref_path_list = train_l
             choice_num = len(train_l)-1
         else:
-            epoch = 30
+            epoch = args.val_aug_num
             ref_path_list = val_l
             choice_num = len(val_l)-1
 

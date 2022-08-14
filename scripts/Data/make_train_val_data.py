@@ -8,7 +8,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description='make data for deepcluster')
 
     parser.add_argument('ring_path', metavar='DIR', help='path to ring')
-    parser.add_argument('non_ring_path', metavar='DIR', help='path to non_ring')
+    parser.add_argument('train_non_ring_path', metavar='DIR', help='path to train non_ring')
+    parser.add_argument('val_non_ring_path', metavar='DIR', help='path to val non_ring')
+    parser.add_argument('train_Non_Ring_num', type=int, help='train Non_Ring number')
+    parser.add_argument('val_Non_Ring_num', type=int, help='val Non_Ring number')
     parser.add_argument('savedir', default='.', 
                         help='data save dir')
 
@@ -38,21 +41,21 @@ def main(args):
     val_label['ymax'] = [ast.literal_eval(d) for d in val_label['ymax']]
 
 
-    no_ring_train_ = np.load(args.non_ring_path+'/no_ring_300_6000_train.npy')
-    no_ring_val_ = np.load(args.non_ring_path+'/no_ring_300_900_val.npy')
+    no_ring_train_ = np.load(args.train_non_ring_path)
+    no_ring_val_ = np.load(args.val_non_ring_path)
 
 
-    train_data = np.concatenate([train_data, no_ring_train_[np.random.randint(0, 6000, 2000)]])
-    val_data = np.concatenate([val_data, no_ring_val_[np.random.randint(0, 900, 88)]])
+    train_data = np.concatenate([train_data, no_ring_train_[np.random.randint(0, no_ring_train_.shape[0], int(args.train_Non_Ring_num))]])
+    val_data = np.concatenate([val_data, no_ring_val_[np.random.randint(0, no_ring_val_.shape[0], int(args.val_Non_Ring_num))]])
 
 
-    for i in range(2000):
+    for i in range(args.train_Non_Ring_num):
         
         train_label = pd.concat([train_label, pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax', 'id'], 
                 data= [[[] for i in range(7)]])])
 
 
-    for i in range(88):
+    for i in range(args.val_Non_Ring_num):
         val_label = pd.concat([val_label, pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax', 'id'], 
                 data= [[[] for i in range(7)]])])
 
