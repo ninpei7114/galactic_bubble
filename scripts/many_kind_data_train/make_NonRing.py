@@ -6,6 +6,7 @@ from astropy.coordinates import SkyCoord
 import numpy as np
 import pandas as pd
 from scipy import signal
+from npy_append_array import NpyAppendArray
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -17,6 +18,7 @@ import random
 import collections
 import copy
 import argparse
+from tqdm import tqdm
 
 import torch
 from torch.nn import functional as F
@@ -85,12 +87,13 @@ def main(args):
             ref_path_list = val_l
             choice_num = len(val_l)-1
 
+        no_nan_no_ring_list = NpyAppendArray('NonRing/no_ring_300_%s_%s.npy'%(900, mode))
 
-        no_nan_no_ring_list = []
         start = time.time()
         sig1 = 1/(2*(np.log(2))**(1/2))
         fits_path = pathlib.Path(args.fits_path)
-        for i in range(epoch):
+        pbar = tqdm(range(epoch))
+        for i in pbar:
             random_int = random.randint(0, choice_num)
             
             path = ref_path_list[random_int]
@@ -103,7 +106,7 @@ def main(args):
                                 spitzer_gfits.data[:,:,None], 
                                 spitzer_bfits.data[:,:,None]], axis=2)
             
-            print(path)
+            pbar.set_description(path)
         #     data[data != data] = 0
             # GLON_LAT関数でGLON_new_min1, GLON_new_max1, GLAT_new_min1, GLAT_new_max1を出す
             GLON_new_min1, GLON_new_max1, GLAT_new_min1, GLAT_new_max1 = NonRing_sub.GLON_LAT(data, header, w)
@@ -118,16 +121,13 @@ def main(args):
                 res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                 res_data = proceesing.normalize(res_data)
                 res_data = proceesing.resize(res_data, 300)
-    
+                res_data = np.ascontiguousarray(res_data.reshape(1,300,300,3))
                 no_nan_no_ring_list.append(res_data)
-                
                 
         stop = time.time()
         print((stop-start)/60)
 
-        np.save('NonRing/no_ring_300_%s_%s.npy'%(len(no_nan_no_ring_list), mode), np.array(no_nan_no_ring_list))
-
-
+        no_nan_no_ring_list.close()
 
 if __name__ == '__main__':
     args = parse_args()
