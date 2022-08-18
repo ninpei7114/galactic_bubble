@@ -170,7 +170,6 @@ def make_ring(spitzer_path, name, train_cfg):
                                                 fl, scale_data, p_data = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
                                                                                     GLAT_min, GLAT_max, scale, star_dic, 
                                                                                     mode, MWP, data, fits_path)
-                                                
                                                 if fl:
                                                     append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
 
@@ -181,7 +180,6 @@ def make_ring(spitzer_path, name, train_cfg):
                                                 fl, scale_data, p_data = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
                                                                                     GLAT_min, GLAT_max, scale, star_dic, 
                                                                                     mode, MWP, data, fits_path)
-                                                
                                                 if fl:
                                                     append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
 
