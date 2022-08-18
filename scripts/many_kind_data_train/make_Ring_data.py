@@ -141,41 +141,28 @@ def make_ring(spitzer_path, name, train_cfg):
                                                                                                       xmax_list, ymax_list)
                             info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
                             p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
+                            def append_data(data, p_data, data_list, frame):
+                                if not np.isnan(data.sum()):
+                                    data_list.append(data)
+                                    frame = pd.concat([frame, p_data])
 
                             if mode == 'train':
-                                if np.isnan(res_data.sum()):
-                                    pass
-                                else:
-                                    mwp_ring_list_train.append(res_data)
-                                    frame_mwp_train = pd.concat([frame_mwp_train, p_data])
+                                append_data(res_data, p_data, mwp_ring_list_train, frame_mwp_train)
 
                                 if rot:
                                     # deg = np.random.randint(0, 359)
                                     for deg in [90, 180, 270, 360]:
                                         res_data, rotate_cut_data, p_data = ring_sub.rotate_data(
                                             pi, deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list, fits_path)
-                                        if np.isnan(res_data.sum()):
-                                            pass
-                                        else:
-                                            mwp_ring_list_train.append(res_data)
-                                            frame_mwp_train = pd.concat([frame_mwp_train, p_data])
+                                        append_data(res_data, p_data, mwp_ring_list_train, frame_mwp_train)
                                         
                                         if flip:
                                             ud_res_data, lr_res_data = ring_sub.flip_data(rotate_cut_data)
                                             info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
                                             p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
-
-                                            if np.isnan(ud_res_data.sum()):
-                                                pass
-                                            else:
-                                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                                mwp_ring_list_train.append(ud_res_data)
-
-                                            if np.isnan(lr_res_data.sum()):
-                                                pass
-                                            else:
-                                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                                mwp_ring_list_train.append(lr_res_data)
+                                            
+                                            append_data(ud_res_data, p_data, mwp_ring_list_train, frame_mwp_train)
+                                            append_data(lr_res_data, p_data, mwp_ring_list_train, frame_mwp_train)
                                             
                                             if type(scale) == bool:
                                                 pass
@@ -185,8 +172,8 @@ def make_ring(spitzer_path, name, train_cfg):
                                                                                     mode, MWP, data, fits_path)
                                                 
                                                 if fl:
-                                                    frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                                    mwp_ring_list_train.append(scale_data)
+                                                    append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
+
                                         else:
                                             if type(scale) == bool:
                                                 pass
@@ -196,25 +183,16 @@ def make_ring(spitzer_path, name, train_cfg):
                                                                                     mode, MWP, data, fits_path)
                                                 
                                                 if fl:
-                                                    frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                                    mwp_ring_list_train.append(scale_data)
+                                                    append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
 
                                             
                                 else:
                                     if flip:
                                             
                                         ud_res_data, lr_res_data = ring_sub.flip_data(pi)
-                                        if np.isnan(ud_res_data.sum()):
-                                            pass
-                                        else:
-                                            frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                            mwp_ring_list_train.append(ud_res_data)
-
-                                        if np.isnan(lr_res_data.sum()):
-                                            pass
-                                        else:
-                                            frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                            mwp_ring_list_train.append(lr_res_data)
+                                        append_data(ud_res_data, p_data, mwp_ring_list_train, frame_mwp_train)
+                                        append_data(lr_res_data, p_data, mwp_ring_list_train, frame_mwp_train)
+                                            
                                         
                                         if type(scale) == bool:
                                             pass
@@ -224,8 +202,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                                                                 mode, MWP, data, fits_path)
                                             
                                             if fl:
-                                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                                mwp_ring_list_train.append(scale_data)
+                                                append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
                                     else:
                                         if type(scale) == bool:
                                             pass
@@ -235,17 +212,11 @@ def make_ring(spitzer_path, name, train_cfg):
                                                                                 mode, MWP, data, fits_path)
                                             
                                             if fl:
-                                                frame_mwp_train = pd.concat([frame_mwp_train, p_data])
-                                                mwp_ring_list_train.append(scale_data)
-
+                                                append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
 
                             if mode == 'val':
-
-                                if np.isnan(res_data.sum()):
-                                    pass
-                                else:
-                                    mwp_ring_list_val.append(res_data)
-                                    frame_mwp_val = pd.concat([frame_mwp_val, p_data])
+                                
+                                append_data(res_data, p_data, mwp_ring_list_val, frame_mwp_val)
 
 
     frame_mwp_train['id']  = [i for i in range(len(frame_mwp_train))]
