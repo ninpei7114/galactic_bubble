@@ -308,25 +308,6 @@ def make_vgg():
     layers = []
     in_channels = 2  # 色チャネル数
     #なぜか自分で実装している
-    # vggモジュールで使用する畳み込み層やマックスプーリングのチャネル数
-#     cfg = [64, 64, 'M', 128, 128, 'M', 256, 256,
-#            256, 'MC', 512, 512, 512, 'M', 512, 512, 512]
-
-#     for v in cfg:
-#         if v == 'M':
-#             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-#         elif v == 'MC':
-#             # ceilは出力サイズを、計算結果（float）に対して、切り上げで整数にするモード
-#             # デフォルトでは出力サイズを計算結果（float）に対して、切り下げで整数にするfloorモード
-#             layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
-#         else:
-#             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
-#             layers += [conv2d, nn.ReLU(inplace=True)]
-#             in_channels = v
-
-#     pool5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
-#     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
-#     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
     Conv2_1 = nn.Conv2d(2, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 #     Conv2_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Conv2_2 = nn.Sequential(nn.BatchNorm2d(64),
@@ -590,12 +571,12 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     area = torch.mul(x2 - x1, y2 - y1)
 
     # boxesをコピーする。後で、BBoxの被り度合いIOUの計算に使用する際のひな形として用意
-    tmp_x1 = boxes.new()
-    tmp_y1 = boxes.new()
-    tmp_x2 = boxes.new()
-    tmp_y2 = boxes.new()
-    tmp_w = boxes.new()
-    tmp_h = boxes.new()
+    # tmp_x1 = boxes.new()
+    # tmp_y1 = boxes.new()
+    # tmp_x2 = boxes.new()
+    # tmp_y2 = boxes.new()
+    # tmp_w = boxes.new()
+    # tmp_h = boxes.new()
 
     # socreを昇順に並び変える
     v, idx = scores.sort(0)
@@ -622,10 +603,15 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         # これからkeepに格納したBBoxと被りの大きいBBoxを抽出して除去する
         # -------------------
         # ひとつ減らしたidxまでのBBoxを、outに指定した変数として作成する
-        torch.index_select(x1, 0, idx, out=tmp_x1)
-        torch.index_select(y1, 0, idx, out=tmp_y1)
-        torch.index_select(x2, 0, idx, out=tmp_x2)
-        torch.index_select(y2, 0, idx, out=tmp_y2)
+        tmp_x1 = x1[idx]
+        tmp_y1 = y1[idx]
+        tmp_x2 = x2[idx]
+        tmp_y2 = y2[idx]
+
+        # torch.index_select(x1, 0, idx, out=tmp_x1)
+        # torch.index_select(y1, 0, idx, out=tmp_y1)
+        # torch.index_select(x2, 0, idx, out=tmp_x2)
+        # torch.index_select(y2, 0, idx, out=tmp_y2)
 
         # すべてのBBoxに対して、現在のBBox=indexがiと被っている値までに設定(clamp)
         tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
@@ -633,20 +619,10 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
         tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
 
-        # wとhのテンソルサイズをindexを1つ減らしたものにする
-        tmp_w.resize_as_(tmp_x2)
-        tmp_h.resize_as_(tmp_y2)
-
-        # clampした状態でのBBoxの幅と高さを求める
-        tmp_w = tmp_x2 - tmp_x1
-        tmp_h = tmp_y2 - tmp_y1
-
-        # 幅や高さが負になっているものは0にする
-        tmp_w = torch.clamp(tmp_w, min=0.0)
-        tmp_h = torch.clamp(tmp_h, min=0.0)
-
-        # clampされた状態での面積を求める
-        inter = tmp_w*tmp_h
+        minxy = boxes[i, 0:2].repeat(2)
+        maxxy = boxes[i, 2:4].repeat(2)
+        clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
+        inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
 
         # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
         rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
@@ -654,23 +630,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         IoU = inter/union
 
         # IoUがoverlapより小さいidxのみを残す
-        idx = idx[IoU.le(overlap)] 
-#         minxy = boxes[i, 0:2].repeat(2)
-#         maxxy = boxes[i, 2:4].repeat(2)
-#         print(boxes[idx].shape)
-#         print(minxy)
-#         print(maxxy)
-# #         print(minxy)
-#         clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
-#         inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
-
-#         # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
-#         rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
-#         union = (rem_areas - inter) + area[i]  # 2つのエリアのANDの面積
-#         IoU = inter/union
-
-#         # IoUがoverlapより小さいidxのみを残す
-#         idx = idx[IoU.le(overlap)]  # leはLess than or Equal toの処理をする演算です
+        idx = idx[IoU.le(overlap)]  # leはLess than or Equal toの処理をする演算です
         # IoUがoverlapより大きいidxは、最初に選んでkeepに格納したidxと同じ物体に対してBBoxを囲んでいるため消去
 
     # whileのループが抜けたら終了
@@ -943,7 +903,7 @@ class MultiBoxLoss(nn.Module):
         loc_t = loc_t[pos_idx].view(-1, 4)
        
         # 物体を発見したPositive DBoxのオフセット情報loc_tの損失（誤差）を計算
-        loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
+        loss_l = torch.nan_to_num(F.smooth_l1_loss(loc_p, loc_t))
 
 
         # ----------
@@ -1005,13 +965,15 @@ class MultiBoxLoss(nn.Module):
         # confidenceの損失関数を計算（要素の合計=sumを求める）
         loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
         loss_c_pos = F.cross_entropy( conf_data[(pos_idx_mask).gt(0)].view(-1, num_classes), 
-                                      conf_t_label[(pos_mask).gt(0)], reduction='sum')
+                                      conf_t_label[(pos_mask).gt(0)])
         loss_c_neg = F.cross_entropy( conf_data[(neg_idx_mask).gt(0)].view(-1, num_classes), 
-                                      conf_t_label[(neg_mask).gt(0)], reduction='sum')
+                                      conf_t_label[(neg_mask).gt(0)])
+        loss_c = loss_c_pos + loss_c_neg
         # 物体を発見したBBoxの数N（全ミニバッチの合計）で損失を割り算
         N = num_pos.sum()
-        loss_l /= N
+        
+        # loss_l /= N
 
-        loss_c /= N
+        # loss_c /= N
 #         loss_c = 2*loss_c_pos/N + loss_c_neg/N
         return loss_l, loss_c, loss_c_pos/N, loss_c_neg/N
