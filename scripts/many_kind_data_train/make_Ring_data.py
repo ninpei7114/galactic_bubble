@@ -1,5 +1,4 @@
 import astropy.io.fits
-import astroquery.vizier
 import astropy.wcs
 import argparse
 
@@ -38,15 +37,6 @@ def make_ring(spitzer_path, name, train_cfg):
     sig1 = 1/(2*(np.log(2))**(1/2))
 
     # MWP = label_caliculator.m_catalogue(args.ring_sentei_path, args.mwp_catalogu_path)
-
-    viz = astroquery.vizier.Vizier(columns=['*'])
-    viz.ROW_LIMIT = -1
-    bub_2006 = viz.query_constraints(catalog='J/ApJ/649/759/bubbles')[0].to_pandas()
-    bub_2007 = viz.query_constraints(catalog='J/ApJ/670/428/bubble')[0].to_pandas()
-    bub_2006_change = bub_2006.set_index('__CPA2006_')
-    bub_2007_change = bub_2007.set_index('__CWP2007_')
-    MWP = pd.concat([bub_2006_change, bub_2007_change])
-    MWP['MWP'] = MWP.index
 
     # viz = astroquery.vizier.Vizier(columns=['*'])
     # viz.ROW_LIMIT = -1
@@ -93,7 +83,7 @@ def make_ring(spitzer_path, name, train_cfg):
             GLON_center = (GLON_min+GLON_max)/2
             GLON_new_min = GLON_center-1.5
             GLON_new_max = GLON_center+1.5
-
+            
             mwp = MWP.query('@GLON_new_min < GLON <= @GLON_new_max')
             mwp = mwp.reset_index()
             if mode == 'train':
@@ -109,6 +99,7 @@ def make_ring(spitzer_path, name, train_cfg):
                 flip = train_cfg['flip']
                 rot = train_cfg['rotate']
                 scale = train_cfg['scale']
+                translation = train_cfg['translation']
 
                 x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, hight, flag = label_caliculator.calc_pix(row, w,GLON_new_min,GLON_new_max,
                                                                                     GLAT_min, GLAT_max, mode, 1/0.89)
@@ -213,8 +204,10 @@ def make_ring(spitzer_path, name, train_cfg):
                                                 append_data(scale_data, p_data, mwp_ring_list_train, frame_mwp_train)
 
                             if mode == 'val':
-                                
-                                append_data(res_data, p_data, mwp_ring_list_val, frame_mwp_val)
+                                flag, res_data,  p_data = ring_sub.translation(MWP, fits_path, data, 
+                                                                star_dic, row, w,GLON_min,GLON_max,GLAT_min,GLAT_max)
+                                if flag:
+                                    append_data(res_data, p_data, mwp_ring_list_val, frame_mwp_val)
 
 
     frame_mwp_train['id']  = [i for i in range(len(frame_mwp_train))]

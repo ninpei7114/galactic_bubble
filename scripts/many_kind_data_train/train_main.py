@@ -88,12 +88,14 @@ def main(args):
     # rotate_list = [False, True]
     # scale_list = [False, 1.5, 2]
     scale_list = [False]
+    translation_list = [False, True]
 
-    for flip, rotate, scale in itertools.product(flip_list, rotate_list, scale_list):
+    for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):
         train_cfg = {
             "flip": flip,
             "rotate": rotate,
-            "scale": scale
+            "scale": scale,
+            "translation":translation
         }
 
         name = []
