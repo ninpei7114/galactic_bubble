@@ -52,10 +52,9 @@ def rotate_data(source_data, deg, xmin_list, ymin_list, xmax_list, ymax_list, na
     res_data = proceesing.normalize(res_data)
     res_data = proceesing.resize(res_data, 300)
 
-    info = [[fits_path, name_list, xmin_list_, xmax_list_, ymin_list_, ymax_list_]]
-    p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
-
-    return res_data, rotate_cut_data, p_data
+    info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
+                        'ymin':ymin_list, 'ymax':ymax_list}
+    return res_data, rotate_cut_data, info
 
 
 
@@ -92,10 +91,10 @@ def scale(row, w,GLON_new_min,GLON_new_max, GLAT_min, GLAT_max, scale, star_dic,
                 xmin_list, ymin_list, xmax_list, ymax_list = label_caliculator.check_list(xmin_list, ymin_list, 
                                                                                                             xmax_list, ymax_list)
                                                                                             
-                info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
-                p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
+                info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
+                        'ymin':ymin_list, 'ymax':ymax_list}
 
-                return True, res_data, p_data
+                return True, res_data, info
 
     else:
         return False, 0, 0
@@ -165,8 +164,8 @@ def translation(MWP, fits_path, data, star_dic, row, world,GLON_min,GLON_max,GLA
             res_data = proceesing.resize(res_data, 300)
             xmin_list, ymin_list, xmax_list, ymax_list = label_caliculator.check_list(xmin_list, ymin_list, 
                                                                                         xmax_list, ymax_list)
-            info = [[fits_path, name_list, xmin_list, xmax_list, ymin_list, ymax_list]]
-            p_data = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'], data=info)
-            return flag, res_data,  p_data
+            info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
+                        'ymin':ymin_list, 'ymax':ymax_list}
+            return flag, res_data, info
     else:
         return flag, 0,  0

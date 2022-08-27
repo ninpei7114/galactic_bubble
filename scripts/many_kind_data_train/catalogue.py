@@ -1,7 +1,7 @@
 import astroquery.vizier
 
 
-def (choice):
+def catatologue(choice):
     if choice=='CH':
         viz = astroquery.vizier.Vizier(columns=['*'])
         viz.ROW_LIMIT = -1
@@ -9,10 +9,10 @@ def (choice):
         bub_2007 = viz.query_constraints(catalog='J/ApJ/670/428/bubble')[0].to_pandas()
         bub_2006_change = bub_2006.set_index('__CPA2006_')
         bub_2007_change = bub_2007.set_index('__CWP2007_')
-        MWP = pd.concat([bub_2006_change, bub_2007_change])
-        MWP['MWP'] = MWP.index
+        CH = pd.concat([bub_2006_change, bub_2007_change])
+        CH['CH'] = CH.index
 
-        return MWP
+        return CH
 
     elif choice=='MWP':
         viz = astroquery.vizier.Vizier(columns=['*'])

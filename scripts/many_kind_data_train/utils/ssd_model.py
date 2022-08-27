@@ -931,7 +931,6 @@ class MultiBoxLoss(nn.Module):
         # Hard Negative Miningを実施する
         # 各DBoxの損失の大きさloss_cの順位であるidx_rankを求める
         _, loss_idx = loss_c.sort(1, descending=True)
-#         print(loss_idx.shape)
         _, idx_rank = loss_idx.sort(1)
         num_neg = torch.clamp(num_pos*self.negpos_ratio, max=num_dbox, min=3)
 
@@ -963,7 +962,7 @@ class MultiBoxLoss(nn.Module):
         conf_t_label_hnm = conf_t_label[(pos_mask+neg_mask).gt(0)]
 
         # confidenceの損失関数を計算（要素の合計=sumを求める）
-        loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
+        # loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
         loss_c_pos = F.cross_entropy( conf_data[(pos_idx_mask).gt(0)].view(-1, num_classes), 
                                       conf_t_label[(pos_mask).gt(0)])
         loss_c_neg = F.cross_entropy( conf_data[(neg_idx_mask).gt(0)].view(-1, num_classes), 

@@ -207,8 +207,9 @@ def check_list(xmin_list, ymin_list, xmax_list, ymax_list):
 
 
 
-
-# def m_catalogue(sentei_path, mwp_catalogu_path):
+### MWPカタログを選定した時のdef
+#  
+# def rank_catalogue(sentei_path, mwp_catalogu_path):
 #     nishimoto = pd.read_csv(sentei_path)
 #     nishimoto = nishimoto.drop('Unnamed: 0', axis=1)
 #     nishimoto = nishimoto.fillna(0)
