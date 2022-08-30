@@ -603,21 +603,21 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         # これからkeepに格納したBBoxと被りの大きいBBoxを抽出して除去する
         # -------------------
         # ひとつ減らしたidxまでのBBoxを、outに指定した変数として作成する
-        tmp_x1 = x1[idx]
-        tmp_y1 = y1[idx]
-        tmp_x2 = x2[idx]
-        tmp_y2 = y2[idx]
+        # tmp_x1 = x1[idx]
+        # tmp_y1 = y1[idx]
+        # tmp_x2 = x2[idx]
+        # tmp_y2 = y2[idx]
 
-        # torch.index_select(x1, 0, idx, out=tmp_x1)
-        # torch.index_select(y1, 0, idx, out=tmp_y1)
-        # torch.index_select(x2, 0, idx, out=tmp_x2)
-        # torch.index_select(y2, 0, idx, out=tmp_y2)
+        # # torch.index_select(x1, 0, idx, out=tmp_x1)
+        # # torch.index_select(y1, 0, idx, out=tmp_y1)
+        # # torch.index_select(x2, 0, idx, out=tmp_x2)
+        # # torch.index_select(y2, 0, idx, out=tmp_y2)
 
-        # すべてのBBoxに対して、現在のBBox=indexがiと被っている値までに設定(clamp)
-        tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
-        tmp_y1 = torch.clamp(tmp_y1, min=y1[i])
-        tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
-        tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
+        # # すべてのBBoxに対して、現在のBBox=indexがiと被っている値までに設定(clamp)
+        # tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
+        # tmp_y1 = torch.clamp(tmp_y1, min=y1[i])
+        # tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
+        # tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
 
         minxy = boxes[i, 0:2].repeat(2)
         maxxy = boxes[i, 2:4].repeat(2)
@@ -975,4 +975,4 @@ class MultiBoxLoss(nn.Module):
 
         # loss_c /= N
 #         loss_c = 2*loss_c_pos/N + loss_c_neg/N
-        return loss_l, loss_c, loss_c_pos/N, loss_c_neg/N
+        return loss_l, loss_c, loss_c_pos, loss_c_neg

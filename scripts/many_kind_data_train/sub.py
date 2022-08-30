@@ -80,18 +80,30 @@ def weights_init(m):
 
 
 # ll , boxは一枚の画像に対する、正解と予想
-# ll , boxは一枚の画像に対する、正解と予想
 def calc_collision(ll, box):
     true_positive = []
+
+    
+    area = (box[:,3] - box[:,1]) * (box[:,4] - box[:,2])
     for l in ll:
-        cx = (l[0]+l[2])/2
-        cy = (l[1]+l[3])/2
+        
+        l_area = (l[2] - l[0])*(l[3] - l[1])
+        abx_mn = np.maximum(l[0], box[:,1]) # xmin
+        aby_mn = np.maximum(l[1], box[:,2]) # ymin
+        abx_mx = np.minimum(l[2], box[:,3]) # xmax
+        aby_mx = np.minimum(l[3], box[:,4]) # ymax
+
+        w = np.maximum(0, abx_mx - abx_mn)
+        h = np.maximum(0, aby_mx - aby_mn)
+
+        intersect = w*h
+        IoU = intersect/(area+l_area-intersect)
 
         # np.logi~~で、どのボックスが正解の中心を含んでいるのかを出している。
-        true_positive.append(np.logical_and.reduce((box[:,1]<=cx, box[:,3]>=cx, box[:,2]<=cy, box[:,4]>=cy)))
+        true_positive.append(IoU)
 
     if len(ll) == 0:
-        return np.zeros([4, 8732]) == 1,  box[:,0], False #, np.array(0)
+        return np.zeros([8732]) == 1,  box[:,0], False #, np.array(0)
     else:
         return np.stack(true_positive), box[:,0], True #, ll[:,2]-ll[:,0]#, true_positive
 
