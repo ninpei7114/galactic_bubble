@@ -1,12 +1,16 @@
-import proceesing
 import numpy as np
 import pandas as pd
 from skimage import transform
-import proceesing
-import label_caliculator
-import ring_sub
 import copy
 
+import label_caliculator
+import proceesing
+import astroquery.vizier
+
+
+"""
+リングのaugmentationパターンを作成するスクリプト
+"""
 
 def flip_data(source_data):
     r_shape_y = source_data.shape[0]
@@ -25,7 +29,6 @@ def flip_data(source_data):
     lr_res_data = proceesing.resize(lr_res_data, 300)
 
     return ud_res_data, lr_res_data
-
 
 
 
@@ -103,7 +106,7 @@ def scale(row, w,GLON_new_min,GLON_new_max, GLAT_min, GLAT_max, scale, star_dic,
 
 
 
-def translation(MWP, fits_path, data, star_dic, row, world,GLON_min,GLON_max,GLAT_min,GLAT_max):
+def translation(MWP, fits_path, data, star_dic, row, world, GLON_min, GLON_max, GLAT_min, GLAT_max):
     import random
     ccc = 0
     ok = True
@@ -169,3 +172,30 @@ def translation(MWP, fits_path, data, star_dic, row, world,GLON_min,GLON_max,GLA
             return flag, res_data, info
     else:
         return flag, 0,  0
+
+
+
+def catatologue(choice):
+    if choice=='CH':
+        viz = astroquery.vizier.Vizier(columns=['*'])
+        viz.ROW_LIMIT = -1
+        bub_2006 = viz.query_constraints(catalog='J/ApJ/649/759/bubbles')[0].to_pandas()
+        bub_2007 = viz.query_constraints(catalog='J/ApJ/670/428/bubble')[0].to_pandas()
+        bub_2006_change = bub_2006.set_index('__CPA2006_')
+        bub_2007_change = bub_2007.set_index('__CWP2007_')
+        CH = pd.concat([bub_2006_change, bub_2007_change])
+        CH['CH'] = CH.index
+
+        return CH
+
+    elif choice=='MWP':
+        viz = astroquery.vizier.Vizier(columns=['*'])
+        viz.ROW_LIMIT = -1
+        MWP = viz.query_constraints(catalog='2019yCat..74881141J ')[0].to_pandas()
+        MWP.loc[MWP['GLON']>=358.446500015535, 'GLON'] -=360 
+        return MWP
+ 
+    else:
+        print('this choice does not exist')
+
+

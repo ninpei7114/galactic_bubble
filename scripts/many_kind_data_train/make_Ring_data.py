@@ -1,6 +1,5 @@
 import astropy.io.fits
 import astropy.wcs
-import argparse
 
 import numpy as np
 import pandas as pd
@@ -13,7 +12,6 @@ from torch.nn import functional as F
 import proceesing
 import label_caliculator
 import ring_sub
-import catalogue
 
 
 
@@ -38,14 +36,10 @@ def make_ring(spitzer_path, name, train_cfg):
     sig1 = 1/(2*(np.log(2))**(1/2))
 
     # choice catalogue from 'CH' or 'MWP'
-    Ring_CATA = catalogue.catalogue('CH')
+    Ring_CATA = ring_sub.catalogue('CH')
 
-    # for ag in args.augmentation_num_list:
-    # frame_mwp_train = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'])
     frame_mwp_train = []
     mwp_ring_list_train = []
-
-    # # frame_mwp_val = pd.DataFrame(columns=['fits', 'name', 'xmin', 'xmax', 'ymin', 'ymax'])
     # frame_mwp_val = []
     # mwp_ring_list_val = []
 

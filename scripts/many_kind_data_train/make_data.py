@@ -9,7 +9,6 @@ def make_data(spitzer_path, name, train_cfg, f_log):
 
     train_data, train_label, val_data, val_label = make_ring(spitzer_path, name, train_cfg)
     train_label.to_csv(name+'/train_label.csv')
-    # print(train_label)
     train_Ring_num, val_Ring_num = train_data.shape[0], val_data.shape[0]
 
     no_Ring_train = np.load('NonRing/no_ring_300_9000_train.npy')
