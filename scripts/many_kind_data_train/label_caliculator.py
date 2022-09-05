@@ -1,20 +1,4 @@
-import astropy.io.fits
-import astropy.wcs
-
 import numpy as np
-import pandas as pd
-from scipy import signal
-
-import matplotlib.pyplot as plt
-import random
-
-
-import torch
-from torch.nn import functional as F
-from torch import nn
-
-
-
 
 def find_cover(star_list, x_pix_min, y_pix_min, x_pix_max, y_pix_max):
     """
@@ -42,7 +26,6 @@ def find_cover(star_list, x_pix_min, y_pix_min, x_pix_max, y_pix_max):
         s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
         c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
         
-#         print('area : ', s_area, g_area*3/4)
         # 場合分け、全体に対してringが1/2以上入っていないといけない
         # 大きさが画像に対して、1/8以上でないとlabel付けしない
         if (c_area>=s_area*1/4 and (d[1][2]-d[1][0])>=(width*2)/8 and 
@@ -80,7 +63,7 @@ def all_star(dataframe, world):
 
 
 
-def calc_pix(row, world, GLON_min,GLON_max,GLAT_min,GLAT_max, mode, scale):
+def calc_pix(row, world, GLON_min, GLON_max, GLAT_min, GLAT_max, mode, scale):
     """
     切り出す画像の範囲をここで決める
 
@@ -151,7 +134,7 @@ def judge_01(number):
 
 
 
-def make_label(x_pix_min, y_pix_min,x_pix_max, y_pix_max, cover_star_position, cover_star_name,  width, hight, MWP):
+def make_label(x_pix_min, y_pix_min, x_pix_max, y_pix_max, cover_star_position, cover_star_name,  width, hight, MWP):
     """
     sは、主体となるringの位置情報
     x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ

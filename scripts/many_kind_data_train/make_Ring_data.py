@@ -17,10 +17,6 @@ import ring_sub
 
 def make_ring(spitzer_path, name, train_cfg):
 
-    # val_l = ['spitzer_00900+0000_rgb','spitzer_03900+0000_rgb','spitzer_31200+0000_rgb','spitzer_34200+0000_rgb',
-    #      'spitzer_33900+0000_rgb',]
-    # val_l = sorted(val_l)
-
     train_l = [
     'spitzer_02100+0000_rgb','spitzer_04200+0000_rgb','spitzer_33300+0000_rgb','spitzer_35400+0000_rgb',
     'spitzer_00300+0000_rgb','spitzer_02400+0000_rgb','spitzer_04500+0000_rgb','spitzer_31500+0000_rgb',
@@ -36,20 +32,14 @@ def make_ring(spitzer_path, name, train_cfg):
     sig1 = 1/(2*(np.log(2))**(1/2))
 
     # choice catalogue from 'CH' or 'MWP'
-    Ring_CATA = ring_sub.catalogue('CH')
+    Ring_CATA = ring_sub.catalogue('MWP')
 
     frame_mwp_train = []
     mwp_ring_list_train = []
-    # frame_mwp_val = []
-    # mwp_ring_list_val = []
 
     l = train_l
     train_count = 0
     train_nan_count = 0
-    # else:
-    #     l = val_l
-    #     val_count = 0
-    #     val_nan_count = 0
 
     for i in range(len(l)): 
 
@@ -90,12 +80,14 @@ def make_ring(spitzer_path, name, train_cfg):
             scale = train_cfg['scale']
             translation = train_cfg['translation']
 
-            x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, hight, flag = label_caliculator.calc_pix(row, w,GLON_new_min,GLON_new_max,
+            x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, hight, flag = label_caliculator.calc_pix(row, w, 
+                                                                                GLON_new_min, GLON_new_max,
                                                                                 GLAT_min, GLAT_max, 'train', 1/0.89)
 
 
             if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
-                cover_star_position, cover_star_name = label_caliculator.find_cover(star_dic, x_pix_min, y_pix_min, x_pix_max, y_pix_max)
+                cover_star_position, cover_star_name = label_caliculator.find_cover(star_dic, x_pix_min, y_pix_min, 
+                                                                                    x_pix_max, y_pix_max)
 
                 if x_pix_min<0 or y_pix_min<0:
                     pass

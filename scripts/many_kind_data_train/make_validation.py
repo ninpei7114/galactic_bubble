@@ -36,7 +36,7 @@ def main(args):
     sig1 = 1/(2*(np.log(2))**(1/2))
 
     # choice catalogue from 'CH' or 'MWP'
-    Ring_CATA = ring_sub.catalogue('CH')
+    Ring_CATA = ring_sub.catalogue('MWP')
 
     # frame_mwp_train = []
     # mwp_ring_list_train = []
