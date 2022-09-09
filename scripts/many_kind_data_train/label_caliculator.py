@@ -154,7 +154,7 @@ def make_label(x_pix_min, y_pix_min, x_pix_max, y_pix_max, cover_star_position, 
         
         for p, n in zip(cover_star_position, cover_star_name):
             # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
-             #                           array(7673.50003014), array(4763.19998004)])
+            #                           array(7673.50003014), array(4763.19998004)])
             #のように、天体名とpostionが入っている
             if p[0] in MWP_name_select:
                 
@@ -190,7 +190,7 @@ def check_list(xmin_list, ymin_list, xmax_list, ymax_list):
 
 
 
-### MWPカタログを選定した時のdef
+### MWPカタログを選定する時の関数
 #  
 # def rank_catalogue(sentei_path, mwp_catalogu_path):
 #     nishimoto = pd.read_csv(sentei_path)

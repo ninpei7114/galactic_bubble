@@ -88,7 +88,6 @@ def make_ring(spitzer_path, name, train_cfg):
             if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
                 cover_star_position, cover_star_name = label_caliculator.find_cover(star_dic, x_pix_min, y_pix_min, 
                                                                                     x_pix_max, y_pix_max)
-
                 if x_pix_min<0 or y_pix_min<0:
                     pass
 
