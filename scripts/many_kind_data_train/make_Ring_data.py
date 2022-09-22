@@ -32,7 +32,8 @@ def make_ring(spitzer_path, name, train_cfg):
     sig1 = 1/(2*(np.log(2))**(1/2))
 
     # choice catalogue from 'CH' or 'MWP'
-    Ring_CATA = ring_sub.catalogue('MWP')
+    choice = 'CH'
+    Ring_CATA = ring_sub.catalogue(choice)
 
     frame_mwp_train = []
     mwp_ring_list_train = []
@@ -70,7 +71,8 @@ def make_ring(spitzer_path, name, train_cfg):
         train_count += len(Ring_cata)
 
         # star_listは辞書
-        star_dic = label_caliculator.all_star(Ring_cata, w)
+        label_cal = label_caliculator.label_caliculator(choice, 'train', w)
+        label_cal.all_star(Ring_cata)
         print(fits_path)
 
         for _, row in Ring_cata.iterrows():    
@@ -78,16 +80,15 @@ def make_ring(spitzer_path, name, train_cfg):
             flip = train_cfg['flip']
             rot = train_cfg['rotate']
             scale = train_cfg['scale']
-            translation = train_cfg['translation']
+            # translation = train_cfg['translation']
 
-            x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, hight, flag = label_caliculator.calc_pix(row, w, 
+            x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, 
                                                                                 GLON_new_min, GLON_new_max,
-                                                                                GLAT_min, GLAT_max, 'train', 1/0.89)
-
+                                                                                GLAT_min, GLAT_max, 1/0.89)
 
             if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
-                cover_star_position, cover_star_name = label_caliculator.find_cover(star_dic, x_pix_min, y_pix_min, 
-                                                                                    x_pix_max, y_pix_max)
+                label_cal.find_cover()
+
                 if x_pix_min<0 or y_pix_min<0:
                     pass
 
@@ -99,17 +100,15 @@ def make_ring(spitzer_path, name, train_cfg):
                         pass
                         
                     else:
+                        ###### 普通に切り出したリング ######
                         pi = proceesing.conv(300, sig1, cut_data)
-                        xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_caliculator.make_label(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
-                                                                                            cover_star_position, cover_star_name,
-                                                                                            width, hight, Ring_CATA)
+                        label_cal.make_label(Ring_CATA)
                         r_shape_y = pi.shape[0]
                         r_shape_x = pi.shape[1]
                         res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                         res_data = proceesing.normalize(res_data)
                         res_data = proceesing.resize(res_data, 300)
-                        xmin_list, ymin_list, xmax_list, ymax_list = label_caliculator.check_list(xmin_list, ymin_list, 
-                                                                                                    xmax_list, ymax_list)
+                        xmin_list, ymin_list, xmax_list, ymax_list, name_list, star_dic = label_cal.check_list()
                             
                         info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
                                 'ymin':ymin_list, 'ymax':ymax_list}
@@ -120,83 +119,44 @@ def make_ring(spitzer_path, name, train_cfg):
                                 frame.append(info)
 
                         append_data(res_data, info, mwp_ring_list_train, frame_mwp_train)
+                        data_proc = ring_sub.data_proccessing(pi)
 
+                        ## データの種類を作成
+
+                        ###### 上下左右反転 ######
+                        if flip:
+                            ud_res_data, lr_res_data = data_proc.flip_data()
+                            append_data(ud_res_data, info, mwp_ring_list_train, frame_mwp_train)
+                            append_data(lr_res_data, info, mwp_ring_list_train, frame_mwp_train)
+
+                        ###### 大きさを変更 ######
+                        if type(scale) == bool:
+                            pass
+                        else:
+                            fl, scale_data, scale_info = data_proc.scale(row, w,GLON_new_min, GLON_new_max,
+                                                                GLAT_min, GLAT_max, scale, star_dic, 
+                                                                Ring_CATA, data)
+                            if fl:
+                                append_data(scale_data, scale_info, mwp_ring_list_train, frame_mwp_train)
+
+                        ###### 回転 ######
                         if rot:
                             # deg = np.random.randint(0, 359)
                             for deg in [90, 180, 270, 360]:
-                                res_data, rotate_cut_data, info = ring_sub.rotate_data(
+                                rot_data, rotate_info = data_proc.rotate_data(
                                     pi, deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list, fits_path)
-                                append_data(res_data, info, mwp_ring_list_train, frame_mwp_train)
-                                
-                                if flip:
-                                    ud_res_data, lr_res_data = ring_sub.flip_data(rotate_cut_data)
-                                    info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
-                                            'ymin':ymin_list, 'ymax':ymax_list}
-                                    
-                                    append_data(ud_res_data, info, mwp_ring_list_train, frame_mwp_train)
-                                    append_data(lr_res_data, info, mwp_ring_list_train, frame_mwp_train)
-                                    
-                                    if type(scale) == bool:
-                                        pass
-                                    else:
-                                        fl, scale_data, info = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
-                                                                            GLAT_min, GLAT_max, scale, star_dic, 
-                                                                            'train', Ring_CATA, data, fits_path)
-                                        if fl:
-                                            append_data(scale_data, info, mwp_ring_list_train, frame_mwp_train)
 
-                                else:
-                                    if type(scale) == bool:
-                                        pass
-                                    else:
-                                        fl, scale_data, info = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
-                                                                            GLAT_min, GLAT_max, scale, star_dic, 
-                                                                            'train', Ring_CATA, data, fits_path)
-                                        if fl:
-                                            append_data(scale_data, info, mwp_ring_list_train, frame_mwp_train)
-
-                                    
-                        else:
-                            if flip:
-                                    
-                                ud_res_data, lr_res_data = ring_sub.flip_data(pi)
-                                append_data(ud_res_data, info, mwp_ring_list_train, frame_mwp_train)
-                                append_data(lr_res_data, info, mwp_ring_list_train, frame_mwp_train)
-                                    
-                                
-                                if type(scale) == bool:
-                                    pass
-                                else:
-                                    fl, scale_data, info = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
-                                                                        GLAT_min, GLAT_max, scale, star_dic, 
-                                                                        'train', Ring_CATA, data, fits_path)
-                                    
-                                    if fl:
-                                        append_data(scale_data, info, mwp_ring_list_train, frame_mwp_train)
-                            else:
-                                if type(scale) == bool:
-                                    pass
-                                else:
-                                    fl, scale_data, info = ring_sub.scale(row, w,GLON_new_min,GLON_new_max,
-                                                                        GLAT_min, GLAT_max, scale, star_dic, 
-                                                                        'train', Ring_CATA, data, fits_path)
-                                    
-                                    if fl:
-                                        append_data(scale_data, info, mwp_ring_list_train, frame_mwp_train)
-
+                                append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
+                        
     frame_mwp_train = pd.DataFrame(frame_mwp_train)
     frame_mwp_train['id']  = [i for i in range(len(frame_mwp_train))]
 
     print('train_count  ',  train_count)
     print('train_nan_count  ',  train_nan_count)
 
-    # for mm in mwp_ring_list_train:
-    #     print(mm.shape)
-
     mwp_ring_list_train = np.array(mwp_ring_list_train).astype(np.float32)
     
     savedir_name = name
-
     if os.path.exists(savedir_name):
         pass
     else:
@@ -206,45 +166,6 @@ def make_ring(spitzer_path, name, train_cfg):
     mwp_ring_list_train_ = mwp_ring_list_train*255
     mwp_ring_list_train_ = np.uint8(mwp_ring_list_train_)
     proceesing.data_view_rectangl(25, mwp_ring_list_train_, frame_mwp_train).save(savedir_name + '/train_ring.pdf')
-
-    width = []
-    for i in range(len(frame_mwp_train)):
-        row = frame_mwp_train.iloc[i]
-        for k in range(len(row['xmin'])):
-            xmin = 300*row['xmin'][k]
-            xmax = 300*row['xmax'][k]
-            ymin = 300*row['ymin'][k]
-            ymax = 300*row['ymax'][k]
-            
-            width.append(xmax-xmin)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.hist(width, bins=100)
-    ax.set_xlabel('width_pix')
-    ax.set_ylabel('number')
-    fig.savefig(savedir_name + '/width.png')
-
-
-    x_cen = []
-    y_cen = []
-    for i in range(len(frame_mwp_train)):
-        row = frame_mwp_train.iloc[i]
-        for k in range(len(row['xmin'])):
-            xmin = 300*row['xmin'][k]
-            xmax = 300*row['xmax'][k]
-            ymin = 300*row['ymin'][k]
-            ymax = 300*row['ymax'][k]
-            
-            x_cen.append((xmax+xmin)/2)
-            y_cen.append((ymax+ymin)/2)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.scatter(x_cen, y_cen, s=0.05)
-    plt.axes().set_aspect('equal') 
-    ax.set_xlabel('x center')
-    ax.set_ylabel('y center')
-
-    fig.savefig(savedir_name + '/center.png')
 
     print('train_Ring_num : ', len(mwp_ring_list_train))
     print('train_Ring_label_num : ', len(frame_mwp_train))

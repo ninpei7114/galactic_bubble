@@ -15,7 +15,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
 
     # Trainデータの作成
     train_data, train_label = make_ring(spitzer_path, name, train_cfg)
-    train_label.to_csv(name+'/train_label.csv')
+    # train_label.to_csv(name+'/train_label.csv')
     # Validationデータの読み込み
     val_data = np.load(validation_data_path+'/data.npy')
     val_label = pd.read_csv(validation_data_path+'/label.csv')
@@ -34,9 +34,9 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     no_Ring_val_moyamoya = np.load('NonRing/no_ring_moyamoya_val.npy')
 
     no_Ring_train_random = default_rng(123).integers(0, no_Ring_train.shape[0], int(train_data.shape[0]))
-    no_Ring_train_moyamoya_random = default_rng(124).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
-    no_Ring_val_random = default_rng(125).integers(0, no_Ring_val.shape[0], int(val_data.shape[0]/2))
-    no_Ring_val_moyamoya_random = default_rng(126).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
+    no_Ring_train_moyamoya_random = default_rng(123).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
+    no_Ring_val_random = default_rng(123).integers(0, no_Ring_val.shape[0], int(val_data.shape[0]/2))
+    no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
 
     # Non-Ringと合わせる
     train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random], 

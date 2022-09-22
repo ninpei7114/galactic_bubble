@@ -57,37 +57,27 @@ def main(args):
     flip_list = [False, True]
     rotate_list = [False, True]
     scale_list = [False, 1.5, 2]
-    translation_list = [False, True]
+    # translation_list = [False, True]
 
-    for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):
+    for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list):#, translation_list):
         train_cfg = {
             "flip": flip,
             "rotate": rotate,
             "scale": scale,
-            "translation":translation
+            # "translation":translation
         }
 
         name = []
-        print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
-        for k, v in zip(list(train_cfg.keys()), list(train_cfg.values())):
-            name.append(k)
-            name.append('_')
-            name.append(str(v))
-            name.append('__')
-        
+        # print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
+        print('flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
+        [name.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
         name = ''.join(name)
         os.mkdir(name)
         f_log = open(name+'/log.txt', 'w')
 
         train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
-
-
-        # print('Ring_num : ', args.Train_Ring_num)
-        # print('Train_Non_Ring_Sampler : ', args.Train_Sampler_num)
-        f_log.write('Train Negative Sampler num  : %s .\n'%train_Ring_num)
-        f_log.write('Val Negative Sampler num  : %s .\n'%val_Ring_num)
-        f_log.write('====================================\n')
+        
 
         train_sampler = NegativeSampler(train_data, true_size=train_Ring_num, 
                                         sample_negative_size=train_Ring_num)

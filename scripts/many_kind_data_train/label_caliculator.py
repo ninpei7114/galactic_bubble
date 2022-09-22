@@ -1,189 +1,191 @@
 import numpy as np
 
-def find_cover(star_list, x_pix_min, y_pix_min, x_pix_max, y_pix_max):
-    """
-    切り出した画像の中に、他のリングが入っていないか確かめる。
-    入っていたら、ラベル付けする
-    star_listはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
-    """
-    width = (x_pix_max - x_pix_min)/4
-    hight = (y_pix_max - y_pix_min)/4
-    
-    g_area = ((x_pix_max-width)-(x_pix_min+width))*((y_pix_max-hight)-(y_pix_min+hight))
-    
-    overlapp_list = []
-    overlapp_name = []
-    for d in star_list.items():
-        s_xmin = d[1][0]
-        s_xmax = d[1][2]
-        s_ymin = d[1][1]
-        s_ymax = d[1][3]
-        
-        xx = np.array([s_xmin, s_xmax])
-        yy = np.array([s_ymin, s_ymax])
-        c_xx = np.clip(xx, x_pix_min+width, x_pix_max-width)
-        c_yy = np.clip(yy, y_pix_min+hight, y_pix_max-hight)   
-        s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
-        c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
-        
-        # 場合分け、全体に対してringが1/2以上入っていないといけない
-        # 大きさが画像に対して、1/8以上でないとlabel付けしない
-        if (c_area>=s_area*1/4 and (d[1][2]-d[1][0])>=(width*2)/8 and 
-            (d[1][3]-d[1][1])>=(hight*2)/10):
-            overlapp_list.append(d)
-            overlapp_name.append(d[0])
+class label_caliculator(object):
 
-        else:pass
-        
-    return overlapp_list, overlapp_name
+    def __init__(self, choice, mode, world):
 
-
-
-def all_star(dataframe, world):
-    """
-    データセットのringの範囲をここで決める
-    1.5倍で切り出し
-    """
-    star_dic = {}
-    for index, row in dataframe.iterrows():    
-    
-        lmax = row['GLON'] + 1.5*row['Rout']/60
-        bmin = row['GLAT'] - 1.5*row['Rout']/60
-        #右端
-        lmin = row['GLON'] - 1.5*row['Rout']/60
-        bmax = row['GLAT'] + 1.5*row['Rout']/60
-        #これは、リングを切り取る範囲　　切り取る範囲はRoutの3倍
-        x_pix_min, y_pix_min = world.all_world2pix(lmax, bmin, 0)
-        x_pix_max, y_pix_max = world.all_world2pix(lmin, bmax, 0)
-
-        
-        star_dic[row['MWP']] = [x_pix_min, y_pix_min, x_pix_max, y_pix_max]
-        
-    return star_dic
-
-
-
-def calc_pix(row, world, GLON_min, GLON_max, GLAT_min, GLAT_max, mode, scale):
-    """
-    切り出す画像の範囲をここで決める
-
-    """
-    import random
-
-    ccc = 0
-    ok = True
-    
-
-    while ok:
-        if mode=='train':
-            # random_num = 1/np.random.uniform(0.3, 0.89) #サイズが一様ver
-            random_num = scale
+        if  choice == 'MWP':
+            self.Rout = 'Reff'
         else:
-            random_num = 1/0.89
-        lmax = row['GLON'] + random_num*1.5*row['Rout']/60
-        bmin = row['GLAT'] - random_num*1.5*row['Rout']/60
-        #右端
-        lmin = row['GLON'] - random_num*1.5*row['Rout']/60
-        bmax = row['GLAT'] + random_num*1.5*row['Rout']/60
-        ccc += 1
-        if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
-            ok = False
-            flag = True
-        if ccc>=400:
-            ok = False
-            flag = False
+            self.Rout = 'Rout'
+
+        self.mode = mode
+        self.world = world
+
+
+    def find_cover(self):
+        """
+        切り出した画像の中に、他のリングが入っていないか確かめる。
+        入っていたら、ラベル付けする
+        star_listはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
+        """
+        width = (self.x_pix_max - self.x_pix_min)/4
+        hight = (self.y_pix_max - self.y_pix_min)/4
         
-    #これは、リングを切り取る範囲　　
-    x_min, y_min = world.all_world2pix(lmax, bmin, 0)
-    x_max, y_max = world.all_world2pix(lmin, bmax, 0)
-    r = int((x_max - x_min)/(2*random_num))#ringの半径pixel
-    
-    width = x_max - x_min
-    height = y_max - y_min
-    
-    x_pix_min = x_min - width/2
-    y_pix_min = y_min - height/2
-    x_pix_max = x_max + width/2
-    y_pix_max = y_max + height/2
-    
-    #random_num - ２とは、切り出した画像が一辺random_num*rに対し、bboxが2*rだから、画像からリングがはみ出さないように
-#     x_offset = random.uniform(-(random_num-1.5)*r, (random_num-1.5)*r)
-#     y_offset = random.uniform(-(random_num-1.5)*r, (random_num-1.5)*r)
-    # x_offset = random.uniform(-(random_num-1)*r-r/2, (random_num-1)*r+r/2)
-    # y_offset = random.uniform(-(random_num-1)*r-r/2, (random_num-1)*r+r/2)
-    # x_pix_min = x_pix_min + int(x_offset)
-    # x_pix_max = x_pix_max + int(x_offset)
-    # y_pix_min = y_pix_min + int(y_offset)
-    # y_pix_max = y_pix_max + int(y_offset)
-    width = x_pix_max - x_pix_min
-    height = y_pix_max - y_pix_min
-    
-    
-    return  x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, height, flag#, star_list
-
-
-
-def judge_01(number):
-    if number > 1:
-        return 1
-    elif number<0:
-        return 0
-    else:
-        return number
-
-
-
-
-def make_label(x_pix_min, y_pix_min, x_pix_max, y_pix_max, cover_star_position, cover_star_name,  width, hight, MWP):
-    """
-    sは、主体となるringの位置情報
-    x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ
-    主体となるringに重なっているringのindex情報、重なったringの情報はstar_listの中にある。
-    """
-
-    xmin_list = []
-    ymin_list = []
-    xmax_list = []
-    ymax_list = []
-    named_list = []
-    MWP_name_select = MWP.index.tolist()
-    #切り出した画像にたまたま入った天体があるか、ないか
-    if len(cover_star_position) == 0:
-        pass
-    else:
+        # g_area = ((x_pix_max-width)-(x_pix_min+width))*((y_pix_max-hight)-(y_pix_min+hight))
         
-        for p, n in zip(cover_star_position, cover_star_name):
-            # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
-            #                           array(7673.50003014), array(4763.19998004)])
-            #のように、天体名とpostionが入っている
-            if p[0] in MWP_name_select:
-                
-                xmin_c = p[1][0] - (x_pix_min+width/4)
-                ymin_c = p[1][1] - (y_pix_min+hight/4)
-                xmax_c = p[1][2] - (x_pix_min+width/4)
-                ymax_c = p[1][3] - (y_pix_min+hight/4)
-                xmin_list.append(judge_01(xmin_c/(width/2)))
-                xmax_list.append(judge_01(xmax_c/(width/2)))
-                ymin_list.append(judge_01(ymin_c/(hight/2)))
-                ymax_list.append(judge_01(ymax_c/(hight/2)))
-                named_list.append(n)
+        self.overlapp_list = []
+        self.overlapp_name = []
+        for d in self.star_dic.items():
+            s_xmin = d[1][0]
+            s_xmax = d[1][2]
+            s_ymin = d[1][1]
+            s_ymax = d[1][3]
             
-    return xmin_list, ymin_list, xmax_list, ymax_list, named_list
+            xx = np.array([s_xmin, s_xmax])
+            yy = np.array([s_ymin, s_ymax])
+            c_xx = np.clip(xx, self.x_pix_min+width, self.x_pix_max-width)
+            c_yy = np.clip(yy, self.y_pix_min+hight, self.y_pix_max-hight)   
+            s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
+            c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
+            
+            # 場合分け、全体に対してringが1/2以上入っていないといけない
+            # 大きさが画像に対して、1/8以上でないとlabel付けしない
+            if (c_area>=s_area*1/4 and (d[1][2]-d[1][0])>=(width*2)/8 and 
+                (d[1][3]-d[1][1])>=(hight*2)/10):
+                self.overlapp_list.append(d)
+                self.overlapp_name.append(d[0])
+
+            else:pass
+            
+        # return overlapp_list, overlapp_name
 
 
-def check_list(xmin_list, ymin_list, xmax_list, ymax_list):
-    xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
-    for xy_num in range(len(xmin_list)):
-        if ((xmax_list[xy_num] - xmin_list[xy_num])==0 or
-            (ymax_list[xy_num] - ymin_list[xy_num])==0):
+
+    def all_star(self, dataframe):
+        """
+        データセットのringの範囲をここで決める
+        1.5倍で切り出し
+        """
+
+        self.star_dic = {}
+
+        for _, row in dataframe.iterrows():    
+        
+            lmax = row['GLON'] + 1.5*row[self.Rout]/60
+            bmin = row['GLAT'] - 1.5*row[self.Rout]/60
+            #右端
+            lmin = row['GLON'] - 1.5*row[self.Rout]/60
+            bmax = row['GLAT'] + 1.5*row[self.Rout]/60
+            #これは、リングを切り取る範囲　　切り取る範囲はRoutの3倍
+            x_pix_min, y_pix_min = self.world.all_world2pix(lmax, bmin, 0)
+            x_pix_max, y_pix_max = self.world.all_world2pix(lmin, bmax, 0)
+
+            self.star_dic[row['MWP']] = [x_pix_min, y_pix_min, x_pix_max, y_pix_max]
+            
+        # return star_dic
+
+
+
+    def calc_pix(self, row, GLON_min, GLON_max, GLAT_min, GLAT_max, scale):
+        """
+        切り出す画像の範囲をここで決める
+
+        """
+        # import random
+
+        ccc = 0
+        ok = True
+        
+        while ok:
+            if self.mode=='train':
+                # random_num = 1/np.random.uniform(0.3, 0.89) #サイズが一様ver
+                random_num = scale
+            else:
+                random_num = 1/0.89
+            lmax = row['GLON'] + random_num*1.5*row[self.Rout]/60
+            bmin = row['GLAT'] - random_num*1.5*row[self.Rout]/60
+            #右端
+            lmin = row['GLON'] - random_num*1.5*row[self.Rout]/60
+            bmax = row['GLAT'] + random_num*1.5*row[self.Rout]/60
+            ccc += 1
+            if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
+                ok = False
+                flag = True
+            if ccc>=400:
+                ok = False
+                flag = False
+            
+        #これは、リングを切り取る範囲　　
+        x_min, y_min = self.world.all_world2pix(lmax, bmin, 0)
+        x_max, y_max = self.world.all_world2pix(lmin, bmax, 0)
+        r = int((x_max - x_min)/(2*random_num))#ringの半径pixel
+        
+        self.width = x_max - x_min
+        self.height = y_max - y_min
+        
+        self.x_pix_min = x_min - self.width/2
+        self.y_pix_min = y_min - self.height/2
+        self.x_pix_max = x_max + self.width/2
+        self.y_pix_max = y_max + self.height/2
+        
+        self.width = self.x_pix_max - self.x_pix_min
+        self.height = self.y_pix_max - self.y_pix_min
+        
+        return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag
+
+
+
+    def judge_01(number):
+        if number > 1:
+            return 1
+        elif number<0:
+            return 0
+        else:
+            return number
+
+
+
+    def make_label(self, MWP):
+        """
+        sは、主体となるringの位置情報
+        x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ
+        主体となるringに重なっているringのindex情報、重なったringの情報はstar_listの中にある。
+        """
+
+        self.xmin_list = []
+        self.ymin_list = []
+        self.xmax_list = []
+        self.ymax_list = []
+        self.named_list = []
+        MWP_name_select = MWP.index.tolist()
+        #切り出した画像にたまたま入った天体があるか、ないか
+        if len(self.cover_star_position) == 0:
             pass
         else:
-            xmin_list_.append(xmin_list[xy_num])
-            ymin_list_.append(ymin_list[xy_num])
-            xmax_list_.append(xmax_list[xy_num])
-            ymax_list_.append(ymax_list[xy_num])
-    
-    return xmin_list_, ymin_list_, xmax_list_, ymax_list_
+            
+            for p, n in zip(self.cover_star_position, self.cover_star_name):
+                # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
+                #                           array(7673.50003014), array(4763.19998004)])
+                #のように、天体名とpostionが入っている
+                if p[0] in MWP_name_select:
+                    
+                    xmin_c = p[1][0] - (self.x_pix_min+self.width/4)
+                    ymin_c = p[1][1] - (self.y_pix_min+self.hight/4)
+                    xmax_c = p[1][2] - (self.x_pix_min+self.width/4)
+                    ymax_c = p[1][3] - (self.y_pix_min+self.hight/4)
+                    self.xmin_list.append(self.judge_01(xmin_c/(self.width/2)))
+                    self.xmax_list.append(self.judge_01(xmax_c/(self.width/2)))
+                    self.ymin_list.append(self.judge_01(ymin_c/(self.hight/2)))
+                    self.ymax_list.append(self.judge_01(ymax_c/(self.hight/2)))
+                    self.named_list.append(n)
+                
+        # return xmin_list, ymin_list, xmax_list, ymax_list, named_list
+
+
+    def check_list(self):
+        xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
+        for xy_num in range(len(self.xmin_list)):
+            if ((self.xmax_list[xy_num] - self.xmin_list[xy_num])==0 or
+                (self.ymax_list[xy_num] - self.ymin_list[xy_num])==0):
+                pass
+            else:
+                xmin_list_.append(self.xmin_list[xy_num])
+                ymin_list_.append(self.ymin_list[xy_num])
+                xmax_list_.append(self.xmax_list[xy_num])
+                ymax_list_.append(self.ymax_list[xy_num])
+        
+        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, self.named_list, self.star_dic
 
 
 
