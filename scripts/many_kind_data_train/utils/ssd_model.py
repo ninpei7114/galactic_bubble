@@ -968,6 +968,8 @@ class MultiBoxLoss(nn.Module):
         loss_c_neg = F.cross_entropy( conf_data[(neg_idx_mask).gt(0)].view(-1, num_classes), 
                                       conf_t_label[(neg_mask).gt(0)])
         loss_c = loss_c_pos + loss_c_neg
+        print('loss_c_pos : ', loss_c_pos)
+        print('loss_c_neg : ', loss_c_neg)
         # 物体を発見したBBoxの数N（全ミニバッチの合計）で損失を割り算
         N = num_pos.sum()
         

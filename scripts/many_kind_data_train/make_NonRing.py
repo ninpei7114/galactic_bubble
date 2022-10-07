@@ -53,7 +53,7 @@ def main(args):
             ref_path_list = val_l
             choice_num = len(val_l)-1
 
-        no_nan_no_ring_list = NpyAppendArray('NonRing/no_ring_300_%s_%s.npy'%(epoch*30, mode))
+        no_nan_no_ring_list = NpyAppendArray('/workspace/NonRing/no_ring_300_%s_%s.npy'%(epoch*30, mode))
 
         start = time.time()
         sig1 = 1/(2*(np.log(2))**(1/2))
@@ -81,7 +81,7 @@ def main(args):
             
             for _ in range(30):
 
-                cut_data = NonRing_sub.no_nan_ring()
+                cut_data = NonRing_sub_c.no_nan_ring()
         #         print(cut_data.shape)
                 pi = proceesing.conv(300, sig1, cut_data)
                 r_shape_y = pi.shape[0]

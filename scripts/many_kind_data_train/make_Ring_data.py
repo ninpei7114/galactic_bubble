@@ -119,7 +119,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                 frame.append(info)
 
                         append_data(res_data, info, mwp_ring_list_train, frame_mwp_train)
-                        data_proc = ring_sub.data_proccessing(pi)
+                        data_proc = ring_sub.data_proccessing(pi, fits_path, choice)
 
                         ## データの種類を作成
 

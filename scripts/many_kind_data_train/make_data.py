@@ -17,8 +17,8 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     train_data, train_label = make_ring(spitzer_path, name, train_cfg)
     # train_label.to_csv(name+'/train_label.csv')
     # Validationデータの読み込み
-    val_data = np.load(validation_data_path+'/data.npy')
-    val_label = pd.read_csv(validation_data_path+'/label.csv')
+    val_data = np.load(validation_data_path+'/val_ring.npy')
+    val_label = pd.read_csv(validation_data_path+'/val_ring_label.csv')
     val_label['xmin'] = [ast.literal_eval(d) for d in val_label['xmin']]
     val_label['xmax'] = [ast.literal_eval(d) for d in val_label['xmax']]
     val_label['ymin'] = [ast.literal_eval(d) for d in val_label['ymin']]
@@ -28,10 +28,10 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
 
     # TrainデータのNon-Ring
     # シード値を決める必要がある
-    no_Ring_train = np.load('NonRing/no_ring_300_9000_train.npy')
-    no_Ring_train_moyamoya = np.load('NonRing/no_ring_moyamoya_train.npy')
-    no_Ring_val = np.load('NonRing/no_ring_300_900_val.npy')
-    no_Ring_val_moyamoya = np.load('NonRing/no_ring_moyamoya_val.npy')
+    no_Ring_train = np.load('/workspace/NonRing/no_ring_300_9000_train.npy')
+    no_Ring_train_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_train.npy')
+    no_Ring_val = np.load('/workspace/NonRing/no_ring_300_900_val.npy')
+    no_Ring_val_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_val.npy')
 
     no_Ring_train_random = default_rng(123).integers(0, no_Ring_train.shape[0], int(train_data.shape[0]))
     no_Ring_train_moyamoya_random = default_rng(123).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
@@ -61,16 +61,16 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     print('val label length : ', len(val_label))
 
     f_log.write('====================================\n')
-    f_log.write('Train Ring num  : %s .\n'%train_Ring_num)
-    f_log.write('Val Ring num  : %s .\n'%val_Ring_num)
+    f_log.write('Train Ring num  : %s \n'%train_Ring_num)
+    f_log.write('Val Ring num  : %s \n'%val_Ring_num)
     f_log.write('> \n')
-    f_log.write('Total Train num  : %s .\n'%str(train_data.shape))
-    f_log.write('Total Val num  : %s .\n'%str(val_data.shape))
+    f_log.write('Total Train num  : %s \n'%str(train_data.shape))
+    f_log.write('Total Val num  : %s \n'%str(val_data.shape))
     f_log.write('> \n')
     f_log.write('Total Train label length  : %s .\n'%len(train_label))
     f_log.write('Total Val label length  : %s .\n'%len(val_label))
     f_log.write('> \n')
-    f_log.write('====================================\n')
+    ## train_main.pyにて、samplerの数を書いている。
 
 
     train_label = train_label.reset_index()

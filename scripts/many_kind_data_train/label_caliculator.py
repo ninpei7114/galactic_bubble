@@ -11,7 +11,7 @@ class label_caliculator(object):
 
         self.mode = mode
         self.world = world
-
+        self.choice = choice
 
     def find_cover(self):
         """
@@ -71,7 +71,7 @@ class label_caliculator(object):
             x_pix_min, y_pix_min = self.world.all_world2pix(lmax, bmin, 0)
             x_pix_max, y_pix_max = self.world.all_world2pix(lmin, bmax, 0)
 
-            self.star_dic[row['MWP']] = [x_pix_min, y_pix_min, x_pix_max, y_pix_max]
+            self.star_dic[row[self.choice]] = [x_pix_min, y_pix_min, x_pix_max, y_pix_max]
             
         # return star_dic
 
@@ -126,7 +126,7 @@ class label_caliculator(object):
 
 
 
-    def judge_01(number):
+    def judge_01(self, number):
         if number > 1:
             return 1
         elif number<0:
@@ -150,24 +150,24 @@ class label_caliculator(object):
         self.named_list = []
         MWP_name_select = MWP.index.tolist()
         #切り出した画像にたまたま入った天体があるか、ないか
-        if len(self.cover_star_position) == 0:
+        if len(self.overlapp_list) == 0:
             pass
         else:
             
-            for p, n in zip(self.cover_star_position, self.cover_star_name):
+            for p, n in zip(self.overlapp_list, self.overlapp_name):
                 # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
                 #                           array(7673.50003014), array(4763.19998004)])
                 #のように、天体名とpostionが入っている
                 if p[0] in MWP_name_select:
                     
                     xmin_c = p[1][0] - (self.x_pix_min+self.width/4)
-                    ymin_c = p[1][1] - (self.y_pix_min+self.hight/4)
+                    ymin_c = p[1][1] - (self.y_pix_min+self.height/4)
                     xmax_c = p[1][2] - (self.x_pix_min+self.width/4)
-                    ymax_c = p[1][3] - (self.y_pix_min+self.hight/4)
+                    ymax_c = p[1][3] - (self.y_pix_min+self.height/4)
                     self.xmin_list.append(self.judge_01(xmin_c/(self.width/2)))
                     self.xmax_list.append(self.judge_01(xmax_c/(self.width/2)))
-                    self.ymin_list.append(self.judge_01(ymin_c/(self.hight/2)))
-                    self.ymax_list.append(self.judge_01(ymax_c/(self.hight/2)))
+                    self.ymin_list.append(self.judge_01(ymin_c/(self.height/2)))
+                    self.ymax_list.append(self.judge_01(ymax_c/(self.height/2)))
                     self.named_list.append(n)
                 
         # return xmin_list, ymin_list, xmax_list, ymax_list, named_list

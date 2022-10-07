@@ -81,17 +81,24 @@ def weights_init(m):
 
 # ll , boxは一枚の画像に対する、正解と予想
 def calc_collision(ll, box):
+    """
+    ll : 正解ラベル  [xmin, ymin, xmax, ymax]。複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
+    box : モデルの予想結果、[[conf, xmin, ymin, xmax, ymax], [conf, xmin, ymin, xmax, ymax], -----]の配列
+    """
     true_positive = []
 
-    
+    # 各boxの面積を求める。
     area = (box[:,3] - box[:,1]) * (box[:,4] - box[:,2])
     for l in ll:
         
+        # 正解boxの面積
         l_area = (l[2] - l[0])*(l[3] - l[1])
+
+        # 重なり部分の面積を求める
         abx_mn = np.maximum(l[0], box[:,1]) # xmin
         aby_mn = np.maximum(l[1], box[:,2]) # ymin
-        abx_mx = np.minimum(l[2], box[:,3]) # xmax
-        aby_mx = np.minimum(l[3], box[:,4]) # ymax
+        abx_mx = np.minimum(l[2], box[:,3])  # xmax
+        aby_mx = np.minimum(l[3], box[:,4])  # ymax
 
         w = np.maximum(0, abx_mx - abx_mn)
         h = np.maximum(0, aby_mx - aby_mn)
@@ -100,15 +107,15 @@ def calc_collision(ll, box):
         IoU = intersect/(area+l_area-intersect)
 
         # np.logi~~で、どのボックスが正解の中心を含んでいるのかを出している。
-        true_positive.append(IoU)
+        true_positive.append(IoU>0.75)
+        # cx = (l[0]+l[2])/2
+        # cy = (l[1]+l[3])/2
+        # true_positive.append(np.logical_and.reduce((box[:,1]<=cx, box[:,3]>=cx, box[:,2]<=cy, box[:,4]>=cy)))
 
     if len(ll) == 0:
-        return np.zeros([8732]) == 1,  box[:,0], False #, np.array(0)
+        return np.zeros([8732]) == 1, box[:,0], False #, np.array(0)
     else:
         return np.stack(true_positive), box[:,0], True #, ll[:,2]-ll[:,0]#, true_positive
-
-    
-
 
 
 def calc_f1score(val_seikai, val_bbbb):
@@ -117,6 +124,8 @@ def calc_f1score(val_seikai, val_bbbb):
 
     f1_score = -10000
     threthre = 0
+    PRE = []
+    RE = []
 
     for th in thresholds:
         TP1 = 0
@@ -131,13 +140,14 @@ def calc_f1score(val_seikai, val_bbbb):
                 tp2 = col[:,idx].any(axis=1) # for tp2
                 tp1_fp = idx.sum()
                 tp2_fn = col.shape[0]
-        #         fp = (~col[:,idx]).any(axis=0)
-        #         fn = (~col[:,idx]).any(axis=1)
 
                 TP1 += np.sum(tp1)
                 TP2 += np.sum(tp2)
                 TP1_FP += tp1_fp
                 TP2_FN += tp2_fn
+
+        PRE.append(TP1/TP1_FP)
+        RE.append(TP2/TP2_FN)
 
         f1_score_ = 2*(TP1/TP1_FP)*(TP2/TP2_FN)/(TP1/TP1_FP+TP2/TP2_FN) 
 
@@ -145,7 +155,7 @@ def calc_f1score(val_seikai, val_bbbb):
             f1_score = f1_score_
             threthre = th
     
-    return f1_score, threthre
+    return f1_score, threthre#, PRE, RE
 
 
 def transfer_resnet(net, param_path):

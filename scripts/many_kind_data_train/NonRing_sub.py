@@ -64,7 +64,7 @@ class NonRing_sub(object):
         random_GLON = self.random_uni.uniform(self.GLON_new_min1, self.GLON_new_max1)
         random_GLAT = self.random_uni.uniform(self.GLAT_new_min1, self.GLAT_new_max1)
         q = self.random_uni.choice(np.arange(0, len(self.hist_)), p = self.hisy)
-        random_Rout = self.random_uni.uniform(self.range_[q+1], self.range_[q])
+        random_Rout = self.random_uni.uniform(self.range_[q], self.range_[q+1])
         
         lmax_random = random_GLON + 3*random_Rout/60
         bmin_random = random_GLAT - 3*random_Rout/60
@@ -119,11 +119,11 @@ class NonRing_sub(object):
         '''
 
         cut_data_random = self.cut_no_ring()
-        while np.isnan(np.sum(cut_data_random)):
+        while not np.isnan(np.sum(cut_data_random)):
             cut_data_random = self.cut_no_ring()
             
-        else:
-            pass
+        # else:
+        #     pass
             
         return cut_data_random
     ### nan処理をする 
