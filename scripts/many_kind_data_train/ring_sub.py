@@ -76,12 +76,12 @@ class data_proccessing(object):
         return res_data, info
 
 
-    def scale(self, row, w,GLON_new_min,GLON_new_max, GLAT_min, GLAT_max, scale, MWP, data, label_cal):
+    def scale(self, row, w, GLON_new_min,GLON_new_max, GLAT_min, GLAT_max, scale, MWP, data, label_cal):
         """
         サイズ縮小
         """
 
-        x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, w,GLON_new_min,GLON_new_max,
+        x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, GLON_new_min,GLON_new_max,
                                                                                         GLAT_min, GLAT_max, scale)
 
         if flag: #calc_pix時に100回試行してもできなかった場合の場合分け

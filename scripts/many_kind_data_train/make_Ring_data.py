@@ -134,8 +134,8 @@ def make_ring(spitzer_path, name, train_cfg):
                             pass
                         else:
                             fl, scale_data, scale_info = data_proc.scale(row, w,GLON_new_min, GLON_new_max,
-                                                                GLAT_min, GLAT_max, scale, star_dic, 
-                                                                Ring_CATA, data)
+                                                                GLAT_min, GLAT_max, scale,
+                                                                Ring_CATA, data, label_cal)
                             if fl:
                                 append_data(scale_data, scale_info, mwp_ring_list_train, frame_mwp_train)
 
@@ -144,7 +144,7 @@ def make_ring(spitzer_path, name, train_cfg):
                             # deg = np.random.randint(0, 359)
                             for deg in [90, 180, 270, 360]:
                                 rot_data, rotate_info = data_proc.rotate_data(
-                                    pi, deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list, fits_path)
+                                    deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list)
 
                                 append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
                         

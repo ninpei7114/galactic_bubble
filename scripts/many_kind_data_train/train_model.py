@@ -228,7 +228,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
             val_seikai_ = val_seikai
             train_bbbb = np.concatenate(train_bbbb, axis=0)
             #f.write(train_bbbb.shape, val_bbbb_.shape)
-            print(train_bbbb.shape, val_bbbb_.shape)
+            # print(train_bbbb.shape, val_bbbb_.shape)
 
         tempo_val_loss = epoch_val_loss
         

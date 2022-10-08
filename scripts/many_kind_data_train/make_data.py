@@ -39,6 +39,9 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
 
     # Non-Ringと合わせる
+    print('confirm nan in train_data : ', np.sum(train_data))
+    print('confirm nan in no_Ring_train_nan : ', np.sum(no_Ring_train))
+    print('confirm nan in no_Ring_train_moyamoya : ', np.sum(no_Ring_train_moyamoya))
     train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random], 
                              no_Ring_train_moyamoya[no_Ring_train_moyamoya_random]])
 
@@ -69,7 +72,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     f_log.write('> \n')
     f_log.write('Total Train label length  : %s .\n'%len(train_label))
     f_log.write('Total Val label length  : %s .\n'%len(val_label))
-    f_log.write('> \n')
+    # f_log.write('> \n')
     ## train_main.pyにて、samplerの数を書いている。
 
 

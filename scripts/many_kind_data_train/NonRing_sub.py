@@ -119,7 +119,7 @@ class NonRing_sub(object):
         '''
 
         cut_data_random = self.cut_no_ring()
-        while not np.isnan(np.sum(cut_data_random)):
+        while np.isnan(np.sum(cut_data_random)):
             cut_data_random = self.cut_no_ring()
             
         # else:

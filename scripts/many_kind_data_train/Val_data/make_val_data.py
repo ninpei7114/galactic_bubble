@@ -159,8 +159,8 @@ def main(args):
     print('val_count  ',  val_count)
 
     mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
-    np.save('val_ring.npy', mwp_ring_list_val)
-    frame_mwp_val.to_csv('val_ring_label.csv')
+    np.save(args.savedir_name + '/val_ring.npy', mwp_ring_list_val)
+    frame_mwp_val.to_csv(args.savedir_name + '/val_ring_label.csv')
     print('array_count ', mwp_ring_list_val.shape[0])
     
     if os.path.exists(args.savedir_name):
