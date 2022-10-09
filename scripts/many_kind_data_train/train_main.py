@@ -21,7 +21,7 @@ from make_data import make_data
 
 from make_figure import make_figure
 from train_model import train_model
-
+from sub import print_and_log
 import itertools
 
 
@@ -77,8 +77,8 @@ def main(args):
             os.mkdir(name)
 
         f_log = open(name+'/log.txt', 'w')
-        print('flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
-        f_log.write('flip : %s,  rotate : %s,  scale : %s \n'%(flip, rotate, scale))
+        print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
+
         train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
         
@@ -94,10 +94,10 @@ def main(args):
         test_dataset = DataSet(torch.Tensor(val_data), val_label)
         test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, 
                                         sampler=val_sampler, collate_fn=od_collate_fn)
-        f_log.write('> \n')
-        f_log.write('Train No Ring sampler  : %s / %s \n'%(train_Ring_num, train_data.shape[0] - train_Ring_num))
-        f_log.write('Val No Ring sampler  : %s / %s \n'%(val_data.shape[0] - val_Ring_num, val_data.shape[0] - val_Ring_num))
-        f_log.write('====================================\n')
+        print_and_log(f_log, '\n')
+        print_and_log(f_log, 'Train No Ring sampler  : %s / %s \n'%(train_Ring_num, train_data.shape[0] - train_Ring_num))
+        print_and_log(f_log, 'Val No Ring sampler  : %s / %s \n'%(val_data.shape[0] - val_Ring_num, val_data.shape[0] - val_Ring_num))
+        print_and_log(f_log, '====================================')
 
 
         dataloaders_dict = {"train": train_loader, "val": test_loader}

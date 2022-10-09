@@ -5,36 +5,16 @@ import pickle
 
 import torch
 import torch.nn as nn
-import torch.nn.init as init
-import torch.nn.functional as F
-from torch.autograd import Function
-import torch.utils.data as data
-import torch.optim as optim
 # from torchvision.models.resnet import resnet18
 
-import ast
-import argparse
 import numpy as np
+from numpy.random import default_rng
 import time
-import random
-import matplotlib.pyplot as plt
-from sklearn.model_selection import KFold
-
-from utils.ssd_model import SSD
-from utils.ssd_model import MultiBoxLoss
-from utils.ssd_model import decode
 
 from sub import EarlyStopping
 from sub import weights_init
-from sub import calc_collision
 from sub import calc_f1score
-from sub import transfer_resnet
-
-from data import od_collate_fn
-from data import DataSet
-from data import NegativeSampler
-from data import make_data
-
+from sub import print_and_log
 
 
 def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name, args, train_Ring_num):
@@ -52,10 +32,15 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
     tempo_val_loss = 100000000000000
     # GPUが使えるかを確認
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print("使用デバイス：", device)
+    print_and_log(f, "使用デバイス： {}".format(device))
 
     # ネットワークをGPUへ
     net.to(device)
+
+    net.vgg.apply(weights_init)
+    net.extras.apply(weights_init)
+    net.loc.apply(weights_init)
+    net.conf.apply(weights_init)
 
     # ネットワークがある程度固定であれば、高速化させる
     torch.backends.cudnn.benchmark = True
@@ -70,19 +55,12 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         epoch_train_loss = 0.0  # epochの損失和
         epoch_val_loss = 0.0  # epochの損失和
  
-        
         # 開始時刻を保存
         t_epoch_start = time.time()
-        t_iter_start = time.time()
-        
 
-        print('-------------')
-        print('Epoch {}/{}'.format(epoch+1, num_epochs))
-        print('-------------')
-        
-        f.write('-------------\n')
-        f.write('Epoch {}/{}\n'.format(epoch+1, num_epochs))
-        f.write('-------------\n')
+        print_and_log(f, '-------------')
+        print_and_log(f, 'Epoch {}/{}'.format(epoch+1, num_epochs))
+        print_and_log(f, '-------------')
 
 
         train_bbbb = []
@@ -104,14 +82,13 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         for phase in ['train', 'val']:
             if phase == 'train':
                 net.train()  # モデルを訓練モードに
-                print('（train）')
-                f.write('（train）')
+                print_and_log(f, '（train）')
             else:
                 net.eval()
     
             for images, targets in dataloaders_dict[phase]:
                 if phase=='train':
-                    images = torch.from_numpy(np.random.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
+                    images = torch.from_numpy(default_rng(123).uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
 
                 images = images.to(device, dtype=torch.float)
                 targets = [ann.to(device, dtype=torch.float) for ann in targets]  # リストの各要素のテンソルをGPUへ
@@ -167,25 +144,15 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         avg_train_loss = epoch_train_loss / iteration
         avg_val_loss = epoch_val_loss / val_iter
     
-        f.write('\nepoch {} || Epoch_TRAIN_Loss:{:.4f} ||Epoch_VAL_Loss:{:.4f}\n'.format(epoch+1,
-                                                                                  avg_train_loss,
-                                                                                  avg_val_loss))
-        print('\nepoch {} || Epoch_TRAIN_Loss:{:.4f} ||Epoch_VAL_Loss:{:.4f} '.format(epoch+1,
+        print_and_log(f, '\nepoch {} || Epoch_TRAIN_Loss:{:.4f} ||Epoch_VAL_Loss:{:.4f} '.format(epoch+1,
                                                                                   avg_train_loss,
                                                                                   avg_val_loss))
         
         # epochのphaseごとのlossと正解率
         t_epoch_finish = time.time()
-        f.write('time:  {:.4f} sec.\n'.format(t_epoch_finish - t_epoch_start))
-        f.write('avarage_loss_l : {:.4f} ||avarage_loss_c : {:.4f} ||avarage_loss_c_posi : {:.4f} \
-||avarage_loss_c_nega:{:.4f}\n'.format(loss_ll_val/val_iter, 
-                                                   loss_cc_val/val_iter,
-                                                   loss_c_posii_val/val_iter,
-                                                   loss_c_negaa_val/val_iter
-                                                  ))
 
-        print('time:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
-        print('avarage_loss_l:{:.4f} ||avarage_loss_c:{:.4f} ||avarage_loss_c_posi:{:.4f} \
+        print_and_log(f, 'time:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
+        print_and_log(f, 'avarage_loss_l:{:.4f} ||avarage_loss_c:{:.4f} ||avarage_loss_c_posi:{:.4f} \
 ||avarage_loss_c_nega:{:.4f}'.format(loss_ll_val/val_iter,
                                                    loss_cc_val/val_iter,
                                                    loss_c_posii_val/val_iter,
@@ -204,10 +171,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         
         train_f1_score, train_threthre = calc_f1score(train_seikai, np.concatenate(train_bbbb, axis=0))
         val_f1_score, val_threthre = calc_f1score(val_seikai, np.concatenate(val_bbbb, axis=0))
-        f.write('train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
-        f.write('val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
-        print('train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
-        print('val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
+        print_and_log(f, 'train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
+        print_and_log(f, 'val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
         train_f1_score_l.append(train_f1_score)
         val_f1_score_l.append(val_f1_score)
 
@@ -237,10 +202,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         early_stopping(epoch_val_loss, net)
     
         if early_stopping.early_stop:
-            
-
-            f.write('Early_Stopping\n')
-            print('Early_Stopping')
+        
+            print_and_log(f, 'Early_Stopping')
             break
             
         epoch_train_loss = 0.0  # epochの損失和

@@ -161,6 +161,11 @@ def calc_f1score(val_seikai, val_bbbb):
     return f1_score, threthre#, PRE, RE
 
 
+def print_and_log(f, moji):
+    print(moji)
+    f.write(moji+'\n')
+
+
 def transfer_resnet(net, param_path):
     deepcluster_weight = torch.load(param_path)
     net.vgg[0].weight = nn.Parameter(deepcluster_weight['state_dict']['features.0.weight'])
