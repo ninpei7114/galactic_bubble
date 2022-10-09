@@ -59,7 +59,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 
     # ネットワークがある程度固定であれば、高速化させる
     torch.backends.cudnn.benchmark = True
-    early_stopping = EarlyStopping(patience=10, verbose=True, path=name+'/earlystopping.pth')
+    early_stopping = EarlyStopping(patience=10, verbose=True, path=name+'/earlystopping.pth', flog=f)
     # イテレーションカウンタをセット
     logs = []
 
@@ -105,6 +105,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
             if phase == 'train':
                 net.train()  # モデルを訓練モードに
                 print('（train）')
+                f.write('（train）')
             else:
                 net.eval()
     
@@ -175,15 +176,15 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         
         # epochのphaseごとのlossと正解率
         t_epoch_finish = time.time()
-        f.write('timer:  {:.4f} sec.\n'.format(t_epoch_finish - t_epoch_start))
-        f.write('avarage_loss_l:{:.4f} ||avarage_loss_c:{:.4f} ||avarage_loss_c_posi:{:.4f} \
+        f.write('time:  {:.4f} sec.\n'.format(t_epoch_finish - t_epoch_start))
+        f.write('avarage_loss_l : {:.4f} ||avarage_loss_c : {:.4f} ||avarage_loss_c_posi : {:.4f} \
 ||avarage_loss_c_nega:{:.4f}\n'.format(loss_ll_val/val_iter, 
                                                    loss_cc_val/val_iter,
                                                    loss_c_posii_val/val_iter,
                                                    loss_c_negaa_val/val_iter
                                                   ))
 
-        print('timer:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
+        print('time:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
         print('avarage_loss_l:{:.4f} ||avarage_loss_c:{:.4f} ||avarage_loss_c_posi:{:.4f} \
 ||avarage_loss_c_nega:{:.4f}'.format(loss_ll_val/val_iter,
                                                    loss_cc_val/val_iter,
@@ -203,10 +204,10 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         
         train_f1_score, train_threthre = calc_f1score(train_seikai, np.concatenate(train_bbbb, axis=0))
         val_f1_score, val_threthre = calc_f1score(val_seikai, np.concatenate(val_bbbb, axis=0))
-        f.write('train_f1_score :{:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
-        f.write('val_f1_score :{:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
-        print('train_f1_score :{:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
-        print('val_f1_score :{:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
+        f.write('train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
+        f.write('val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
+        print('train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
+        print('val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
         train_f1_score_l.append(train_f1_score)
         val_f1_score_l.append(val_f1_score)
 
@@ -223,14 +224,14 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         df = pd.DataFrame(logs)
         df.to_csv(name+'/log_output.csv')
         
-        if epoch_val_loss < tempo_val_loss:
-            val_bbbb_ = np.concatenate(val_bbbb, axis=0)
-            val_seikai_ = val_seikai
-            train_bbbb = np.concatenate(train_bbbb, axis=0)
+        # if epoch_val_loss < tempo_val_loss:
+        #     val_bbbb_ = np.concatenate(val_bbbb, axis=0)
+        #     val_seikai_ = val_seikai
+        #     train_bbbb = np.concatenate(train_bbbb, axis=0)
             #f.write(train_bbbb.shape, val_bbbb_.shape)
             # print(train_bbbb.shape, val_bbbb_.shape)
 
-        tempo_val_loss = epoch_val_loss
+        # tempo_val_loss = epoch_val_loss
         
 #         early_stopping(val_f1_score, net)
         early_stopping(epoch_val_loss, net)
@@ -250,9 +251,10 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
             torch.save(net.state_dict(), name+'/ssd300_' +
                        str(epoch+1) + '.pth')
 
-    return train_bbbb, val_bbbb_, train_seikai, val_seikai_,\
-loss_l_list_val, loss_c_list_val, loss_l_list_train, loss_c_list_train,\
+    return loss_l_list_val, loss_c_list_val, loss_l_list_train, loss_c_list_train,\
 train_f1_score_l, val_f1_score_l
+#train_bbbb, val_bbbb_, train_seikai, val_seikai_,\
+
 #     return train_bbbb, val_bbbb_, train_seikai, val_seikai_,\
 # loss_l_list_val, loss_c_list_val, loss_c_posi_list_val, loss_c_nega_list_val,\
 # loss_l_list_train, loss_c_list_train, loss_c_posi_list_train, loss_c_nega_list_train
