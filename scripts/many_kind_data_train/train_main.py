@@ -69,7 +69,6 @@ def main(args):
 
         name = []
         # print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
-        print('flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
         [name.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
         name = '/workspace/weights/'+''.join(name)
         if os.path.exists(name):
@@ -78,6 +77,7 @@ def main(args):
             os.mkdir(name)
 
         f_log = open(name+'/log.txt', 'w')
+        print('flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
         f_log.write('flip : %s,  rotate : %s,  scale : %s \n'%(flip, rotate, scale))
         train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)

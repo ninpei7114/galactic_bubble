@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 import copy
 import os
+import tqdm
+
 from torch.nn import functional as F
 import proceesing
 import label_caliculator
@@ -41,9 +43,10 @@ def make_ring(spitzer_path, name, train_cfg):
     l = train_l
     train_count = 0
     train_nan_count = 0
-
-    for i in range(len(l)): 
-
+    pbar = tqdm.tqdm(range(len(l)))
+    for i in pbar: 
+    # for i in range(len(l)): 
+        pbar.set_description(l[i])
         fits_path = l[i]
         spitzer_rfits = astropy.io.fits.open(spitzer_path+'/'+fits_path+'/'+'r.fits')[0]
         spitzer_gfits = astropy.io.fits.open(spitzer_path+'/'+fits_path+'/'+'g.fits')[0]
@@ -73,7 +76,7 @@ def make_ring(spitzer_path, name, train_cfg):
         # star_listは辞書
         label_cal = label_caliculator.label_caliculator(choice, 'train', w)
         label_cal.all_star(Ring_cata)
-        print(fits_path)
+        # print(fits_path)
 
         for _, row in Ring_cata.iterrows():    
 
