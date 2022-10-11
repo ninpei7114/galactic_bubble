@@ -44,8 +44,11 @@ def make_ring(spitzer_path, name, train_cfg):
     train_count = 0
     train_nan_count = 0
     pbar = tqdm.tqdm(range(len(l)))
+    flip = train_cfg['flip']
+    rot = train_cfg['rotate']
+    scale = train_cfg['scale']
+
     for i in pbar: 
-    # for i in range(len(l)): 
         pbar.set_description(l[i])
         fits_path = l[i]
         spitzer_rfits = astropy.io.fits.open(spitzer_path+'/'+fits_path+'/'+'r.fits')[0]
@@ -60,7 +63,6 @@ def make_ring(spitzer_path, name, train_cfg):
 
         a = data.shape[0]
         b = data.shape[1]
-#         data[data!=data] = 0
         w = astropy.wcs.WCS(spitzer_rfits.header)
         GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
         GLON_max, GLAT_max = w.all_pix2world(0, a, 0) 
@@ -79,10 +81,6 @@ def make_ring(spitzer_path, name, train_cfg):
         # print(fits_path)
 
         for _, row in Ring_cata.iterrows():    
-
-            flip = train_cfg['flip']
-            rot = train_cfg['rotate']
-            scale = train_cfg['scale']
             # translation = train_cfg['translation']
 
             x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, 
@@ -103,7 +101,11 @@ def make_ring(spitzer_path, name, train_cfg):
                         pass
                         
                     else:
-                        ###### 普通に切り出したリング ######
+
+                        ########################
+                        ## 普通に切り出したリング ##
+                        ########################
+
                         pi = proceesing.conv(300, sig1, cut_data)
                         label_cal.make_label(Ring_CATA)
                         r_shape_y = pi.shape[0]
@@ -111,7 +113,7 @@ def make_ring(spitzer_path, name, train_cfg):
                         res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                         res_data = proceesing.normalize(res_data)
                         res_data = proceesing.resize(res_data, 300)
-                        xmin_list, ymin_list, xmax_list, ymax_list, name_list, star_dic = label_cal.check_list()
+                        xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                             
                         info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
                                 'ymin':ymin_list, 'ymax':ymax_list}
@@ -122,15 +124,18 @@ def make_ring(spitzer_path, name, train_cfg):
                                 frame.append(info)
 
                         append_data(res_data, info, mwp_ring_list_train, frame_mwp_train)
-                        data_proc = ring_sub.data_proccessing(pi, fits_path, choice)
-
-                        ## データの種類を作成
+                        data_proc = ring_sub.data_proccessing(pi, fits_path, choice, name_list, 
+                                                            xmin_list, ymin_list, xmax_list, ymax_list)
+                        
+                        #####################
+                        ## データの種類を作成 ##
+                        #####################
 
                         ###### 上下左右反転 ######
                         if flip:
-                            ud_res_data, lr_res_data = data_proc.flip_data()
-                            append_data(ud_res_data, info, mwp_ring_list_train, frame_mwp_train)
-                            append_data(lr_res_data, info, mwp_ring_list_train, frame_mwp_train)
+                            ud_res_data, lr_res_data, ud_info, lr_info = data_proc.flip_data()
+                            append_data(ud_res_data, ud_info, mwp_ring_list_train, frame_mwp_train)
+                            append_data(lr_res_data, lr_info, mwp_ring_list_train, frame_mwp_train)
 
                         ###### 大きさを変更 ######
                         if type(scale) == bool:
@@ -144,12 +149,12 @@ def make_ring(spitzer_path, name, train_cfg):
 
                         ###### 回転 ######
                         if rot:
-                            # deg = np.random.randint(0, 359)
                             for deg in [90, 180, 270, 360]:
                                 rot_data, rotate_info = data_proc.rotate_data(
-                                    deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list)
+                                    deg)
 
                                 append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
+
                         
     frame_mwp_train = pd.DataFrame(frame_mwp_train)
     frame_mwp_train['id']  = [i for i in range(len(frame_mwp_train))]

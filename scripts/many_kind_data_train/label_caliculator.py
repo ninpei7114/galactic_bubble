@@ -173,6 +173,7 @@ class label_caliculator(object):
         # return xmin_list, ymin_list, xmax_list, ymax_list, named_list
 
 
+
     def check_list(self):
         xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
         for xy_num in range(len(self.xmin_list)):
@@ -185,7 +186,7 @@ class label_caliculator(object):
                 xmax_list_.append(self.xmax_list[xy_num])
                 ymax_list_.append(self.ymax_list[xy_num])
         
-        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, self.named_list, self.star_dic
+        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, self.named_list
 
 
 

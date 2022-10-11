@@ -12,15 +12,22 @@ import astroquery.vizier
 """
 
 class data_proccessing(object):
-    def __init__(self, source_data, fits_path, choice):
+    def __init__(self, source_data, fits_path, choice, name_list, xmin_list, ymin_list, xmax_list, ymax_list):
 
         self.source_data = source_data
         self.fits_path = fits_path
         self.choice = choice
+        self.name_list = name_list
+        self.xmin_list = xmin_list
+        self.ymin_list = ymin_list 
+        self.xmax_list = xmax_list 
+        self.ymax_list = ymax_list
         if choice == 'MWP':
             self.Rout = 'Reff'
         else:
             self.Rout = 'Rout'
+
+
 
     def norm_res(self, data):
         """
@@ -36,30 +43,60 @@ class data_proccessing(object):
         return data
 
 
+
     def flip_data(self):
         """
         リングを上下左右反転させる。
+        ターゲットのリング以外の割り込みリングもあるため、
+        flipもラベルの修正が必要
         """
         ud = np.flipud(self.source_data)
         ud_res_data = self.norm_res(ud)
+        
+        ud_xmin_list, ud_xmax_list, ud_ymin_list, ud_ymax_list = [], [], [], []
+        for i in range(len(self.xmin_list)):
+            y_min = -(self.ymin_list[i] - 0.5) + 0.5
+            x_min = self.xmin_list[i]
+            y_max = -(self.ymax_list[i] - 0.5) + 0.5
+            x_max = self.xmax_list[i]
+            ud_xmin_list.append(x_min)
+            ud_xmax_list.append(x_max)
+            ud_ymin_list.append(y_min)
+            ud_ymax_list.append(y_max)
+        ud_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':ud_xmin_list, 'xmax':ud_xmax_list, 
+                    'ymin':ud_ymin_list, 'ymax':ud_ymax_list}
 
         lr = np.fliplr(self.source_data)
         lr_res_data = self.norm_res(lr)
 
-        return ud_res_data, lr_res_data
+        lr_xmin_list, lr_xmax_list, lr_ymin_list, lr_ymax_list = [], [], [], []
+        for i in range(len(self.xmin_list)):
+            x_min = -(self.xmin_list[i] - 0.5) + 0.5
+            y_min = self.ymin_list[i]
+            x_max = -(self.xmax_list[i] - 0.5) + 0.5
+            y_max = self.ymax_list[i]
+            lr_xmin_list.append(x_min)
+            lr_xmax_list.append(x_max)
+            lr_ymin_list.append(y_min)
+            lr_ymax_list.append(y_max)
+        lr_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':lr_xmin_list, 'xmax':lr_xmax_list, 
+                    'ymin':lr_ymin_list, 'ymax':lr_ymax_list}
+
+        return ud_res_data, lr_res_data, ud_info, lr_info
 
 
-    def rotate_data(self, deg, xmin_list, ymin_list, xmax_list, ymax_list, name_list):
+
+    def rotate_data(self, deg):
         """
         リングを回転させる。
         """
         rotate_cut_data = transform.rotate(self.source_data, deg)
         xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
 
-        for xy_num in range(len(xmin_list)):
-            width = xmax_list[xy_num] - xmin_list[xy_num]
-            center_x = ((xmin_list[xy_num] - 0.5) + (xmax_list[xy_num] - 0.5))/2
-            center_y = ((ymin_list[xy_num] - 0.5) + (ymax_list[xy_num] - 0.5))/2
+        for xy_num in range(len(self.xmin_list)):
+            width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
+            center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
+            center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
 
             new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
             new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
@@ -70,26 +107,26 @@ class data_proccessing(object):
             ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
 
         res_data = self.norm_res(rotate_cut_data)
-        info = {'fits':self.fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
-                            'ymin':ymin_list, 'ymax':ymax_list}
+        info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_, 
+                            'ymin':ymin_list_, 'ymax':ymax_list_}
 
         return res_data, info
 
 
+
     def scale(self, row, w, GLON_new_min,GLON_new_max, GLAT_min, GLAT_max, scale, MWP, data, label_cal):
         """
-        サイズ縮小
+        サイズを縮小したパターンのRingを作り出す
         """
-
         x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, GLON_new_min,GLON_new_max,
                                                                                         GLAT_min, GLAT_max, scale)
-
-        if flag: #calc_pix時に100回試行してもできなかった場合の場合分け
+        #calc_pix時に100回試行してもできなかった場合の場合分け
+        if flag: 
             label_cal.find_cover()
 
             sig1 = 1/(2*(np.log(2))**(1/2))
             if x_pix_min<0 or y_pix_min<0:
-    #                 print('min_error')
+
                 return False, 0, 0
             else:
                 c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
@@ -101,7 +138,7 @@ class data_proccessing(object):
                     return False, 0, 0
                 else:
                     label_cal.make_label(MWP)
-                    xmin_list, ymin_list, xmax_list, ymax_list, name_list, star_dic = label_cal.check_list()
+                    xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                                                                                                 
                     info = {'fits':self.fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
                             'ymin':ymin_list, 'ymax':ymax_list}

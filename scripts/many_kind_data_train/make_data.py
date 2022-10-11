@@ -1,5 +1,6 @@
 # from make_NonRing  import make_nonring
 from make_Ring_data import make_ring
+from sub import print_and_log
 
 import numpy as np
 import pandas as pd
@@ -39,9 +40,18 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
 
     # Non-Ringと合わせる
-    print('confirm nan in train_data : ', np.sum(train_data))
-    print('confirm nan in no_Ring_train_nan : ', np.sum(no_Ring_train))
-    print('confirm nan in no_Ring_train_moyamoya : ', np.sum(no_Ring_train_moyamoya))
+    print_and_log(f_log, '====================================')
+    print_and_log(f_log, '(confirm nan in Train)')
+    print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(train_data)))
+    print_and_log(f_log, 'no_Ring_train : %s'%np.isnan(np.sum(no_Ring_train)))
+    print_and_log(f_log, 'no_Ring_train_moyamoya : %s'%np.isnan(np.sum(no_Ring_train_moyamoya)))
+    print_and_log(f_log, ' ')
+    print_and_log(f_log, '(confirm nan in Val)')
+    print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(val_data)))
+    print_and_log(f_log, 'no_Ring_val : %s'%np.isnan(np.sum(no_Ring_val)))
+    print_and_log(f_log, 'no_Ring_val_moyamoya : %s'%np.isnan(np.sum(no_Ring_val_moyamoya)))
+    print_and_log(f_log, ' ')
+
     train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random], 
                              no_Ring_train_moyamoya[no_Ring_train_moyamoya_random]])
 
@@ -58,21 +68,16 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
                         ])
 
 
-    print('train data shape : ', train_data.shape)
-    print('train label length : ', len(train_label))
-    print('val data shape : ', val_data.shape)
-    print('val label length : ', len(val_label))
+    print_and_log(f_log, 'Train Ring num  : %s '%train_Ring_num)
+    print_and_log(f_log, 'Val Ring num  : %s '%val_Ring_num)
+    print_and_log(f_log, ' ')
+    print_and_log(f_log, 'Total Train Ring Shape  : %s '%str(train_data.shape))
+    print_and_log(f_log, 'Total Val Ring Shape  : %s '%str(val_data.shape))
+    print_and_log(f_log, ' ')
+    print_and_log(f_log, 'Total Train label length  : %s '%len(train_label))
+    print_and_log(f_log, 'Total Val label length  : %s '%len(val_label))
 
-    f_log.write('====================================\n')
-    f_log.write('Train Ring num  : %s \n'%train_Ring_num)
-    f_log.write('Val Ring num  : %s \n'%val_Ring_num)
-    f_log.write(' \n')
-    f_log.write('Total Train Ring Shape  : %s \n'%str(train_data.shape))
-    f_log.write('Total Val Ring Shape  : %s \n'%str(val_data.shape))
-    f_log.write(' \n')
-    f_log.write('Total Train label length  : %s .\n'%len(train_label))
-    f_log.write('Total Val label length  : %s .\n'%len(val_label))
-    # f_log.write('> \n')
+
     ## train_main.pyにて、samplerの数を書いている。
 
 

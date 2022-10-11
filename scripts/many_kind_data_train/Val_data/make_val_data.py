@@ -157,16 +157,17 @@ def main(args):
     frame_mwp_val['id']  = [i for i in range(len(frame_mwp_val))]
 
     print('val_count  ',  val_count)
+    
+    if os.path.exists(args.savedir_name):
+        pass
+    else:
+        os.mkdir(args.savedir_name)
 
     mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
     np.save(args.savedir_name + '/val_ring.npy', mwp_ring_list_val)
     frame_mwp_val.to_csv(args.savedir_name + '/val_ring_label.csv')
     print('array_count ', mwp_ring_list_val.shape[0])
     
-    if os.path.exists(args.savedir_name):
-        pass
-    else:
-        os.mkdir(args.savedir_name)
 
     # mwp_ring_list_train_ = np.array(mwp_ring_list_train)
     mwp_ring_list_val_ = mwp_ring_list_val*255

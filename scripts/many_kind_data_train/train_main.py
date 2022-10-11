@@ -94,9 +94,9 @@ def main(args):
         test_dataset = DataSet(torch.Tensor(val_data), val_label)
         test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, 
                                         sampler=val_sampler, collate_fn=od_collate_fn)
-        print_and_log(f_log, '\n')
-        print_and_log(f_log, 'Train No Ring sampler  : %s / %s \n'%(train_Ring_num, train_data.shape[0] - train_Ring_num))
-        print_and_log(f_log, 'Val No Ring sampler  : %s / %s \n'%(val_data.shape[0] - val_Ring_num, val_data.shape[0] - val_Ring_num))
+        print_and_log(f_log, ' ')
+        print_and_log(f_log, 'Train No Ring sampler  : %s / %s '%(train_Ring_num, train_data.shape[0] - train_Ring_num))
+        print_and_log(f_log, 'Val No Ring sampler  : %s / %s '%(val_data.shape[0] - val_Ring_num, val_data.shape[0] - val_Ring_num))
         print_and_log(f_log, '====================================')
 
 
