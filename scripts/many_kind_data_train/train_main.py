@@ -109,7 +109,7 @@ def main(args):
         # net = transfer_resnet(net, args.parameter_path)
 
         criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=2, device=device)
-        optimizer = optim.AdamW(net.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False)
+        optimizer = optim.AdamW(net.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False)
         net.to(device)
 
         

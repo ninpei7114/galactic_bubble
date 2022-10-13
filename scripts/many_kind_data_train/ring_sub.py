@@ -50,7 +50,8 @@ class data_proccessing(object):
         ターゲットのリング以外の割り込みリングもあるため、
         flipもラベルの修正が必要
         """
-        ud = np.flipud(self.source_data)
+        tempo = copy.deepcopy(self.source_data)
+        ud = np.flipud(tempo)
         ud_res_data = self.norm_res(ud)
         
         ud_xmin_list, ud_xmax_list, ud_ymin_list, ud_ymax_list = [], [], [], []
@@ -66,7 +67,8 @@ class data_proccessing(object):
         ud_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':ud_xmin_list, 'xmax':ud_xmax_list, 
                     'ymin':ud_ymin_list, 'ymax':ud_ymax_list}
 
-        lr = np.fliplr(self.source_data)
+        tempo = copy.deepcopy(self.source_data)
+        lr = np.fliplr(tempo)
         lr_res_data = self.norm_res(lr)
 
         lr_xmin_list, lr_xmax_list, lr_ymin_list, lr_ymax_list = [], [], [], []
@@ -86,11 +88,13 @@ class data_proccessing(object):
 
 
 
+
     def rotate_data(self, deg):
         """
         リングを回転させる。
         """
-        rotate_cut_data = transform.rotate(self.source_data, deg)
+        tempo = copy.deepcopy(self.source_data)
+        rotate_cut_data = transform.rotate(tempo, deg)
         xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
 
         for xy_num in range(len(self.xmin_list)):

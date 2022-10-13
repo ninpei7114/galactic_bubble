@@ -107,10 +107,11 @@ def make_ring(spitzer_path, name, train_cfg):
                         ########################
 
                         pi = proceesing.conv(300, sig1, cut_data)
+                        pi_ = copy.deepcopy(pi)
                         label_cal.make_label(Ring_CATA)
-                        r_shape_y = pi.shape[0]
-                        r_shape_x = pi.shape[1]
-                        res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
+                        r_shape_y = pi_.shape[0]
+                        r_shape_x = pi_.shape[1]
+                        res_data = pi_[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                         res_data = proceesing.normalize(res_data)
                         res_data = proceesing.resize(res_data, 300)
                         xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
