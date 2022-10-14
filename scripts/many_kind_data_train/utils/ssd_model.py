@@ -967,6 +967,7 @@ class MultiBoxLoss(nn.Module):
         # 同様に教師データであるconf_t_labelからposとnegだけを取り出してconf_t_label_hnmに
         # 形はtorch.Size([pos+neg])になる
         #### conf_t_label_hnm = conf_t_label[(pos_mask+neg_mask).gt(0)]
+        #### loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
 
         # confidenceの損失関数を計算（要素の合計=sumを求める）
         
@@ -976,7 +977,6 @@ class MultiBoxLoss(nn.Module):
         loss_c_neg = F.cross_entropy( conf_data[(neg_idx_mask).gt(0)].view(-1, num_classes), 
                                     #   conf_t_label[(neg_mask).gt(0)], reduction='sum')
                                       conf_t_label[(neg_mask).gt(0)])
-        # loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
         loss_c = loss_c_pos + loss_c_neg
 
         # 物体を発見したBBoxの数N（全ミニバッチの合計）で損失を割り算
