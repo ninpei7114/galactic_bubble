@@ -48,6 +48,7 @@ def intersect(box_a, box_b):
       box_b: (tensor) bounding boxes, Shape: [B,4].
     Return:
       (tensor) intersection area, Shape: [A,B].
+    重なり部分の計算
     """
     A = box_a.size(0)
     B = box_b.size(0)

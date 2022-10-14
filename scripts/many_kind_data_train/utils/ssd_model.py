@@ -873,6 +873,9 @@ class MultiBoxLoss(nn.Module):
         num_batch = loc_data.size(0)  # ミニバッチのサイズ
         num_dbox = loc_data.size(1)  # DBoxの数 = 8732
         num_classes = conf_data.size(2)  # クラス数 = 2
+
+        # conf_t_label：各DBoxに一番近い正解のBBoxのラベルを格納させる
+        # loc_t:各DBoxに一番近い正解のBBoxの位置情報を格納させる
         conf_t_label = torch.zeros(num_batch, num_dbox).to(self.device, dtype=torch.long)
         loc_t = torch.zeros(num_batch, num_dbox, 4).to(self.device)
             
@@ -896,14 +899,17 @@ class MultiBoxLoss(nn.Module):
         pos_mask = conf_t_label > 0  # torch.Size([num_batch, 8732])
 
         # pos_maskをloc_dataのサイズに変形
+        # pos_mask : torch.size([num_batch, 8732]) → torch.size([num_batch, 8732, 1])
+        # pos_idx : torch.size([num_batch, 8732, 4])
         pos_idx = pos_mask.unsqueeze(pos_mask.dim()).expand_as(loc_data)
-#         print('pos_idx', pos_idx)
+
         # Positive DBoxのloc_dataと、教師データloc_tを取得
         loc_p = loc_data[pos_idx].view(-1, 4)
         loc_t = loc_t[pos_idx].view(-1, 4)
        
         # 物体を発見したPositive DBoxのオフセット情報loc_tの損失（誤差）を計算
         loss_l = torch.nan_to_num(F.smooth_l1_loss(loc_p, loc_t))
+        #### loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
 
 
         # ----------
@@ -927,6 +933,7 @@ class MultiBoxLoss(nn.Module):
         num_pos = pos_mask.long().sum(1, keepdim=True)  # ミニバッチごとの物体クラス予測の数
         loss_c = loss_c.view(num_batch, -1)  # torch.Size([num_batch, 8732])
         loss_c[pos_mask] = 0  # 物体を発見したDBoxは損失0とする
+        # ↑ Non-Ringのうち、最もlossが大きいものを抽出していく
 
         # Hard Negative Miningを実施する
         # 各DBoxの損失の大きさloss_cの順位であるidx_rankを求める
@@ -951,30 +958,35 @@ class MultiBoxLoss(nn.Module):
         neg_idx_mask = neg_mask.unsqueeze(2).expand_as(conf_data)
 
         # conf_dataからposとnegだけを取り出してconf_hnmにする。形はtorch.Size([num_pos+num_neg, 21])
-        conf_hnm = conf_data[(pos_idx_mask+neg_idx_mask).gt(0)
-                             ].view(-1, num_classes)
+        #### conf_hnm = conf_data[(pos_idx_mask+neg_idx_mask).gt(0)
+        #                      ].view(-1, num_classes)
         # （注釈）gtは greater than (>)の略称。これでmaskが1のindexを取り出す。
         # pos_idx_mask+neg_idx_maskは足し算だが、indexへのmaskをまとめているだけである。
         # つまり、posであろうがnegであろうが、マスクが1のものを足し算で一つのリストにし、それをgtで取得
 
         # 同様に教師データであるconf_t_labelからposとnegだけを取り出してconf_t_label_hnmに
         # 形はtorch.Size([pos+neg])になる
-        conf_t_label_hnm = conf_t_label[(pos_mask+neg_mask).gt(0)]
+        #### conf_t_label_hnm = conf_t_label[(pos_mask+neg_mask).gt(0)]
 
         # confidenceの損失関数を計算（要素の合計=sumを求める）
-        # loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
+        
         loss_c_pos = F.cross_entropy( conf_data[(pos_idx_mask).gt(0)].view(-1, num_classes), 
+                                    #   conf_t_label[(pos_mask).gt(0)], reduction='sum')
                                       conf_t_label[(pos_mask).gt(0)])
         loss_c_neg = F.cross_entropy( conf_data[(neg_idx_mask).gt(0)].view(-1, num_classes), 
+                                    #   conf_t_label[(neg_mask).gt(0)], reduction='sum')
                                       conf_t_label[(neg_mask).gt(0)])
+        # loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction='sum')
         loss_c = loss_c_pos + loss_c_neg
-        # print('loss_c_pos : ', loss_c_pos)
-        # print('loss_c_neg : ', loss_c_neg)
-        # 物体を発見したBBoxの数N（全ミニバッチの合計）で損失を割り算
-        N = num_pos.sum()
-        
-        # loss_l /= N
 
+        # 物体を発見したBBoxの数N（全ミニバッチの合計）で損失を割り算
+        
+        ##################
+        # 参考にした本では、Nで割っているが、今回の学習ではNon-Ringのように、
+        # positiveが0のデータもあるため、nanが出る可能性がある。
+        # N = num_pos.sum()
+        # loss_l /= N
         # loss_c /= N
+        ##################
 #         loss_c = 2*loss_c_pos/N + loss_c_neg/N
         return loss_l, loss_c, loss_c_pos, loss_c_neg
