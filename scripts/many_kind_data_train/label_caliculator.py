@@ -266,7 +266,6 @@ class label_caliculator(object):
         MWP_name_select = MWP.index.tolist()
         #切り出した画像にたまたま入った天体があるか、ないか
         if len(self.overlapp_list) == 0:
-            print('No over')
             pass
         else:
             
