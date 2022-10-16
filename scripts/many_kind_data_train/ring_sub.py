@@ -156,7 +156,7 @@ class data_proccessing(object):
     def translation(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal, trans_rg):
         random_num = 1/trans_rg.uniform(0.125, 0.8)
 
-        x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag= label_cal.calc_pi(row, GLON_new_min, GLON_new_max,
+        x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag= label_cal.calc_pix(row, GLON_new_min, GLON_new_max,
                                                                                         GLAT_min, GLAT_max, random_num)
         if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
             
