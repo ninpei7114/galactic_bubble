@@ -57,14 +57,14 @@ def main(args):
     flip_list = [False, True]
     rotate_list = [False, True]
     scale_list = [False, 1.5, 2]
-    # translation_list = [False, True]
+    translation_list = [False, True]
 
-    for flip, rotate, scale in itertools.product(flip_list, rotate_list, scale_list):#, translation_list):
+    for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):#, translation_list):
         train_cfg = {
             "flip": flip,
             "rotate": rotate,
             "scale": scale,
-            # "translation":translation
+            "translation":translation
         }
 
         name = []
@@ -77,7 +77,7 @@ def main(args):
             os.mkdir(name)
 
         f_log = open(name+'/log.txt', 'w')
-        print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s'%(flip, rotate, scale))
+        print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
 
         train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)

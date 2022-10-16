@@ -48,7 +48,38 @@ class label_caliculator(object):
 
             else:pass
             
-        # return overlapp_list, overlapp_name
+    def find_cover_for_translation(self, x_pix_min, x_pix_max, y_pix_min, y_pix_max):
+        """
+        translationのための
+        """
+        width = (x_pix_max - x_pix_min)/4
+        hight = (y_pix_max - y_pix_min)/4
+        
+        # g_area = ((x_pix_max-width)-(x_pix_min+width))*((y_pix_max-hight)-(y_pix_min+hight))
+        
+        self.overlapp_list = []
+        self.overlapp_name = []
+        for d in self.star_dic.items():
+            s_xmin = d[1][0]
+            s_xmax = d[1][2]
+            s_ymin = d[1][1]
+            s_ymax = d[1][3]
+            
+            xx = np.array([s_xmin, s_xmax])
+            yy = np.array([s_ymin, s_ymax])
+            c_xx = np.clip(xx, self.x_pix_min+width, self.x_pix_max-width)
+            c_yy = np.clip(yy, self.y_pix_min+hight, self.y_pix_max-hight)   
+            s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
+            c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
+            
+            # 場合分け、全体に対してringが1/2以上入っていないといけない
+            # 大きさが画像に対して、1/8以上でないとlabel付けしない
+            if (c_area>=s_area*1/4 and (d[1][2]-d[1][0])>=(width*2)/8 and 
+                (d[1][3]-d[1][1])>=(hight*2)/10):
+                self.overlapp_list.append(d)
+                self.overlapp_name.append(d[0])
+
+            else:pass
 
 
 
@@ -168,6 +199,41 @@ class label_caliculator(object):
                     self.xmax_list.append(self.judge_01(xmax_c/(self.width/2)))
                     self.ymin_list.append(self.judge_01(ymin_c/(self.height/2)))
                     self.ymax_list.append(self.judge_01(ymax_c/(self.height/2)))
+                    self.named_list.append(n)
+    
+
+    def make_label_for_translation(self, x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, height, MWP):
+        """
+        sは、主体となるringの位置情報
+        x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ
+        主体となるringに重なっているringのindex情報、重なったringの情報はstar_listの中にある。
+        """
+
+        self.xmin_list = []
+        self.ymin_list = []
+        self.xmax_list = []
+        self.ymax_list = []
+        self.named_list = []
+        MWP_name_select = MWP.index.tolist()
+        #切り出した画像にたまたま入った天体があるか、ないか
+        if len(self.overlapp_list) == 0:
+            pass
+        else:
+            
+            for p, n in zip(self.overlapp_list, self.overlapp_name):
+                # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
+                #                           array(7673.50003014), array(4763.19998004)])
+                #のように、天体名とpostionが入っている
+                if p[0] in MWP_name_select:
+                    
+                    xmin_c = p[1][0] - (x_pix_min + width/4)
+                    ymin_c = p[1][1] - (y_pix_min + height/4)
+                    xmax_c = p[1][2] - (x_pix_min + width/4)
+                    ymax_c = p[1][3] - (y_pix_min + height/4)
+                    self.xmin_list.append(self.judge_01(xmin_c/(width/2)))
+                    self.xmax_list.append(self.judge_01(xmax_c/(width/2)))
+                    self.ymin_list.append(self.judge_01(ymin_c/(height/2)))
+                    self.ymax_list.append(self.judge_01(ymax_c/(height/2)))
                     self.named_list.append(n)
                 
         # return xmin_list, ymin_list, xmax_list, ymax_list, named_list

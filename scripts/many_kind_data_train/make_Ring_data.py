@@ -4,7 +4,6 @@ import astropy.wcs
 import numpy as np
 import pandas as pd
 
-import matplotlib.pyplot as plt
 
 import copy
 import os
@@ -47,6 +46,7 @@ def make_ring(spitzer_path, name, train_cfg):
     flip = train_cfg['flip']
     rot = train_cfg['rotate']
     scale = train_cfg['scale']
+    translation = train_cfg['translation']
 
     for i in pbar: 
         pbar.set_description(l[i])
@@ -142,7 +142,7 @@ def make_ring(spitzer_path, name, train_cfg):
                         if type(scale) == bool:
                             pass
                         else:
-                            fl, scale_data, scale_info = data_proc.scale(row, w,GLON_new_min, GLON_new_max,
+                            fl, scale_data, scale_info = data_proc.scale(row, GLON_new_min, GLON_new_max,
                                                                 GLAT_min, GLAT_max, scale,
                                                                 Ring_CATA, data, label_cal)
                             if fl:
@@ -155,6 +155,13 @@ def make_ring(spitzer_path, name, train_cfg):
                                     deg)
 
                                 append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
+
+                        ###### 並行移動 ######
+                        if translation:
+                            fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
+                                                                GLAT_min, GLAT_max, Ring_CATA, data, label_cal)
+                            if fl:
+                                append_data(trans_data, trans_info, mwp_ring_list_train, frame_mwp_train)
 
                         
     frame_mwp_train = pd.DataFrame(frame_mwp_train)
