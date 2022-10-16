@@ -6,8 +6,6 @@ import copy
 import proceesing
 import astroquery.vizier
 
-from numpy.random import default_rng
-
 
 """
 リングのaugmentationパターンを作成するスクリプト
@@ -29,9 +27,6 @@ class data_proccessing(object):
             self.Rout = 'Reff'
         else:
             self.Rout = 'Rout'
-
-        self.rg = default_rng(123)
-
 
 
     def norm_res(self, data):
@@ -158,8 +153,8 @@ class data_proccessing(object):
             return False, 0, 0
 
 
-    def translation(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal):
-        random_num = 1/self.rg.uniform(0.125, 0.8)
+    def translation(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal, trans_rg):
+        random_num = 1/trans_rg.uniform(0.125, 0.8)
 
         x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, GLON_new_min, GLON_new_max,
                                                                                         GLAT_min, GLAT_max, random_num)

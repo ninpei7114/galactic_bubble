@@ -2,6 +2,7 @@ import astropy.io.fits
 import astropy.wcs
 
 import numpy as np
+from numpy.random import default_rng
 import pandas as pd
 
 
@@ -47,6 +48,7 @@ def make_ring(spitzer_path, name, train_cfg):
     rot = train_cfg['rotate']
     scale = train_cfg['scale']
     translation = train_cfg['translation']
+    trans_rg = default_rng(123)
 
     for i in pbar: 
         pbar.set_description(l[i])
@@ -159,7 +161,7 @@ def make_ring(spitzer_path, name, train_cfg):
                         ###### 並行移動 ######
                         if translation:
                             fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
-                                                                GLAT_min, GLAT_max, Ring_CATA, data, label_cal)
+                                                                GLAT_min, GLAT_max, Ring_CATA, data, label_cal, trans_rg)
                             if fl:
                                 append_data(trans_data, trans_info, mwp_ring_list_train, frame_mwp_train)
 
