@@ -57,8 +57,7 @@ def main(args):
     flip_list = [False, True]
     rotate_list = [False, True]
     scale_list = [False, 1.5, 2]
-    # translation_list = [False, True]
-    translation_list = [True]
+    translation_list = [False, True]
 
     for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):#, translation_list):
         train_cfg = {
