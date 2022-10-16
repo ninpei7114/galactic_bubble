@@ -47,6 +47,7 @@ class label_caliculator(object):
                 self.overlapp_name.append(d[0])
 
             else:pass
+
             
     def find_cover_for_translation(self, x_pix_min, x_pix_max, y_pix_min, y_pix_max):
         """
@@ -67,8 +68,8 @@ class label_caliculator(object):
             
             xx = np.array([s_xmin, s_xmax])
             yy = np.array([s_ymin, s_ymax])
-            c_xx = np.clip(xx, self.x_pix_min+width, self.x_pix_max-width)
-            c_yy = np.clip(yy, self.y_pix_min+hight, self.y_pix_max-hight)   
+            c_xx = np.clip(xx, x_pix_min+width, x_pix_max-width)
+            c_yy = np.clip(yy, y_pix_min+hight, y_pix_max-hight)   
             s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
             c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
             

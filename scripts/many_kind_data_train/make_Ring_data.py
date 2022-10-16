@@ -83,7 +83,6 @@ def make_ring(spitzer_path, name, train_cfg):
         # print(fits_path)
 
         for _, row in Ring_cata.iterrows():    
-            # translation = train_cfg['translation']
 
             x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, 
                                                                                 GLON_new_min, GLON_new_max,
