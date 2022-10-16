@@ -163,41 +163,42 @@ class data_proccessing(object):
 
         x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(row, GLON_new_min, GLON_new_max,
                                                                                         GLAT_min, GLAT_max, random_num)
-            
-        half_width = (x_pix_max - x_pix_min)/4
-        r = int(((x_pix_max - half_width) - (x_pix_min + half_width))/(2*random_num))
-        x_offset = self.rg.uniform(-(random_num-0.5)*r, (random_num-0.5)*r)
-        y_offset = self.rg.uniform(-(random_num-0.5)*r, (random_num-0.5)*r)
-        x_pix_min = x_pix_min + int(x_offset)
-        x_pix_max = x_pix_max + int(x_offset)
-        y_pix_min = y_pix_min + int(y_offset)
-        y_pix_max = y_pix_max + int(y_offset)
-        width = x_pix_max - x_pix_min
-        height = y_pix_max - y_pix_min
-        
         if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
-            label_cal.find_cover_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max)
+            
+            half_width = (x_pix_max - x_pix_min)/4
+            r = int(((x_pix_max - half_width) - (x_pix_min + half_width))/(2*random_num))
+            x_offset = self.rg.uniform(-(random_num-0.5)*r, (random_num-0.5)*r)
+            y_offset = self.rg.uniform(-(random_num-0.5)*r, (random_num-0.5)*r)
+            x_pix_min = x_pix_min + int(x_offset)
+            x_pix_max = x_pix_max + int(x_offset)
+            y_pix_min = y_pix_min + int(y_offset)
+            y_pix_max = y_pix_max + int(y_offset)
+            width = x_pix_max - x_pix_min
+            height = y_pix_max - y_pix_min
 
-            c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
-            cut_data = copy.deepcopy(c_data)
-            if np.isnan(cut_data.sum()):
-                return flag, 0,  0
-                
+            if x_pix_min<0 or y_pix_min<0:
+                return False, 0, 0
+
             else:
+            
+                label_cal.find_cover_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max)
                 sig1 = 1/(2*(np.log(2))**(1/2))
+
+                c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
+                cut_data = copy.deepcopy(c_data)
                 pi = proceesing.conv(300, sig1, cut_data)
-                xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.make_label_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
-                                                                                    width, height, MWP)
-                r_shape_y = pi.shape[0]
-                r_shape_x = pi.shape[1]
-                res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
-                res_data = proceesing.normalize(res_data)
-                res_data = proceesing.resize(res_data, 300)
-                xmin_list, ymin_list, xmax_list, ymax_list = label_cal.check_list(xmin_list, ymin_list, 
-                                                                                            xmax_list, ymax_list)
-                info = {'fits':self.fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
-                            'ymin':ymin_list, 'ymax':ymax_list}
-                return flag, res_data, info
+                res_data = self.norm_res(pi)
+                
+                if np.isnan(cut_data.sum()):
+                    return flag, 0,  0
+                    
+                else:
+                    label_cal.make_label_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
+                                                                                        width, height, MWP)
+                    xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
+                    info = {'fits':self.fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
+                                'ymin':ymin_list, 'ymax':ymax_list}
+                    return flag, res_data, info
         else:
             return flag, 0,  0
 

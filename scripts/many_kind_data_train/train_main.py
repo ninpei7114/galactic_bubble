@@ -77,7 +77,7 @@ def main(args):
             os.mkdir(name)
 
         f_log = open(name+'/log.txt', 'w')
-        print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
+        print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s,  translation : %s'%(flip, rotate, scale, translation))
 
         train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
