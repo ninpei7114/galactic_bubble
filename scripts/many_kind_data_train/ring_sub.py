@@ -188,9 +188,9 @@ class data_proccessing(object):
                 cut_data = copy.deepcopy(c_data)
                 pi = proceesing.conv(300, sig1, cut_data)
                 res_data = self.norm_res(pi)
-                
+
                 if np.isnan(cut_data.sum()):
-                    return flag, 0,  0
+                    return False, 0,  0
                     
                 else:
                     label_cal.make_label_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
@@ -198,9 +198,9 @@ class data_proccessing(object):
                     xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                     info = {'fits':self.fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
                                 'ymin':ymin_list, 'ymax':ymax_list}
-                    return flag, res_data, info
+                    return True, res_data, info
         else:
-            return flag, 0,  0
+            return False, 0,  0
 
 
 
