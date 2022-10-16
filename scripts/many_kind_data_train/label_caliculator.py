@@ -155,6 +155,54 @@ class label_caliculator(object):
         self.height = self.y_pix_max - self.y_pix_min
         
         return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag
+    
+
+    def calc_pix_for_translation(self, row, GLON_min, GLON_max, GLAT_min, GLAT_max, scale):
+        """
+        切り出す画像の範囲をここで決める
+
+        """
+        # import random
+
+        ccc = 0
+        ok = True
+        
+        while ok:
+            if self.mode=='train':
+                # random_num = 1/np.random.uniform(0.3, 0.89) #サイズが一様ver
+                random_num = scale
+            else:
+                random_num = 1/0.89
+            lmax = row['GLON'] + random_num*1.5*row[self.Rout]/60
+            bmin = row['GLAT'] - random_num*1.5*row[self.Rout]/60
+            #右端
+            lmin = row['GLON'] - random_num*1.5*row[self.Rout]/60
+            bmax = row['GLAT'] + random_num*1.5*row[self.Rout]/60
+            ccc += 1
+            if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
+                ok = False
+                flag = True
+            if ccc>=400:
+                ok = False
+                flag = False
+            
+        #これは、リングを切り取る範囲　　
+        x_min, y_min = self.world.all_world2pix(lmax, bmin, 0)
+        x_max, y_max = self.world.all_world2pix(lmin, bmax, 0)
+        r = int((x_max - x_min)/(2*random_num))#ringの半径pixel
+        
+        self.width = x_max - x_min
+        self.height = y_max - y_min
+        
+        self.x_pix_min = x_min - self.width/2
+        self.y_pix_min = y_min - self.height/2
+        self.x_pix_max = x_max + self.width/2
+        self.y_pix_max = y_max + self.height/2
+        
+        self.width = self.x_pix_max - self.x_pix_min
+        self.height = self.y_pix_max - self.y_pix_min
+        
+        return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag, r
 
 
 
