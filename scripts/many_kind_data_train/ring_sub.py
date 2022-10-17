@@ -56,19 +56,19 @@ class data_proccessing(object):
         
         ud_xmin_list, ud_xmax_list, ud_ymin_list, ud_ymax_list = [], [], [], []
         for i in range(len(self.xmin_list)):
-            y_min = -(self.ymin_list[i] - 0.5) + 0.5
+            y_max = -(self.ymin_list[i] - 0.5) + 0.5
             x_min = self.xmin_list[i]
-            y_max = -(self.ymax_list[i] - 0.5) + 0.5
+            y_min = -(self.ymax_list[i] - 0.5) + 0.5
             x_max = self.xmax_list[i]
             if ((x_max - x_min) == 0 or (y_max - y_min) == 0 or
                  x_max < x_min or y_max < y_min ):
+                 pass
+            else:
                 ud_xmin_list.append(x_min)
                 ud_xmax_list.append(x_max)
                 ud_ymin_list.append(y_min)
                 ud_ymax_list.append(y_max)
-        
-
-
+    
         ud_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':ud_xmin_list, 'xmax':ud_xmax_list, 
                     'ymin':ud_ymin_list, 'ymax':ud_ymax_list}
 
@@ -78,12 +78,14 @@ class data_proccessing(object):
 
         lr_xmin_list, lr_xmax_list, lr_ymin_list, lr_ymax_list = [], [], [], []
         for i in range(len(self.xmin_list)):
-            x_min = -(self.xmin_list[i] - 0.5) + 0.5
+            x_max = -(self.xmin_list[i] - 0.5) + 0.5
             y_min = self.ymin_list[i]
-            x_max = -(self.xmax_list[i] - 0.5) + 0.5
+            x_min = -(self.xmax_list[i] - 0.5) + 0.5
             y_max = self.ymax_list[i]
             if ((x_max - x_min) == 0 or (y_max - y_min) == 0 or
                  x_max < x_min or y_max < y_min ):
+                 pass
+            else:
                 lr_xmin_list.append(x_min)
                 lr_xmax_list.append(x_max)
                 lr_ymin_list.append(y_min)

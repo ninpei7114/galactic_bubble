@@ -54,9 +54,9 @@ def main(args):
     }
 
     # 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentatio を作る。
-    flip_list = [True]
+    flip_list = [False, True]
     rotate_list = [False, True]
-    scale_list = [False, 1.5, 2]
+    scale_list = [False, 1.5, 2, 2.5]
     translation_list = [False, True]
 
     for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):#, translation_list):
