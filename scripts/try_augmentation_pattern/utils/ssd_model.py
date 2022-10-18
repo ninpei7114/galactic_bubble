@@ -668,11 +668,6 @@ class Detect(Function):
             （batch_num、クラス、confのtop200、BBoxの情報）
         """
 
-#         # 各サイズを取得
-#         ctx.softmax = nn.Softmax(dim=-1)
-#         ctx.conf_thresh = 0.01
-#         ctx.top_k = 200
-#         ctx.nms_thresh = 0.45
         num_batch = loc_data.size(0)  # ミニバッチのサイズ
         num_dbox = loc_data.size(1)  # DBoxの数 = 8732
         num_classes = conf_data.size(2)  # クラス数 = 21

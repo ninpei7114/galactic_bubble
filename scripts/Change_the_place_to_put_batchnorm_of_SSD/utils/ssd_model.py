@@ -304,7 +304,7 @@ def od_collate_fn(batch):
 
 # 34層にわたる、vggモジュールを作成
 
-def make_vgg():
+def make_vgg(batch_bool_list):
     layers = []
     in_channels = 2  # 色チャネル数
     #なぜか自分で実装している
@@ -328,37 +328,61 @@ def make_vgg():
 #     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
 #     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
     Conv2_1 = nn.Conv2d(2, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-#     Conv2_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_2 = nn.Sequential(nn.BatchNorm2d(64),
-              nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+    if batch_bool_list[0]:
+        Conv2_2 = nn.Sequential(nn.BatchNorm2d(64),
+                nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+    else:
+        Conv2_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    
     Maxpool_1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_3 = nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_4 = nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-#     Conv2_4 = nn.Sequential(nn.BatchNorm2d(128),
-#               nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+
+    if batch_bool_list[1]:
+        Conv2_4 = nn.Sequential(nn.BatchNorm2d(128),
+              nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+    else:
+        Conv2_4 = nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    
     Maxpool_2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_5 = nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_6 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-#     Conv2_6 = nn.Sequential(nn.BatchNorm2d(256),
-#               nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+
+    if batch_bool_list[2]:
+        Conv2_6 = nn.Sequential(nn.BatchNorm2d(256),
+              nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+    else:
+        Conv2_6 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    
     Conv2_7 = nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_3 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=True)
     Conv2_8 = nn.Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_9 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-#     Conv2_9 = nn.Sequential(nn.BatchNorm2d(512),
-#               nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+
+    if batch_bool_list[3]:
+        Conv2_9 = nn.Sequential(nn.BatchNorm2d(512),
+              nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+    else:
+        Conv2_9 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     
     Conv2_10 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_4 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
     Conv2_11 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-    Conv2_12 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-#     Conv2_12 = nn.Sequential(nn.BatchNorm2d(512),
-#               nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+
+    if batch_bool_list[4]:
+        Conv2_12 = nn.Sequential(nn.BatchNorm2d(512),
+              nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
+    else:
+        Conv2_12 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+#     
     Conv2_13 = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
     Maxpool_5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1, dilation=1, ceil_mode=False)
     Conv2_14 = nn.Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(6, 6), dilation=(6, 6))
+
+    # if batch_bool_list[5]:
+    #     Conv2_15 = nn.Sequential(nn.BatchNorm2d(1024),
+    #           nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1)))
+    # else:
+    #     Conv2_15 = nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1))
     Conv2_15 = nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1))
-#     Conv2_15 = nn.Sequential(nn.BatchNorm2d(1024),
-#               nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1)))
+#     
     
     
     layers += [Conv2_1, nn.ReLU(inplace=True), Conv2_2, nn.ReLU(inplace=True), Maxpool_1, Conv2_3, nn.ReLU(inplace=True), Conv2_4, nn.ReLU(inplace=True), Maxpool_2, Conv2_5, nn.ReLU(inplace=True), Conv2_6, nn.ReLU(inplace=True), Conv2_7, nn.ReLU(inplace=True), Maxpool_3, Conv2_8, nn.ReLU(inplace=True), Conv2_9, nn.ReLU(inplace=True), Conv2_10, nn.ReLU(inplace=True), Maxpool_4, Conv2_11, nn.ReLU(inplace=True), Conv2_12, nn.ReLU(inplace=True), Conv2_13, nn.ReLU(inplace=True), Maxpool_5, Conv2_14, nn.ReLU(inplace=True), Conv2_15, nn.ReLU(inplace=True)]
@@ -779,14 +803,14 @@ class Detect(Function):
 
 class SSD(nn.Module):
 
-    def __init__(self, phase, cfg):
+    def __init__(self, phase, cfg, batch_bool_list):
         super(SSD, self).__init__()
 #         self.softmax = nn.Softmax(dim=-1)
         self.phase = phase  # train or inferenceを指定
         self.num_classes = cfg["num_classes"]  # クラス数=21
 
         # SSDのネットワークを作る
-        self.vgg = make_vgg()
+        self.vgg = make_vgg(batch_bool_list)
 #         print(len(self.vgg))
         self.extras = make_extras()
         self.L2Norm = L2Norm()
@@ -944,62 +968,28 @@ class MultiBoxLoss(nn.Module):
        
         # 物体を発見したPositive DBoxのオフセット情報loc_tの損失（誤差）を計算
         loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
-
-
-        # ----------
-        # クラス予測の損失：loss_cを計算
-        # 交差エントロピー誤差関数で損失を計算する。ただし、背景クラスが正解であるDBoxが圧倒的に多いので、
-        # Hard Negative Miningを実施し、物体発見DBoxと背景クラスDBoxの比が1:3になるようにする。
-        # そこで背景クラスDBoxと予想したもののうち、損失が小さいものは、クラス予測の損失から除く
-        # ----------
         batch_conf = conf_data.view(-1, num_classes)
 
         # クラス予測の損失を関数を計算(reduction='none'にして、和をとらず、次元をつぶさない)
         loss_c = F.cross_entropy(
             batch_conf, conf_t_label.view(-1), reduction='none')
 
-        # -----------------
-        # これからNegative DBoxのうち、Hard Negative Miningで抽出するものを求めるマスクを作成します
-        # -----------------
-
-        # 物体発見したPositive DBoxの損失を0にする
-        # （注意）物体はlabelが1以上になっている。ラベル0は背景。
         num_pos = pos_mask.long().sum(1, keepdim=True)  # ミニバッチごとの物体クラス予測の数
         loss_c = loss_c.view(num_batch, -1)  # torch.Size([num_batch, 8732])
         loss_c[pos_mask] = 0  # 物体を発見したDBoxは損失0とする
 
-        # Hard Negative Miningを実施する
-        # 各DBoxの損失の大きさloss_cの順位であるidx_rankを求める
         _, loss_idx = loss_c.sort(1, descending=True)
-#         print(loss_idx.shape)
         _, idx_rank = loss_idx.sort(1)
-        num_neg = torch.clamp(num_pos*self.negpos_ratio, max=num_dbox, min=2)
-
-        # idx_rankは各DBoxの損失の大きさが上から何番目なのかが入っている
-        # 背景のDBoxの数num_negよりも、順位が低い（すなわち損失が大きい）DBoxを取るマスク作成
-        # torch.Size([num_batch, 8732])
+        num_neg = torch.clamp(num_pos*self.negpos_ratio, max=num_dbox)
         neg_mask = idx_rank < (num_neg).expand_as(idx_rank)
 
-        # -----------------
-        # （終了）これからNegative DBoxのうち、Hard Negative Miningで抽出するものを求めるマスクを作成します
-        # -----------------
-
-        # マスクの形を整形し、conf_dataに合わせる
-        # pos_idx_maskはPositive DBoxのconfを取り出すマスクです
-        # neg_idx_maskはHard Negative Miningで抽出したNegative DBoxのconfを取り出すマスクです
-        # pos_mask：torch.Size([num_batch, 8732])→pos_idx_mask：torch.Size([num_batch, 8732, 21])
         pos_idx_mask = pos_mask.unsqueeze(2).expand_as(conf_data)
         neg_idx_mask = neg_mask.unsqueeze(2).expand_as(conf_data)
 
         # conf_dataからposとnegだけを取り出してconf_hnmにする。形はtorch.Size([num_pos+num_neg, 21])
         conf_hnm = conf_data[(pos_idx_mask+neg_idx_mask).gt(0)
                              ].view(-1, num_classes)
-        # （注釈）gtは greater than (>)の略称。これでmaskが1のindexを取り出す。
-        # pos_idx_mask+neg_idx_maskは足し算だが、indexへのmaskをまとめているだけである。
-        # つまり、posであろうがnegであろうが、マスクが1のものを足し算で一つのリストにし、それをgtで取得
-
-        # 同様に教師データであるconf_t_labelからposとnegだけを取り出してconf_t_label_hnmに
-        # 形はtorch.Size([pos+neg])になる
+        
         conf_t_label_hnm = conf_t_label[(pos_mask+neg_mask).gt(0)]
 
         # confidenceの損失関数を計算（要素の合計=sumを求める）

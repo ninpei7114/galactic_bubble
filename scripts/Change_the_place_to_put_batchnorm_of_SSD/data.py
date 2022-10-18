@@ -12,6 +12,7 @@ import torch.utils.data as data
 import torch.optim as optim
 
 import ast
+import cv2
 import numpy as np
 import time
 import random
@@ -65,8 +66,8 @@ def make_data(train_data, val_data, train_label, val_label):
     val_data = np.swapaxes(val_data, 2, 3)
     val_data = np.swapaxes(val_data, 1, 2)
 
-    print('train label : ', len(train_label), ',  train data : ', train_data.shape)
-    print('val label : ', len(val_label), ',  val data : ', val_data.shape)
+    print('train label : ', len(train_label), 'train data : ', train_data.shape)
+    print('val label : ', len(val_label), 'val data : ', val_data.shape)
 
     train_label = train_label.drop('Unnamed: 0', axis=1)
     val_label = val_label.drop('Unnamed: 0', axis=1)
