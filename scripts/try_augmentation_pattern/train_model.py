@@ -47,6 +47,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
     early_stopping = EarlyStopping(patience=10, verbose=True, path=name+'/earlystopping.pth', flog=f)
     # イテレーションカウンタをセット
     logs = []
+    train_rng = default_rng(123)
 
     # epochのループ
     for epoch in range(num_epochs):
@@ -88,7 +89,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
     
             for images, targets in dataloaders_dict[phase]:
                 if phase=='train':
-                    images = torch.from_numpy(default_rng(123).uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
+                    images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
 
                 images = images.to(device, dtype=torch.float)
                 targets = [ann.to(device, dtype=torch.float) for ann in targets]  # リストの各要素のテンソルをGPUへ
