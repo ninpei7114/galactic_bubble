@@ -50,6 +50,24 @@ def make_ring(spitzer_path, name, train_cfg):
     translation = train_cfg['translation']
     trans_rg = default_rng(123)
 
+    ## 目標の分布
+    def func(x):
+        return x**(-2) 
+
+    def sampling():
+        # とりうる最大値
+        k = func(0.125)
+        # loop until accepted
+        while True:
+            # sampling from the proposed distribution
+            t = trans_rg.uniform(0.125, 0.8)
+            # sampling u from [0, kq(z)]
+            u = k*trans_rg.uniform(0, 1)
+            # judge if accept
+            if(func(t) > u):
+                return t
+    samples = np.array([sampling() for i in range(1000000)])
+
     for i in pbar: 
         pbar.set_description(l[i])
         fits_path = l[i]
@@ -135,27 +153,11 @@ def make_ring(spitzer_path, name, train_cfg):
 
 
                         ###### 並行移動 ######
-
-                        ## 目標の分布
-                        def func(x):
-                            return x**(-2) 
-
-                        def sampling():
-                            # とりうる最大値
-                            k = func(0.125)
-                            # loop until accepted
-                            while True:
-                                # sampling from the proposed distribution
-                                t = trans_rg.uniform(0.125, 0.8)
-                                # sampling u from [0, kq(z)]
-                                u = k*trans_rg.uniform(0, 1)
-                                # judge if accept
-                                if(func(t) > u):
-                                    return t
+                        
 
                         if translation:
                             for _ in range(20):
-                                m2_size = sampling()
+                                m2_size = trans_rg.choice(samples)
                                 fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
                                 if fl:
@@ -179,7 +181,11 @@ def make_ring(spitzer_path, name, train_cfg):
     # mwp_ring_list_train_ = np.array(mwp_ring_list_train)
     mwp_ring_list_train_ = mwp_ring_list_train*255
     mwp_ring_list_train_ = np.uint8(mwp_ring_list_train_)
-    proceesing.data_view_rectangl(25, mwp_ring_list_train_, frame_mwp_train).save(savedir_name + '/train_ring.pdf')
+    if mwp_ring_list_train_.shape[0]>3000:
+        slice = 2
+    else:
+        slice = 1
+    proceesing.data_view_rectangl(25, mwp_ring_list_train_[::slice], frame_mwp_train[::slice]).save(savedir_name + '/train_ring.pdf')
     frame_mwp_train.to_csv(savedir_name + '/train_label.csv')
 
     print('train_Ring_num : ', len(mwp_ring_list_train))
