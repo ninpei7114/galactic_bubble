@@ -154,7 +154,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                     return t
 
                         if translation:
-                            for _ in range(10):
+                            for _ in range(20):
                                 m2_size = sampling()
                                 fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
@@ -180,6 +180,7 @@ def make_ring(spitzer_path, name, train_cfg):
     mwp_ring_list_train_ = mwp_ring_list_train*255
     mwp_ring_list_train_ = np.uint8(mwp_ring_list_train_)
     proceesing.data_view_rectangl(25, mwp_ring_list_train_, frame_mwp_train).save(savedir_name + '/train_ring.pdf')
+    frame_mwp_train.to_csv(savedir_name + '/train_label.csv')
 
     print('train_Ring_num : ', len(mwp_ring_list_train))
     print('train_Ring_label_num : ', len(frame_mwp_train))
