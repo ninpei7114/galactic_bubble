@@ -45,6 +45,7 @@ class EarlyStopping_f1_score:
         self.delta = delta
         self.path = path
         self.trace_func = trace_func
+        self.flog = flog
     def __call__(self, f1_score, model):
 
         score = f1_score
