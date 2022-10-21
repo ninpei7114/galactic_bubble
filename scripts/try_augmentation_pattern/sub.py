@@ -18,6 +18,7 @@ import random
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 
+from utils.ssd_model import Detect
 
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
@@ -85,13 +86,19 @@ def weights_init(m):
 # ll , boxは一枚の画像に対する、正解と予想
 def calc_collision(ll, box):
     """
-    ll : 正解ラベル  [xmin, ymin, xmax, ymax]。複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
+    ll : 正解ラベル  [xmin, ymin, xmax, ymax]。
+         複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
+         
     box : モデルの予想結果、[[conf, xmin, ymin, xmax, ymax], [conf, xmin, ymin, xmax, ymax], -----]の配列
     """
     true_positive = []
 
+    # Ringのみの結果を取り出す
+    box = box[1, :, :].detach().numpy()
+    
     # 各boxの面積を求める。
     area = (box[:,3] - box[:,1]) * (box[:,4] - box[:,2])
+
     for l in ll:
         
         # 正解boxの面積
@@ -109,21 +116,27 @@ def calc_collision(ll, box):
         intersect = w*h
         IoU = intersect/(area+l_area-intersect)
 
-        # np.logi~~で、どのボックスが正解の中心を含んでいるのかを出している。
-        true_positive.append(IoU>0.75)
-        # cx = (l[0]+l[2])/2
-        # cy = (l[1]+l[3])/2
-        # true_positive.append(np.logical_and.reduce((box[:,1]<=cx, box[:,3]>=cx, box[:,2]<=cy, box[:,4]>=cy)))
-
+        # 重なりが0.75以上のbox
+        true_positive.append(IoU>0.45)
+        
     if len(ll) == 0:
-        return np.zeros([8732]) == 1, box[:,0], False #, np.array(0)
+        return 0, box[:,0], False # box[:,0]は、probability
     else:
-        return np.stack(true_positive), box[:,0], True #, ll[:,2]-ll[:,0]#, true_positive
+        return np.stack(true_positive), box[:,0], True # box[:,0]は、probability
 
 
 def calc_f1score(val_seikai, val_bbbb):
-    collisions = [calc_collision(s,b) for s,b in zip(val_seikai, val_bbbb)]
-    thresholds = [ i/20 for i in range(0, 20, 1)]
+    """
+    TP1=推定したボックスのうち、正解の中心を含む個数
+    FP=推定したボックスのうち、正解の中心を含まない個数
+    TP2=正解のうち、中心が推定したボックスに含まれる個数
+    FN=正解のうち、中心が推定したボックスに含まれない個数
+    
+    TP1_FP : モデルのboxの数（conf閾値適応済み）, predict showした時の赤枠
+    
+    """
+    
+    thresholds = [i/20 for i in range(0, 20, 1)]
 
     f1_score = -10000
     threthre = 0
@@ -135,30 +148,42 @@ def calc_f1score(val_seikai, val_bbbb):
         TP2 = 0
         TP1_FP = 0
         TP2_FN = 0
+        
+        # detectクラスで、nm_suppressionする
+        detect = Detect(conf_thresh=th)
+        output = detect(val_bbbb[0].to('cpu'), val_bbbb[1].to('cpu'), val_bbbb[2].to('cpu'))
+        collisions = [calc_collision(s,b) for s,b in zip(val_seikai, output)]
+        # colは面積のあたり判定
+        for col, prob, flag in collisions:
 
-        for col,prob, flag in collisions:
             if flag:
                 idx = prob > th
-                tp1 = col[:,idx].any(axis=0) # for tp1
-                tp2 = col[:,idx].any(axis=1) # for tp2
+                ## 正解boxとDBoxで、重なりが0.75以上でかつ、probが閾値を超えるもの
+
+                tp1 = col.any(axis=0)
+                tp2 = col.any(axis=1) # for tp2
+                
                 tp1_fp = idx.sum()
                 tp2_fn = col.shape[0]
 
                 TP1 += np.sum(tp1)
                 TP2 += np.sum(tp2)
+                
                 TP1_FP += tp1_fp
                 TP2_FN += tp2_fn
-
+        
         PRE.append(TP1/TP1_FP)
         RE.append(TP2/TP2_FN)
 
-        f1_score_ = 2*(TP1/TP1_FP)*(TP2/TP2_FN)/(TP1/TP1_FP+TP2/TP2_FN) 
+        f1_score_ = 2*(TP1/TP1_FP)*(TP2/TP2_FN)/(TP1/TP1_FP+TP2/TP2_FN+1e-9) 
+        # if th == 0.2:
+        #     print(f'th : {th}, TP1 : {TP1} , TP2 : {TP2}, TP1_FP : {TP1_FP}, TP2_FN  : {TP2_FN}, f1_score_ : {f1_score_}')
 
         if f1_score_>f1_score:
             f1_score = f1_score_
             threthre = th
     
-    return f1_score, threthre#, PRE, RE
+    return f1_score, threthre
 
 
 def print_and_log(f, moji):
@@ -244,5 +269,3 @@ def transfer_resnet(net, param_path):
 
     net.vgg[33].weight = nn.Parameter(deepcluster_weight['state_dict']['features.33.weight'])
     net.vgg[33].bias = nn.Parameter(deepcluster_weight['state_dict']['features.33.bias'])
-
-    return net

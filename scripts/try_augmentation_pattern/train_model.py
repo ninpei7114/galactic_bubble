@@ -11,6 +11,7 @@ import numpy as np
 from numpy.random import default_rng
 import time
 
+from utils.ssd_model import Detect
 from sub import EarlyStopping
 from sub import weights_init
 from sub import calc_f1score
@@ -64,12 +65,17 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         print_and_log(f, '-------------')
 
 
-        train_bbbb = []
+        train_bbbb_loc = []
+        train_bbbb_conf = []
+        train_bbbb_b = []
         train_seikai = []
-        val_bbbb = []
+        val_bbbb_loc = []
+        val_bbbb_conf = []
+        val_bbbb_b = []
         val_seikai = []
         train_f1_score_l = []
         val_f1_score_l = []
+
         loss_ll_val = 0
         loss_cc_val = 0
         loss_c_posii_val = 0
@@ -101,9 +107,9 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                     # 順伝搬（forward）計算
                     outputs, decoded_box = net(images)
 
-                    conf = softmax(outputs[1])
-                    bbb = np.concatenate([conf[:, :, 1].to('cpu').detach().numpy()[:,:,None], 
-                                             decoded_box.detach().numpy()], axis=2)
+                    # conf = softmax(outputs[1])
+                    # bbb = np.concatenate([conf[:, :, 1].to('cpu').detach().numpy()[:,:,None], 
+                    #                          decoded_box.detach().numpy()], axis=2)
 
 
                     # 損失の計算
@@ -113,7 +119,10 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 #                     訓練時はバックプロパゲーション
                     if phase == 'train':
                         train_seikai.extend([ann.to('cpu').detach().numpy() for ann in targets])
-                        train_bbbb.append(bbb)
+                        train_bbbb_loc.append(outputs[0].to('cpu'))
+                        train_bbbb_conf.append(outputs[1].to('cpu'))
+                        train_bbbb_b.append(outputs[2].to('cpu'))
+                        
                         loss_ll_train += loss_l.to('cpu').item()
                         loss_cc_train += loss_c.to('cpu').item()
                         loss_c_posii_train += loss_c_posi.to('cpu').item()
@@ -132,8 +141,10 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                     # 検証時
                     else:
                         val_seikai.extend([ann.to('cpu').detach().numpy() for ann in targets])
-                        val_bbbb.append(bbb)
-#                         print(loss)
+                        val_bbbb_loc.append(outputs[0].to('cpu'))
+                        val_bbbb_conf.append(outputs[1].to('cpu'))
+                        val_bbbb_b.append(outputs[2].to('cpu'))
+
                         loss_ll_val += loss_l.to('cpu').item()
                         loss_cc_val += loss_c.to('cpu').item()
                         loss_c_posii_val += loss_c_posi.to('cpu').item()
@@ -141,7 +152,9 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                         
                         epoch_val_loss += loss.to('cpu').item()
                         val_iter += 1  
-                        
+
+        val_bbbb = [torch.cat(val_bbbb_loc), torch.cat(val_bbbb_conf), val_bbbb_b[0]]
+        train_bbbb = [torch.cat(train_bbbb_loc), torch.cat(train_bbbb_conf), train_bbbb_b[0]]        
         avg_train_loss = epoch_train_loss / iteration
         avg_val_loss = epoch_val_loss / val_iter
     
@@ -170,8 +183,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         loss_c_posi_list_train.append(loss_c_posii_train/iteration)
         loss_c_nega_list_train.append(loss_c_negaa_train/iteration)
         
-        train_f1_score, train_threthre = calc_f1score(train_seikai, np.concatenate(train_bbbb, axis=0))
-        val_f1_score, val_threthre = calc_f1score(val_seikai, np.concatenate(val_bbbb, axis=0))
+        train_f1_score, train_threthre = calc_f1score(train_seikai, train_bbbb)
+        val_f1_score, val_threthre = calc_f1score(val_seikai, val_bbbb)
         print_and_log(f, 'train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
         print_and_log(f, 'val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
         train_f1_score_l.append(train_f1_score)
@@ -217,26 +230,3 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 
     return loss_l_list_val, loss_c_list_val, loss_l_list_train, loss_c_list_train,\
 train_f1_score_l, val_f1_score_l
-#train_bbbb, val_bbbb_, train_seikai, val_seikai_,\
-
-#     return train_bbbb, val_bbbb_, train_seikai, val_seikai_,\
-# loss_l_list_val, loss_c_list_val, loss_c_posi_list_val, loss_c_nega_list_val,\
-# loss_l_list_train, loss_c_list_train, loss_c_posi_list_train, loss_c_nega_list_train
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

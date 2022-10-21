@@ -85,7 +85,9 @@ def weights_init(m):
 # ll , boxは一枚の画像に対する、正解と予想
 def calc_collision(ll, box):
     """
-    ll : 正解ラベル  [xmin, ymin, xmax, ymax]。複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
+    ll : 正解ラベル  [xmin, ymin, xmax, ymax]。
+         複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
+         
     box : モデルの予想結果、[[conf, xmin, ymin, xmax, ymax], [conf, xmin, ymin, xmax, ymax], -----]の配列
     """
     true_positive = []
