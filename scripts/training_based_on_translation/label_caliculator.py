@@ -94,11 +94,11 @@ class label_caliculator(object):
 
         for _, row in dataframe.iterrows():    
         
-            lmax = row['GLON'] + 1.5*row[self.Rout]/60
-            bmin = row['GLAT'] - 1.5*row[self.Rout]/60
+            lmax = row['GLON'] + row[self.Rout]/60
+            bmin = row['GLAT'] - row[self.Rout]/60
             #右端
-            lmin = row['GLON'] - 1.5*row[self.Rout]/60
-            bmax = row['GLAT'] + 1.5*row[self.Rout]/60
+            lmin = row['GLON'] - row[self.Rout]/60
+            bmax = row['GLAT'] + row[self.Rout]/60
             #これは、リングを切り取る範囲　　切り取る範囲はRoutの3倍
             x_pix_min, y_pix_min = self.world.all_world2pix(lmax, bmin, 0)
             x_pix_max, y_pix_max = self.world.all_world2pix(lmin, bmax, 0)

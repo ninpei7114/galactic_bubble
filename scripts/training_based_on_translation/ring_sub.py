@@ -163,8 +163,8 @@ class data_proccessing(object):
             return False, 0, 0
 
 
-    def translation(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal, m2_size, trans_rg):
-        random_num = 1/m2_size
+    def translation(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal, trans_rg):
+        random_num = 1/trans_rg.uniform(0.125, 0.8)
 
         x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag= label_cal.calc_pix(row, GLON_new_min, GLON_new_max,
                                                                                         GLAT_min, GLAT_max, random_num)
