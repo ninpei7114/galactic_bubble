@@ -643,7 +643,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
 
 class Detect(Function):
 
-    def __init__(self, conf_thresh=0.01, top_k=200, nms_thresh=0.45):
+    def __init__(self, conf_thresh=0.01, top_k=100, nms_thresh=0.45):
         self.softmax = nn.Softmax(dim=-1)  # confをソフトマックス関数で正規化するために用意
         self.conf_thresh = conf_thresh  # confがconf_thresh=0.01より高いDBoxのみを扱う
         self.top_k = top_k  # nm_supressionでconfの高いtop_k個を計算に使用する, top_k = 200
