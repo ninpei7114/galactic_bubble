@@ -16,7 +16,6 @@ rgb_imageも変更した
 """
 import numpy as np
 import matplotlib.pyplot as plt 
-import cv2  # OpenCVライブラリ
 import torch
 import copy
 
