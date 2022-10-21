@@ -13,6 +13,7 @@ import time
 
 from utils.ssd_model import Detect
 from sub import EarlyStopping
+from sub import EarlyStopping_f1_score
 from sub import weights_init
 from sub import calc_f1score
 from sub import print_and_log
@@ -29,8 +30,6 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
     loss_c_nega_list_train = []
     loss_c_posi_list_train = [] 
     
-    softmax = nn.Softmax(dim=-1)
-    tempo_val_loss = 100000000000000
     # GPUが使えるかを確認
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print_and_log(f, "使用デバイス： {}".format(device))
@@ -45,7 +44,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 
     # ネットワークがある程度固定であれば、高速化させる
     torch.backends.cudnn.benchmark = True
-    early_stopping = EarlyStopping(patience=10, verbose=True, path=name+'/earlystopping.pth', flog=f)
+    # early_stopping = EarlyStopping(patience=10, verbose=True, path=name+'/earlystopping.pth', flog=f)
+    early_stopping = EarlyStopping_f1_score(patience=10, verbose=True, path=name+'/earlystopping.pth', flog=f)
     # イテレーションカウンタをセット
     logs = []
     train_rng = default_rng(123)
@@ -212,8 +212,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 
         # tempo_val_loss = epoch_val_loss
         
-#         early_stopping(val_f1_score, net)
-        early_stopping(epoch_val_loss, net)
+        early_stopping(val_f1_score, net)
+        # early_stopping(epoch_val_loss, net)
     
         if early_stopping.early_stop:
         
