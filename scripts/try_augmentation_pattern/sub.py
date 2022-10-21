@@ -68,7 +68,7 @@ class EarlyStopping_f1_score:
         '''Saves model when f1_score increase.'''
         if self.verbose:
             self.trace_func(f'f1_score increase ({self.f1_score_max:.6f} --> {f1_score:.6f}).  Saving model ...')
-            self.flog.write(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...\n')
+            self.flog.write(f'f1_score increase ({self.f1_score_max:.6f} --> {f1_score:.6f}).  Saving model ...\n')
         torch.save(model.state_dict(), self.path)
         self.f1_score_max = f1_score
 
