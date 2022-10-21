@@ -11,8 +11,6 @@ import os
 import tqdm
 
 from torch.nn import functional as F
-import sys
-sys.append('../try_augmentation_pattern/')
 import proceesing
 import label_caliculator
 import ring_sub

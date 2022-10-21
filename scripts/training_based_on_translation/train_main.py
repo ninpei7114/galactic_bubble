@@ -15,8 +15,6 @@ from utils.ssd_model import SSD
 from utils.ssd_model import MultiBoxLoss
 
 
-import sys
-sys.path.append('../try_augmentation_pattern')
 from data import od_collate_fn
 from data import DataSet
 from data import NegativeSampler
