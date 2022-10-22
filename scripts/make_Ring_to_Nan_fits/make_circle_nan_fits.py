@@ -6,6 +6,7 @@ import pandas as pd
 import pathlib
 import cv2
 import argparse
+import os
 
 import astroquery.vizier
 import astropy.wcs
@@ -118,7 +119,12 @@ def main(args):
 
             new_hdu = astropy.io.fits.PrimaryHDU(data, header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
-            new_hdu_list.writeto(pathlib.Path(args.save_dir)/i/rgb, overwrite=True)
+            save_name = pathlib.Path(args.save_dir)/i
+            if os.path.exists(save_name):
+                pass
+            else:
+                os.mkdir(save_name)
+            new_hdu_list.writeto(save_name/rgb, overwrite=True)
 
 
 
