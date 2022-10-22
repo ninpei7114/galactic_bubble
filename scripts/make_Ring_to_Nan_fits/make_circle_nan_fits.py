@@ -96,7 +96,7 @@ def main(args):
         print(i)
         for rgb in ['r.fits', 'g.fits', 'b.fits']:
 
-            hdu = astropy.io.fits.open(args.fits_path/i/rgb)[0]
+            hdu = astropy.io.fits.open(pathlib.Path(args.fits_path)/i/rgb)[0]
             header = hdu.header
             fits = remove_nan(hdu.data)
 
@@ -118,7 +118,7 @@ def main(args):
 
             new_hdu = astropy.io.fits.PrimaryHDU(data, header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
-            new_hdu_list.writeto(args.save_dir/i/rgb, overwrite=True)
+            new_hdu_list.writeto(pathlib.Path(args.save_dir)/i/rgb, overwrite=True)
 
 
 
