@@ -30,33 +30,36 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     # TrainデータのNon-Ring
     # シード値を決める必要がある
     no_Ring_train = np.load('/workspace/NonRing/no_ring_300_9000_train.npy')
-    no_Ring_train_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_train.npy')
+    # no_Ring_train_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_train.npy')
     no_Ring_val = np.load('/workspace/NonRing/no_ring_300_900_val.npy')
-    no_Ring_val_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_val.npy')
+    # no_Ring_val_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_val.npy')
 
-    no_Ring_train_random = default_rng(123).integers(0, no_Ring_train.shape[0], int(train_data.shape[0]))
-    no_Ring_train_moyamoya_random = default_rng(123).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
-    no_Ring_val_random = default_rng(123).integers(0, no_Ring_val.shape[0], int(val_data.shape[0]/2))
-    no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
+    no_Ring_train_random = default_rng(123).integers(0, no_Ring_train.shape[0], int(train_data.shape[0])*2)
+    # no_Ring_train_moyamoya_random = default_rng(123).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
+    no_Ring_val_random = default_rng(123).integers(0, no_Ring_val.shape[0], int(val_data.shape[0])*2)
+    # no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
 
     # Non-Ringと合わせる
     print_and_log(f_log, '====================================')
     print_and_log(f_log, '(confirm nan in Train)')
     print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(train_data)))
     print_and_log(f_log, 'no_Ring_train : %s'%np.isnan(np.sum(no_Ring_train)))
-    print_and_log(f_log, 'no_Ring_train_moyamoya : %s'%np.isnan(np.sum(no_Ring_train_moyamoya)))
+    # print_and_log(f_log, 'no_Ring_train_moyamoya : %s'%np.isnan(np.sum(no_Ring_train_moyamoya)))
     print_and_log(f_log, ' ')
     print_and_log(f_log, '(confirm nan in Val)')
     print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(val_data)))
     print_and_log(f_log, 'no_Ring_val : %s'%np.isnan(np.sum(no_Ring_val)))
-    print_and_log(f_log, 'no_Ring_val_moyamoya : %s'%np.isnan(np.sum(no_Ring_val_moyamoya)))
+    # print_and_log(f_log, 'no_Ring_val_moyamoya : %s'%np.isnan(np.sum(no_Ring_val_moyamoya)))
     print_and_log(f_log, ' ')
 
-    train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random], 
-                             no_Ring_train_moyamoya[no_Ring_train_moyamoya_random]])
+    # train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random], 
+    #                          no_Ring_train_moyamoya[no_Ring_train_moyamoya_random]])
+    train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random]])
 
-    val_data = np.concatenate([val_data, no_Ring_val[no_Ring_val_random], 
-                             no_Ring_val_moyamoya[no_Ring_val_moyamoya_random]])
+    # val_data = np.concatenate([val_data, no_Ring_val[no_Ring_val_random], 
+    #                          no_Ring_val_moyamoya[no_Ring_val_moyamoya_random]])
+    val_data = np.concatenate([val_data, no_Ring_val[no_Ring_val_random]])
+
     # Non-Ringのlabelと合わせる
     train_label = pd.concat([train_label, 
                         pd.DataFrame([{'fits':[],'name':[],'xmin':[],'xmax':[],'ymin':[],'ymax':[],'id':[] } 
@@ -64,7 +67,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
                         ])
     val_label = pd.concat([val_label, 
                         pd.DataFrame([{'fits':[],'name':[],'xmin':[],'xmax':[],'ymin':[],'ymax':[],'id':[] } 
-                        for i in range(int(val_Ring_num/2)*2)])
+                        for i in range(int(val_Ring_num)*2)])
                         ])
 
 
