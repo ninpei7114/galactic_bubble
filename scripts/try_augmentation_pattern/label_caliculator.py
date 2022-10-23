@@ -19,6 +19,8 @@ class label_caliculator(object):
         入っていたら、ラベル付けする
         star_listはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
         """
+        ## x_pix_maxなどは、convolutionを考えて幅の1/4大きめに設定しているため
+        ## widthを計算して、正確な切り出し範囲を算出する
         width = (self.x_pix_max - self.x_pix_min)/4
         hight = (self.y_pix_max - self.y_pix_min)/4
         
@@ -34,15 +36,15 @@ class label_caliculator(object):
             
             xx = np.array([s_xmin, s_xmax])
             yy = np.array([s_ymin, s_ymax])
+            ## それぞれのリングが、切り出す範囲に入っているかを見る
             c_xx = np.clip(xx, self.x_pix_min+width, self.x_pix_max-width)
-            c_yy = np.clip(yy, self.y_pix_min+hight, self.y_pix_max-hight)   
-            s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
-            c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
+            c_yy = np.clip(yy, self.y_pix_min+hight, self.y_pix_max-hight)  
+            s_width =  c_xx[1]-c_xx[0]
+            s_height = c_yy[1]-c_yy[0]
             
             # 場合分け、全体に対してringが1/2以上入っていないといけない
             # 大きさが画像に対して、1/8以上でないとlabel付けしない
-            if (c_area>=s_area*1/4 and (d[1][2]-d[1][0])>=(width*2)/8 and 
-                (d[1][3]-d[1][1])>=(hight*2)/10):
+            if (s_height/s_width<1/4 or s_width/s_height<1/4):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
 

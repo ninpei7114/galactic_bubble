@@ -89,7 +89,6 @@ def main(args):
     bub_2006_change = bub_2006.set_index('__CPA2006_')
     bub_2007_change = bub_2007.set_index('__CWP2007_')
     CH = pd.concat([bub_2006_change, bub_2007_change])
-    CH.loc[CH['GLON']>=358.446500015535, 'GLON'] -=360 
     CH['CH'] = CH.index
 
 
