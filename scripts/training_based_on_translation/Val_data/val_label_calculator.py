@@ -44,7 +44,7 @@ class label_caliculator(object):
             
             # 場合分け、全体に対してringが1/2以上入っていないといけない
             # 大きさが画像に対して、1/8以上でないとlabel付けしない
-            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/4 or s_width/(s_height + 1e-9)>1/4):
+            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/3 or s_width/(s_height + 1e-9)>1/3):
                 overlapp_list.append(d)
                 overlapp_name.append(d[0])
 
