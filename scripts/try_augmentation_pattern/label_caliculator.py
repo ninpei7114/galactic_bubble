@@ -72,8 +72,8 @@ class label_caliculator(object):
             yy = np.array([s_ymin, s_ymax])
             c_xx = np.clip(xx, x_pix_min+width, x_pix_max-width)
             c_yy = np.clip(yy, y_pix_min+hight, y_pix_max-hight)   
-            s_width =  c_xx[1]-c_xx[0]
-            s_height = c_yy[1]-c_yy[0]
+            s_width =  c_xx[1]-c_xx[0] + 1e-9
+            s_height = c_yy[1]-c_yy[0] + 1e-9
             
             # 場合分け、全体に対してringが1/2以上入っていないといけない
             # 大きさが画像に対して、1/8以上でないとlabel付けしない
