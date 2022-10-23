@@ -41,10 +41,12 @@ class label_caliculator(object):
             c_yy = np.clip(yy, self.y_pix_min+hight, self.y_pix_max-hight)  
             s_width =  c_xx[1]-c_xx[0] + 1e-9
             s_height = c_yy[1]-c_yy[0] + 1e-9
+            s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
+            c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
             
             # 場合分け、全体に対してringが1/2以上入っていないといけない
             # 大きさが画像に対して、1/8以上でないとlabel付けしない
-            if (s_height/s_width<1/4 or s_width/s_height<1/4):
+            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/4 or s_width/(s_height + 1e-9)>1/4):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
 
@@ -74,10 +76,12 @@ class label_caliculator(object):
             c_yy = np.clip(yy, y_pix_min+hight, y_pix_max-hight)   
             s_width =  c_xx[1]-c_xx[0] + 1e-9
             s_height = c_yy[1]-c_yy[0] + 1e-9
+            s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
+            c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
             
             # 場合分け、全体に対してringが1/2以上入っていないといけない
             # 大きさが画像に対して、1/8以上でないとlabel付けしない
-            if (s_height/s_width<1/4 or s_width/s_height<1/4):
+            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/4 or s_width/(s_height + 1e-9)>1/4):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
 
