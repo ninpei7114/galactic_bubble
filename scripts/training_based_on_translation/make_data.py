@@ -34,7 +34,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     no_Ring_val = np.load('/workspace/NonRing/no_ring_300_900_val.npy')
     # no_Ring_val_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_val.npy')
 
-    no_Ring_train_random = default_rng(123).integers(0, no_Ring_train.shape[0], int(train_data.shape[0])*2)
+    no_Ring_train_random = default_rng(123).integers(0, no_Ring_train.shape[0], int(train_data.shape[0])*4)
     # no_Ring_train_moyamoya_random = default_rng(123).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
     no_Ring_val_random = default_rng(123).integers(0, no_Ring_val.shape[0], int(val_data.shape[0])*2)
     # no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
@@ -63,7 +63,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     # Non-Ringのlabelと合わせる
     train_label = pd.concat([train_label, 
                         pd.DataFrame([{'fits':[],'name':[],'xmin':[],'xmax':[],'ymin':[],'ymax':[],'id':[] } 
-                        for i in range(int(train_Ring_num)*2)])
+                        for i in range(int(train_Ring_num)*4)])
                         ])
     val_label = pd.concat([val_label, 
                         pd.DataFrame([{'fits':[],'name':[],'xmin':[],'xmax':[],'ymin':[],'ymax':[],'id':[] } 
