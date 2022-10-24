@@ -130,11 +130,11 @@ class label_caliculator(object):
                 random_num = scale
             else:
                 random_num = 1/0.89
-            lmax = row['GLON'] + random_num*1.5*row[self.Rout]/60
-            bmin = row['GLAT'] - random_num*1.5*row[self.Rout]/60
+            lmax = row['GLON'] + random_num*row[self.Rout]/60
+            bmin = row['GLAT'] - random_num*row[self.Rout]/60
             #右端
-            lmin = row['GLON'] - random_num*1.5*row[self.Rout]/60
-            bmax = row['GLAT'] + random_num*1.5*row[self.Rout]/60
+            lmin = row['GLON'] - random_num*row[self.Rout]/60
+            bmax = row['GLAT'] + random_num*row[self.Rout]/60
             ccc += 1
             if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
                 ok = False
@@ -178,11 +178,11 @@ class label_caliculator(object):
                 random_num = scale
             else:
                 random_num = 1/0.89
-            lmax = row['GLON'] + random_num*1.5*row[self.Rout]/60
-            bmin = row['GLAT'] - random_num*1.5*row[self.Rout]/60
+            lmax = row['GLON'] + random_num*row[self.Rout]/60
+            bmin = row['GLAT'] - random_num*row[self.Rout]/60
             #右端
-            lmin = row['GLON'] - random_num*1.5*row[self.Rout]/60
-            bmax = row['GLAT'] + random_num*1.5*row[self.Rout]/60
+            lmin = row['GLON'] - random_num*row[self.Rout]/60
+            bmax = row['GLAT'] + random_num*row[self.Rout]/60
             ccc += 1
             if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
                 ok = False
