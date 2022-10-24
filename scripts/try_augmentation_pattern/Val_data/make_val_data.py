@@ -88,11 +88,11 @@ def main(args):
             while ok:
 
                 random_num = 1/random_uni.uniform(0.125, 0.8)
-                lmax = row['GLON'] + random_num*1.5*row[Rout]/60
-                bmin = row['GLAT'] - random_num*1.5*row[Rout]/60
+                lmax = row['GLON'] + random_num*row[Rout]/60
+                bmin = row['GLAT'] - random_num*row[Rout]/60
                 #右端
-                lmin = row['GLON'] - random_num*1.5*row[Rout]/60
-                bmax = row['GLAT'] + random_num*1.5*row[Rout]/60
+                lmin = row['GLON'] - random_num*row[Rout]/60
+                bmax = row['GLAT'] + random_num*row[Rout]/60
                 ccc += 1
                 if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
                     ok = False
