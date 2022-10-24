@@ -45,7 +45,7 @@ def main(args):
     for mode in ['train', 'val']:
 
         if mode == 'train':
-            epoch = 300
+            epoch = 400
             ref_path_list = train_l
             choice_num = len(train_l)-1
         else:
