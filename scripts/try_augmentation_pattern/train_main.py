@@ -83,7 +83,7 @@ def main(args):
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
         
         train_sampler = NegativeSampler(train_data, true_size=train_Ring_num, 
-                                        sample_negative_size=train_Ring_num)
+                                        sample_negative_size=train_Ring_num*2)
         val_sampler = NegativeSampler(val_data, true_size=val_Ring_num, 
                                         sample_negative_size=val_data.shape[0] - val_Ring_num)
         # batch_size = 32
