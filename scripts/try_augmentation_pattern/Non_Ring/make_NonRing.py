@@ -3,6 +3,7 @@ import astropy.wcs
 
 import numpy as np
 from npy_append_array import NpyAppendArray
+from numpy.random import default_rng
 
 import time
 import pathlib
@@ -40,7 +41,7 @@ def main(args):
         'spitzer_35100+0000_rgb']
     train_l = sorted(train_l)
     #,'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため、x
-
+    random_uni = default_rng(123)
 
     for mode in ['train', 'val']:
 
@@ -74,7 +75,7 @@ def main(args):
             
             pbar.set_description(path)
 
-            NonRing_sub_c = NonRing_sub.NonRing_sub(w, data)
+            NonRing_sub_c = NonRing_sub.NonRing_sub(w, data, random_uni)
         #     data[data != data] = 0
             # GLON_LAT関数でGLON_new_min1, GLON_new_max1, GLAT_new_min1, GLAT_new_max1を出す
             NonRing_sub_c.GLON_LAT(data, header)

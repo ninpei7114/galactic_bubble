@@ -1,11 +1,10 @@
 import numpy as np
-from numpy.random import default_rng
 import copy
 
 
 class NonRing_sub(object):
 
-    def __init__(self, world, fits_data):
+    def __init__(self, world, fits_data, random_uni):
 
         self.hist = np.array([190., 138.,  97.,  55.,  29.,  10.,  12.,   8.,  12.,  11.,   4.,
             7.,   4.,   5.,   1.,   1.,   2.,   0.,   1.,   1.,   0.,   0.,
@@ -24,7 +23,7 @@ class NonRing_sub(object):
         self.fits_data = fits_data
         self.fits_data_shape_x = fits_data.shape[1]
         self.fits_data_shape_y = fits_data.shape[0]
-        self.random_uni = default_rng(123)
+        self.random_uni = random_uni
 
     def GLON_LAT(self, data, header):
         
