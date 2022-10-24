@@ -42,9 +42,9 @@ class label_caliculator(object):
             s_area = (xx[1]-xx[0])*(yy[1]-yy[0])
             c_area = (c_xx[1]-c_xx[0])*(c_yy[1]-c_yy[0])
             
-            # 場合分け、全体に対してringが1/2以上入っていないといけない
-            # 大きさが画像に対して、1/8以上でないとlabel付けしない
-            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/3 or s_width/(s_height + 1e-9)>1/3):
+            # 場合分け、全体に対してringが1/4以上入っていないといけない
+            # width/height比が1/3以上でないとlabel付けしない
+            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/4 and s_width/(s_height + 1e-9)>1/4):
                 overlapp_list.append(d)
                 overlapp_name.append(d[0])
 
