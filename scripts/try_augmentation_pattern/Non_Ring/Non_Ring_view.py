@@ -41,6 +41,7 @@ def data_view_rectangl(col, imgs, infos=None, moji_size=100):
 
 
 def main(args):
+    
     Non_Ring = np.load(args.Non_Ring_path)
 
     if Non_Ring.shape[0] >= 1000:
