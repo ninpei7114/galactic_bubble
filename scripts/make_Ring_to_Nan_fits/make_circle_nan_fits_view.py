@@ -43,8 +43,8 @@ def main(args):
         path = l[i]
         pbar.set_description(path)
         data_fits_R = args.fits_path + '/%s/r.fits'%path##2D
-        data_fits_G = args.fits_path + '/fits_data/spitzer_data/%s/g.fits'%path##2D
-        data_fits_B = args.fits_path + '/fits_data/spitzer_data/%s/b.fits'%path
+        data_fits_G = args.fits_path + '/%s/g.fits'%path##2D
+        data_fits_B = args.fits_path + '/%s/b.fits'%path
         
         color_min_R = 10
         color_max_R = 100.0
@@ -54,10 +54,10 @@ def main(args):
         color_max_B = 100
         
         colorval = "%.1f_%.1f_%.1f_%.1f_%.1f_%.1f"%(color_min_R, color_max_R, color_min_G, color_max_G, color_min_B, color_max_B)
-        if os.path.exists(args.save_dir + 'spitzer_aplpy'):
+        if os.path.exists(args.save_dir + '/spitzer_aplpy'):
             pass
         else:
-            os.mkdir(args.save_dir + 'spitzer_aplpy')
+            os.mkdir(args.save_dir + '/spitzer_aplpy')
 
         save_png_name = 'spitzer_aplpy/RG_%s'%colorval + '_%s.png'%path
         fitss = [data_fits_R, data_fits_G, data_fits_B]
