@@ -143,7 +143,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                 data_list.append(data)
                                 frame.append(info)
 
-                        append_data(res_data, info, mwp_ring_list_train, frame_mwp_train)
+                        # append_data(res_data, info, mwp_ring_list_train, frame_mwp_train)
                         data_proc = ring_sub.data_proccessing(pi, fits_path, choice, name_list, 
                                                             xmin_list, ymin_list, xmax_list, ymax_list)
                         
