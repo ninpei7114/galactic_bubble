@@ -65,9 +65,9 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         print_and_log(f, '-------------')
 
 
-        train_bbbb_loc = []
-        train_bbbb_conf = []
-        train_bbbb_b = []
+        #### train_bbbb_loc = []
+        #### train_bbbb_conf = []
+        #### train_bbbb_b = []
         train_seikai = []
         val_bbbb_loc = []
         val_bbbb_conf = []
@@ -75,6 +75,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         val_seikai = []
         train_f1_score_l = []
         val_f1_score_l = []
+        val_f1_score_l_non_ring = []
 
         loss_ll_val = 0
         loss_cc_val = 0
@@ -119,9 +120,9 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 #                     訓練時はバックプロパゲーション
                     if phase == 'train':
                         train_seikai.extend([ann.to('cpu').detach().numpy() for ann in targets])
-                        train_bbbb_loc.append(outputs[0].to('cpu'))
-                        train_bbbb_conf.append(outputs[1].to('cpu'))
-                        train_bbbb_b.append(outputs[2].to('cpu'))
+                        #### train_bbbb_loc.append(outputs[0].to('cpu'))
+                        #### train_bbbb_conf.append(outputs[1].to('cpu'))
+                        #### train_bbbb_b.append(outputs[2].to('cpu'))
                         
                         loss_ll_train += loss_l.to('cpu').item()
                         loss_cc_train += loss_c.to('cpu').item()
@@ -154,7 +155,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                         val_iter += 1  
 
         val_bbbb = [torch.cat(val_bbbb_loc), torch.cat(val_bbbb_conf), val_bbbb_b[0]]
-        train_bbbb = [torch.cat(train_bbbb_loc), torch.cat(train_bbbb_conf), train_bbbb_b[0]]        
+        #### train_bbbb = [torch.cat(train_bbbb_loc), torch.cat(train_bbbb_conf), train_bbbb_b[0]]        
         avg_train_loss = epoch_train_loss / iteration
         avg_val_loss = epoch_val_loss / val_iter
     
@@ -183,12 +184,16 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
         loss_c_posi_list_train.append(loss_c_posii_train/iteration)
         loss_c_nega_list_train.append(loss_c_negaa_train/iteration)
         
-        train_f1_score, train_threthre = calc_f1score(train_seikai, train_bbbb)
-        val_f1_score, val_threthre = calc_f1score(val_seikai, val_bbbb)
-        print_and_log(f, 'train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
-        print_and_log(f, 'val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
-        train_f1_score_l.append(train_f1_score)
+        #### train_f1_score, train_threthre = calc_f1score(train_seikai, train_bbbb)
+        val_f1_score, val_threthre, val_f1_score_non_ring, val_threthre_noring = calc_f1score(val_seikai, val_bbbb)
+        #### print_and_log(f, 'train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
+        print_and_log(f, 
+        'val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))
+        print_and_log(f, 
+        'val_f1_score_add_non_ring : {:.4f}, threshold_add_non_ring : {:.4f}\n'.format(val_f1_score_non_ring, val_threthre_noring))
+        #### train_f1_score_l.append(train_f1_score)
         val_f1_score_l.append(val_f1_score)
+        val_f1_score_l_non_ring.append(val_f1_score_non_ring)
 
         t_epoch_start = time.time()
 
@@ -197,7 +202,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                      'train_loss': avg_train_loss, 'val_loss': avg_val_loss,
                     'avarage_loss_l':loss_ll_val/val_iter, 'avarage_loss_c':loss_cc_val/val_iter,
                     'avarage_loss_c_posi':loss_c_posii_val/val_iter, 'avarage_loss_c_nega':loss_c_negaa_val/val_iter,
-                    'val_f1_score':val_f1_score, 'train_f1_score':train_f1_score}
+                    'val_f1_score':val_f1_score, 'val_f1_score_non_ring':val_f1_score_non_ring}#, 'train_f1_score':train_f1_score}
 
         logs.append(log_epoch)
         df = pd.DataFrame(logs)

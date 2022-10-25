@@ -201,6 +201,7 @@ def calc_f1score(val_seikai, val_bbbb):
         TP1 = 0
         TP2 = 0
         TP1_FP = 0
+        TP1_FP_non_ring = 0
         TP2_FN = 0
         
         # detectクラスで、nm_suppressionする
@@ -224,20 +225,30 @@ def calc_f1score(val_seikai, val_bbbb):
                 TP2 += np.sum(tp2)
                 
                 TP1_FP += tp1_fp
+                TP1_FP_non_ring += tp1_fp
                 TP2_FN += tp2_fn
+
+            else:
+                idx = prob > th
+                TP1_FP_non_ring += idx.sum()
         
-        PRE.append(TP1/TP1_FP)
-        RE.append(TP2/TP2_FN)
+        # PRE.append(TP1/TP1_FP)
+        # RE.append(TP2/TP2_FN)
 
         f1_score_ = 2*(TP1/TP1_FP)*(TP2/TP2_FN)/(TP1/TP1_FP+TP2/TP2_FN+1e-9) 
+        f1_score_non_ring_ = 2*(TP1/TP1_FP_non_ring)*(TP2/TP2_FN)/(TP1/TP1_FP_non_ring+TP2/TP2_FN+1e-9)
         # if th == 0.2:
         #     print(f'th : {th}, TP1 : {TP1} , TP2 : {TP2}, TP1_FP : {TP1_FP}, TP2_FN  : {TP2_FN}, f1_score_ : {f1_score_}')
 
         if f1_score_>f1_score:
             f1_score = f1_score_
             threthre = th
+        
+        if f1_score_non_ring_>f1_score_non_ring:
+            f1_score_non_ring = f1_score_non_ring_
+            threthre_noring = th
     
-    return f1_score, threthre
+    return f1_score, threthre, f1_score_non_ring, threthre_noring
 
 
 def print_and_log(f, moji):
