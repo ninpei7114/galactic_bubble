@@ -49,10 +49,12 @@ def main(args):
             epoch = 400
             ref_path_list = train_l
             choice_num = len(train_l)-1
+            choice_list = random_uni.integers(0, choice_num, epoch)
         else:
             epoch = 30
             ref_path_list = val_l
             choice_num = len(val_l)-1
+            choice_list = random_uni.integers(0, choice_num, epoch)
 
         no_nan_no_ring_list = NpyAppendArray('/workspace/NonRing/no_ring_300_%s_%s.npy'%(epoch*30, mode))
 
@@ -61,9 +63,8 @@ def main(args):
         fits_path = pathlib.Path(args.fits_path)
         pbar = tqdm(range(epoch))
         for _ in pbar:
-            random_int = random.randint(0, choice_num)
-            
-            path = ref_path_list[random_int]
+
+            path = ref_path_list[choice_list[_]]
             spitzer_rfits = astropy.io.fits.open(fits_path/path/'r.fits')[0]
             spitzer_gfits = astropy.io.fits.open(fits_path/path/'g.fits')[0]   
             spitzer_bfits = astropy.io.fits.open(fits_path/path/'b.fits')[0]   
