@@ -29,7 +29,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
 
     # TrainデータのNon-Ring
     # シード値を決める必要がある
-    no_Ring_train = np.load('/workspace/NonRing/no_ring_300_12000_train.npy')
+    no_Ring_train = np.load('/workspace/NonRing/no_ring_300_18000_train.npy')
     # no_Ring_train_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_train.npy')
     no_Ring_val = np.load('/workspace/NonRing/no_ring_300_900_val.npy')
     # no_Ring_val_moyamoya = np.load('/workspace/NonRing/no_ring_moyamoya_val.npy')

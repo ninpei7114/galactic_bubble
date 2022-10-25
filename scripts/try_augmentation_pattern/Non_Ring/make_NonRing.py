@@ -46,7 +46,7 @@ def main(args):
     for mode in ['train', 'val']:
 
         if mode == 'train':
-            epoch = 400
+            epoch = 600
             ref_path_list = train_l
             choice_num = len(train_l)-1
             choice_list = random_uni.integers(0, choice_num, epoch)
