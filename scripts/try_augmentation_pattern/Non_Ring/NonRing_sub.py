@@ -60,16 +60,19 @@ class NonRing_sub(object):
 
     def calc_cut_pix(self):
         
+        ## 一つのfitsの、galactic logititude, latitudeの範囲から、一点を取ってくる
         random_GLON = self.random_uni.uniform(self.GLON_new_min1, self.GLON_new_max1)
         random_GLAT = self.random_uni.uniform(self.GLAT_new_min1, self.GLAT_new_max1)
+
+        ## Churchwellのリングのサイズ分布に従って、切り出す大きさを決める。
         q = self.random_uni.choice(np.arange(0, len(self.hist_)), p = self.hisy)
         random_Rout = self.random_uni.uniform(self.range_[q], self.range_[q+1])
         
         lmax_random = random_GLON + 3*random_Rout/60
         bmin_random = random_GLAT - 3*random_Rout/60
         #右端
+
         #銀中のfitsを扱うための処理
-        # 
         if self.GLON_new_min1< 0:
             lmin_random = random_GLON - 3*random_Rout/60 +360
         
@@ -99,7 +102,7 @@ class NonRing_sub(object):
         
         x_random_min, x_random_max, y_random_min, y_random_max = self.calc_cut_pix()
         
-        while x_random_min<=0 or x_random_max>self.fits_data_shape_x or y_random_min<=0 or y_random_max>self.fits_data_shape_y:
+        while x_random_min<=0 or x_random_max>=self.fits_data_shape_x or y_random_min<=0 or y_random_max>=self.fits_data_shape_y:
             
             x_random_min, x_random_max, y_random_min, y_random_max = self.calc_cut_pix()
             
