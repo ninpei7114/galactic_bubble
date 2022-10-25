@@ -193,7 +193,9 @@ def calc_f1score(val_seikai, val_bbbb):
     thresholds = [i/20 for i in range(0, 20, 1)]
 
     f1_score = -10000
+    f1_score_non_ring = -10000
     threthre = 0
+    threthre_noring = 0
     PRE = []
     RE = []
 
