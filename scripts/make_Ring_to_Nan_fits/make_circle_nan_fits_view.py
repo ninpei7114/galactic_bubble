@@ -59,7 +59,7 @@ def main(args):
         else:
             os.mkdir(args.save_dir + '/spitzer_aplpy')
 
-        save_png_name = 'spitzer_aplpy/RG_%s'%colorval + '_%s.png'%path
+        save_png_name = args.save_dir + '/spitzer_aplpy/RG_%s'%colorval + '_%s.png'%path
         fitss = [data_fits_R, data_fits_G, data_fits_B]
         
         aplpy.make_rgb_image(fitss, save_png_name, 
