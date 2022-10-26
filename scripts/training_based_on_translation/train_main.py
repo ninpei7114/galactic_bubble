@@ -108,7 +108,7 @@ def main(args):
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')    
 
         
-        net = SSD(phase='train', cfg=ssd_cfg)
+        net = SSD(cfg=ssd_cfg)
         # net = transfer_resnet(net, args.parameter_path)
 
         criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=2, device=device)

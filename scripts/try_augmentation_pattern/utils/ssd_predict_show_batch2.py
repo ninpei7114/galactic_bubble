@@ -23,6 +23,7 @@ import torch
 import copy
 
 from utils.ssd_model import DataTransform
+from utils.ssd_model import Detect
 
 
 class SSDPredictShow():
@@ -31,6 +32,7 @@ class SSDPredictShow():
     def __init__(self, eval_categories, net):
         self.eval_categories = eval_categories  # クラス名
         self.net = net  # SSDネットワーク
+        self.detect = Detect()
 
         color_mean = (0, 0)  # (BGR)の色の平均値
         input_size = 300  # 画像のinputサイズを300×300にする
@@ -138,7 +140,9 @@ class SSDPredictShow():
         x = img_.unsqueeze(0).float()  # ミニバッチ化：torch.Size([1, 3, 300, 300])
 
 #         detections, loc, conf = self.net(x) # 学習できているか確認した時の残骸、消してもok
-        detections = self.net(x)
+        with torch.no_grad():
+            output, decoded_box = self.net(x)
+            detections = self.detect(output[0], output[1], output[2])
         # detectionsの形は、torch.Size([1, 21, 200, 5])  ※200はtop_kの値
 #         print(detections.shape)
 #         for i in range(1, 2):

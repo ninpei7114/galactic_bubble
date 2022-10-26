@@ -734,10 +734,10 @@ class Detect(Function):
 
 class SSD(nn.Module):
 
-    def __init__(self, phase, cfg):
+    def __init__(self, cfg):
         super(SSD, self).__init__()
 #         self.softmax = nn.Softmax(dim=-1)
-        self.phase = phase  # train or inferenceを指定
+        # self.phase = phase  # train or inferenceを指定
         self.num_classes = cfg["num_classes"]  # クラス数=21
 
         # SSDのネットワークを作る
@@ -819,15 +819,15 @@ class SSD(nn.Module):
         # 最後に出力する
         output = (loc, conf, self.dbox_list)
 
-        if self.phase == "inference":  # 推論時
-            # クラス「Detect」のforwardを実行
-            # 返り値のサイズは torch.Size([batch_num, 21, 200, 5])
-            with torch.no_grad():
-                return self.detect(output[0], output[1], output[2])#, decode(loc[0], self.dbox_list), self.softmax(conf)
+        # if self.phase == "inference":  # 推論時
+        #     # クラス「Detect」のforwardを実行
+        #     # 返り値のサイズは torch.Size([batch_num, 21, 200, 5])
+        #     with torch.no_grad():
+        #         return self.detect(output[0], output[1], output[2])#, decode(loc[0], self.dbox_list), self.softmax(conf)
 
-        else:  # 学習時
+        # else:  # 学習時
         
-            return output, torch.cat([decode(loc[rr].to('cpu'), self.dbox_list)[None] for rr in range(loc.shape[0])], axis=0)
+        return output, torch.cat([decode(loc[rr].to('cpu'), self.dbox_list)[None] for rr in range(loc.shape[0])], axis=0)
             # 返り値は(loc, conf, dbox_list)のタプル
 
 
