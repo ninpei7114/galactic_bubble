@@ -17,7 +17,7 @@ import NonRing_sub
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='make data for deepcluster')
+    parser = argparse.ArgumentParser(description='make data for SSD')
 
     parser.add_argument('fits_path', metavar='DIR', help='path to dataset')
     # parser.add_argument('ring_sentei_path', metavar='DIR', help='path to ring setntei file')

@@ -100,14 +100,15 @@ class NonRing_sub(object):
 
     def cut_no_ring(self):
         
-        x_random_min, x_random_max, y_random_min, y_random_max = self.calc_cut_pix()
-        
-        while x_random_min<=0 or x_random_max>=self.fits_data_shape_x or y_random_min<=0 or y_random_max>=self.fits_data_shape_y:
-            
+        while True:
+
             x_random_min, x_random_max, y_random_min, y_random_max = self.calc_cut_pix()
+        
+            if not x_random_min<=0 or x_random_max>=self.fits_data_shape_x or y_random_min<=0 or y_random_max>=self.fits_data_shape_y:
+                break
             
         cut_data_random = self.fits_data[int(y_random_min):int(y_random_max), int(x_random_min):int(x_random_max)].view()
-        cut_data_random_ = copy.deepcopy(cut_data_random)
+        cut_data_random_ = cut_data_random.copy()
         
         return cut_data_random_
 
@@ -120,9 +121,11 @@ class NonRing_sub(object):
         というのも、この関数はnan判定するための物だから
         '''
 
-        cut_data_random = self.cut_no_ring()
-        while np.isnan(np.sum(cut_data_random)):
+        while True:
+
             cut_data_random = self.cut_no_ring()
+            if not np.isnan(np.sum(cut_data_random)):
+                break
             
         # else:
         #     pass
