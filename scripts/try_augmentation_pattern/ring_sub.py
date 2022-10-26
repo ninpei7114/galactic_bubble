@@ -50,7 +50,7 @@ class data_proccessing(object):
         ターゲットのリング以外の割り込みリングもあるため、
         flipもラベルの修正が必要
         """
-        tempo = copy.deepcopy(self.source_data)
+        tempo = self.source_data.copy()
         ud = np.flipud(tempo)
         ud_res_data = self.norm_res(ud)
         
@@ -72,7 +72,7 @@ class data_proccessing(object):
         ud_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':ud_xmin_list, 'xmax':ud_xmax_list, 
                     'ymin':ud_ymin_list, 'ymax':ud_ymax_list}
 
-        tempo = copy.deepcopy(self.source_data)
+        tempo = self.source_data.copy()
         lr = np.fliplr(tempo)
         lr_res_data = self.norm_res(lr)
 
@@ -103,7 +103,7 @@ class data_proccessing(object):
         """
         リングを回転させる。
         """
-        tempo = copy.deepcopy(self.source_data)
+        tempo = self.source_data.copy()
         rotate_cut_data = transform.rotate(tempo, deg)
         xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
 
@@ -144,7 +144,7 @@ class data_proccessing(object):
                 return False, 0, 0
             else:
                 c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
-                cut_data = copy.deepcopy(c_data)
+                cut_data = c_data.copy()
                 pi = proceesing.conv(300, sig1, cut_data)
                 res_data = self.norm_res(pi)
                 
@@ -190,7 +190,7 @@ class data_proccessing(object):
                 sig1 = 1/(2*(np.log(2))**(1/2))
 
                 c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
-                cut_data = copy.deepcopy(c_data)
+                cut_data = c_data.copy()
                 pi = proceesing.conv(300, sig1, cut_data)
                 res_data = self.norm_res(pi)
 

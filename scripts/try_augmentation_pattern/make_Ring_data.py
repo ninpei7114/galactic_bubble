@@ -96,7 +96,7 @@ def make_ring(spitzer_path, name, train_cfg):
 
                 else:
                     c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
-                    cut_data = copy.deepcopy(c_data)
+                    cut_data = c_data.copy()
 
                     if np.isnan(cut_data.sum()):
                         pass
@@ -108,7 +108,7 @@ def make_ring(spitzer_path, name, train_cfg):
                         ########################
 
                         pi = proceesing.conv(300, sig1, cut_data)
-                        pi_ = copy.deepcopy(pi)
+                        pi_ = pi.copy()
                         label_cal.make_label(Ring_CATA)
                         r_shape_y = pi_.shape[0]
                         r_shape_x = pi_.shape[1]
