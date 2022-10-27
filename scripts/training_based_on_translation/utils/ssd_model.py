@@ -752,8 +752,8 @@ class SSD(nn.Module):
         self.dbox_list = dbox.make_dbox_list()
 
         # 推論時はクラス「Detect」を用意します
-        if phase == 'inference':
-            self.detect = Detect()
+        # if phase == 'inference':
+        #     self.detect = Detect()
 
     def forward(self, x):
         sources = list()  # locとconfへの入力source1～6を格納
