@@ -104,7 +104,7 @@ class NonRing_sub(object):
 
             x_random_min, x_random_max, y_random_min, y_random_max = self.calc_cut_pix()
         
-            if not x_random_min<=0 or x_random_max>=self.fits_data_shape_x or y_random_min<=0 or y_random_max>=self.fits_data_shape_y:
+            if not (x_random_min<=0 or x_random_max>=self.fits_data_shape_x or y_random_min<=0 or y_random_max>=self.fits_data_shape_y):
                 break
             
         cut_data_random = self.fits_data[int(y_random_min):int(y_random_max), int(x_random_min):int(x_random_max)].view()
