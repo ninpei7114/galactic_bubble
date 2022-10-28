@@ -50,11 +50,13 @@ def main(args):
             ref_path_list = train_l
             choice_num = len(train_l)-1
             choice_list = random_uni.integers(0, choice_num, epoch)
+            iter = 60
         else:
             epoch = 30
             ref_path_list = val_l
             choice_num = len(val_l)-1
             choice_list = random_uni.integers(0, choice_num, epoch)
+            iter = 30
 
         no_nan_no_ring_list = NpyAppendArray('/workspace/NonRing/no_ring_300_%s_%s.npy'%(epoch*30, mode))
 
@@ -81,7 +83,7 @@ def main(args):
             # GLON_LAT関数でGLON_new_min1, GLON_new_max1, GLAT_new_min1, GLAT_new_max1を出す
             NonRing_sub_c.GLON_LAT(data, header)
             
-            for _ in range(30):
+            for _ in range(iter):
 
                 cut_data = NonRing_sub_c.no_nan_ring()
         #         print(cut_data.shape)
