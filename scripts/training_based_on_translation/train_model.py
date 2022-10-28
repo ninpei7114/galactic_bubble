@@ -136,7 +136,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                         optimizer.step()  # パラメータ更新
                         epoch_train_loss += loss.item()
                         print("\r"+str(iteration)+'/'+str(int((
-                            int(train_Ring_num)+int(train_Ring_num*2))/args.batch_size))+'       ', end="")
+                            int(train_Ring_num)+int(train_Ring_num*3))/args.batch_size))+'       ', end="")
                         iteration += 1
 
                     # 検証時

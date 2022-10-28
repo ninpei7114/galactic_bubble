@@ -83,7 +83,7 @@ def main(args):
         train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
         
-        train_negative_sample_size = train_Ring_num*2
+        train_negative_sample_size = train_Ring_num*3
         val_negative_sample_size = val_data.shape[0] - val_Ring_num
         train_sampler = NegativeSampler(train_data, true_size=train_Ring_num, 
                                         sample_negative_size=train_negative_sample_size)
