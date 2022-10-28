@@ -30,6 +30,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of SSD')
     parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path')
     parser.add_argument('validation_data_path', metavar='DIR', help='validation data path')
+    parser.add_argument('--savefolder', metavar='DIR', help='savefolder', default='weights')
     parser.add_argument('--num_epoch', type=int, default=300,
                         help='number of total epochs to run (default: 300)')
     parser.add_argument('--batch_size', default=32, type=int,
@@ -71,7 +72,7 @@ def main(args):
         name = []
         # print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
         [name.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
-        name = '/workspace/weights_translation_10/'+''.join(name)
+        name = '/workspace/%s/'%args.savefolder+''.join(name)
         if os.path.exists(name):
             pass
         else:
