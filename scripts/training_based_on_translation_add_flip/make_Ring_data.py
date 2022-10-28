@@ -162,7 +162,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
                                 if fl:
                                     if _>=5:
-                                        data_proc_flip = ring_sub.data_proccessing(pi, fits_path, choice, trans_info['name'], 
+                                        data_proc_flip = ring_sub.data_proccessing(trans_data, fits_path, choice, trans_info['name'], 
                                                             trans_info['xmin'], trans_info['ymin'], 
                                                             trans_info['xmax'], trans_info['ymax'])
                                         ud_res_data, lr_res_data, ud_info, lr_info = data_proc_flip.flip_data()
