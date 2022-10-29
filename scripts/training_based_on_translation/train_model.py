@@ -217,7 +217,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
 
         # tempo_val_loss = epoch_val_loss
         
-        early_stopping(val_f1_score, net)
+        early_stopping(val_f1_score_non_ring, net)
         # early_stopping(epoch_val_loss, net)
     
         if early_stopping.early_stop:
