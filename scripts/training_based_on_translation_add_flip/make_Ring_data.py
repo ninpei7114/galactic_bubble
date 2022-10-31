@@ -172,7 +172,7 @@ def make_ring(spitzer_path, name, train_cfg):
                                     ###### 回転 ######
                                     elif 10<= _ <=20:
                                         for deg in [90, 180, 270]:
-                                            rot_data, rotate_info = data_proc_flip_rot.rotate_data(deg)
+                                            rot_data, rotate_info = data_proc.rotate_data(deg)
                                         append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
 
                                     ###### 並行移動 ######
