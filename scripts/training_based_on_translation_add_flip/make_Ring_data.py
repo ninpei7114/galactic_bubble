@@ -200,7 +200,7 @@ def make_ring(spitzer_path, name, train_cfg):
     mwp_ring_list_train_ = mwp_ring_list_train*255
     mwp_ring_list_train_ = np.uint8(mwp_ring_list_train_)
     if mwp_ring_list_train_.shape[0]>3000:
-        slice = 2
+        slice = 5
     else:
         slice = 1
     proceesing.data_view_rectangl(25, mwp_ring_list_train_[::slice], frame_mwp_train[::slice]).save(savedir_name + '/train_ring.pdf')
