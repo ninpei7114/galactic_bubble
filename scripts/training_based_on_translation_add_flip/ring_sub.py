@@ -103,14 +103,14 @@ class data_proccessing(object):
         """
         リングを回転させる。
         """
-        tempo = self.source_data.copy()
-        rotate_cut_data = transform.rotate(tempo, deg)
+        # tempo = self.source_data.copy()
+        rotate_cut_data = transform.rotate(self.pi, deg)
         xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
 
-        for xy_num in range(len(self.xmin_list)):
-            width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
-            center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
-            center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
+        for xy_num in range(len(self.xmin_list_trans)):
+            width = self.xmax_list_trans[xy_num] - self.xmin_list_trans[xy_num]
+            center_x = ((self.xmin_list_trans[xy_num] - 0.5) + (self.xmax_list_trans[xy_num] - 0.5))/2
+            center_y = ((self.ymin_list_trans[xy_num] - 0.5) + (self.ymax_list_trans[xy_num] - 0.5))/2
 
             new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
             new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
@@ -121,7 +121,7 @@ class data_proccessing(object):
             ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
 
         res_data = self.norm_res(rotate_cut_data)
-        info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_, 
+        info = {'fits':self.fits_path, 'name':self.name_list_trans, 'xmin':xmin_list_, 'xmax':xmax_list_, 
                             'ymin':ymin_list_, 'ymax':ymax_list_}
 
         return res_data, info
@@ -144,7 +144,7 @@ class data_proccessing(object):
                 return False, 0, 0
             else:
                 c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
-                cut_data = copy.deepcopy(c_data)
+                cut_data = c_data.copy()
                 pi = proceesing.conv(300, sig1, cut_data)
                 res_data = self.norm_res(pi)
                 
@@ -191,8 +191,8 @@ class data_proccessing(object):
 
                 c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
                 cut_data = copy.deepcopy(c_data)
-                pi = proceesing.conv(300, sig1, cut_data)
-                res_data = self.norm_res(pi)
+                self.pi = proceesing.conv(300, sig1, cut_data)
+                res_data = self.norm_res(self.pi)
 
                 if np.isnan(cut_data.sum()):
                     return False, 0,  0
@@ -200,9 +200,11 @@ class data_proccessing(object):
                 else:
                     label_cal.make_label_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
                                                                                         width, height, MWP)
-                    xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
-                    info = {'fits':self.fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
-                                'ymin':ymin_list, 'ymax':ymax_list}
+                    self.xmin_list_trans, self.ymin_list_trans, self.xmax_list_trans, \
+                    self.ymax_list_trans, self.name_list_trans = label_cal.check_list()
+                    info = {'fits':self.fits_path, 'name':self.name_list_trans, 
+                            'xmin':self.xmin_list_trans, 'xmax':self.xmax_list_trans, 
+                            'ymin':self.ymin_list_trans, 'ymax':self.ymax_list_trans}
                     return True, res_data, info
         else:
             return False, 0,  0

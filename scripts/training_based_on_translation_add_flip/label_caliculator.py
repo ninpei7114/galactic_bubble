@@ -81,7 +81,8 @@ class label_caliculator(object):
             
             # 場合分け、全体に対してringが1/4以上入っていないといけない
             # width/height比が1/3以上でないとlabel付けしない
-            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/3 and s_width/(s_height + 1e-9)>1/3):
+            if (c_area>=s_area*1/4 and s_height/(s_width + 1e-9)>1/3 and s_width/(s_height + 1e-9)>1/3 and
+                s_height>30 and s_width>30):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
 

@@ -58,7 +58,7 @@ def main(args):
             choice_list = random_uni.integers(0, choice_num, epoch)
             iter = 30
 
-        no_nan_no_ring_list = NpyAppendArray('/workspace/NonRing/no_ring_300_%s_%s.npy'%(epoch*30, mode))
+        no_nan_no_ring_list = NpyAppendArray('/workspace/NonRing/no_ring_300_%s_%s.npy'%(epoch*iter, mode))
 
         start = time.time()
         sig1 = 1/(2*(np.log(2))**(1/2))
