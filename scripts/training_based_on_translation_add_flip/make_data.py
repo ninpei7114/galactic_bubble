@@ -36,7 +36,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
 
     train_arange = np.arange(0, no_Ring_train.shape[0])
     val_arange = np.arange(0, no_Ring_val.shape[0])
-    no_Ring_train_random = default_rng(123).choice(train_arange, int(train_data.shape[0])*4, replace=False)
+    # no_Ring_train_random = default_rng(123).choice(train_arange, int(train_data.shape[0])*4, replace=False)
     # no_Ring_train_moyamoya_random = default_rng(123).integers(0, no_Ring_train_moyamoya.shape[0], int(train_data.shape[0]))
     no_Ring_val_random = default_rng(123).choice(val_arange, int(val_data.shape[0])*2, replace=False)
     # no_Ring_val_moyamoya_random = default_rng(123).integers(0, no_Ring_val_moyamoya.shape[0], int(val_data.shape[0]/2))
@@ -56,7 +56,8 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
 
     # train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random], 
     #                          no_Ring_train_moyamoya[no_Ring_train_moyamoya_random]])
-    train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random]])
+    # train_data = np.concatenate([train_data, no_Ring_train[no_Ring_train_random]])
+    train_data = np.concatenate([train_data, no_Ring_train])
 
     # val_data = np.concatenate([val_data, no_Ring_val[no_Ring_val_random], 
     #                          no_Ring_val_moyamoya[no_Ring_val_moyamoya_random]])
@@ -65,7 +66,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     # Non-Ringのlabelと合わせる
     train_label = pd.concat([train_label, 
                         pd.DataFrame([{'fits':[],'name':[],'xmin':[],'xmax':[],'ymin':[],'ymax':[],'id':[] } 
-                        for i in range(int(train_Ring_num)*4)])
+                        for i in range(int(no_Ring_train.shape[0]))])
                         ])
     val_label = pd.concat([val_label, 
                         pd.DataFrame([{'fits':[],'name':[],'xmin':[],'xmax':[],'ymin':[],'ymax':[],'id':[] } 
