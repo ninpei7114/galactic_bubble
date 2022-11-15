@@ -71,7 +71,7 @@ def main(args):
         pbar = tqdm(range(epoch))
         for k in pbar:
 
-            path = ref_path_list[choice_list[_]]
+            path = ref_path_list[choice_list[k]]
             spitzer_rfits = astropy.io.fits.open(fits_path/path/'r.fits')[0]
             spitzer_gfits = astropy.io.fits.open(fits_path/path/'g.fits')[0]   
             spitzer_bfits = astropy.io.fits.open(fits_path/path/'b.fits')[0]   
