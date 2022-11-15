@@ -97,7 +97,7 @@ def main(args):
                 res_data = pi[int(r_shape_y/4):int(r_shape_y*3/4), int(r_shape_x/4):int(r_shape_x*3/4)]
                 res_data = proceesing.normalize(res_data)
                 res_data = proceesing.resize(res_data, 300)
-                pil_image = Image.fromarray(np.uint8(res_data*255)[:,:,:2])
+                pil_image = Image.fromarray(np.uint8(res_data*255))
 
                 ## 2chの画像に
                 pil_image.save('/workspace/dataset/%s/NonRing_%s.jpg'%(mode, k*epoch+i))
