@@ -19,15 +19,33 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 
 
+# def od_collate_fn(batch):
+#     targets = []
+#     imgs = []
+#     for sample in batch:
+#         imgs.append(sample[0])
+#         targets.append(torch.FloatTensor(sample[1]))
+#     imgs = torch.stack(imgs, dim=0)
+        
+#     return imgs, targets
+
+## webdatasetのために作成
 def od_collate_fn(batch):
     targets = []
     imgs = []
     for sample in batch:
         imgs.append(sample[0])
+        # print(sample[1])
         targets.append(torch.FloatTensor(sample[1]))
-    imgs = torch.stack(imgs, dim=0)
+    imgs = np.array(imgs)
         
     return imgs, targets
+
+## webdatasetのために作成
+def preprocess(sample):
+    img, json = sample
+    return np.array(img.resize((256, 256))), [(float(x['Confidence']), float(x['XMin']), float(x['XMax']), float(x['YMin']), float(x['YMax'])) for x in json]
+
 
 class DataSet():
     def __init__(self, data, label):

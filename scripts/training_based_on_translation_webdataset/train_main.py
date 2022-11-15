@@ -5,6 +5,7 @@ import pickle
 
 import torch
 import torch.optim as optim
+import webdataset
 # from torchvision.models.resnet import resnet18
 
 import argparse
@@ -16,6 +17,7 @@ from utils.ssd_model import MultiBoxLoss
 
 
 from data import od_collate_fn
+from data import preprocess
 from data import DataSet
 from data import NegativeSampler
 from make_data import make_data
@@ -80,26 +82,21 @@ def main(args):
         f_log = open(name+'/log.txt', 'w')
         print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s,  translation : %s'%(flip, rotate, scale, translation))
 
-        train_data, train_label, val_data, val_label, train_Ring_num, val_Ring_num = make_data(
+        ## pngのRing画像とjson形式のlabelを作成
+        train_Ring_num, val_Ring_num = make_data(
             args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
         
-        train_negative_sample_size = train_Ring_num*3
-        val_negative_sample_size = val_data.shape[0] - val_Ring_num
-        train_sampler = NegativeSampler(train_data, true_size=train_Ring_num, 
-                                        sample_negative_size=train_negative_sample_size)
-        val_sampler = NegativeSampler(val_data, true_size=val_Ring_num, 
-                                        sample_negative_size=val_negative_sample_size)
-        # batch_size = 32
 
-        train_dataset = DataSet(torch.Tensor(train_data), train_label)
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, 
-                                        sampler=train_sampler, collate_fn=od_collate_fn)
-        test_dataset = DataSet(torch.Tensor(val_data), val_label)
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, 
-                                        sampler=val_sampler, collate_fn=od_collate_fn)
+        batch_size = 32
+        
+        ds_train = webdataset.WebDataset("/workspace/dataset/bubble_dataset_train.tar").shuffle(1000).decode("pil").to_tuple("jpg", "json").map(preprocess)
+        ds_val = webdataset.WebDataset("/workspace/dataset/bubble_dataset_val.tar").shuffle(1000).decode("pil").to_tuple("jpg", "json").map(preprocess)
+
+
+        train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, collate_fn=od_collate_fn)
+        test_loader = torch.utils.data.DataLoader(ds_val, batch_size=batch_size, collate_fn=od_collate_fn)
+
         print_and_log(f_log, ' ')
-        print_and_log(f_log, 'Train No Ring sampler  : %s / %s '%(train_negative_sample_size, train_data.shape[0] - train_Ring_num))
-        print_and_log(f_log, 'Val No Ring sampler  : %s / %s '%(val_negative_sample_size, val_data.shape[0] - val_Ring_num))
         print_and_log(f_log, '====================================')
 
 
@@ -109,7 +106,6 @@ def main(args):
 
         
         net = SSD(cfg=ssd_cfg)
-        # net = transfer_resnet(net, args.parameter_path)
 
         criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=2, device=device)
         optimizer = optim.AdamW(net.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False)

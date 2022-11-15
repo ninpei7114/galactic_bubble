@@ -1,18 +1,17 @@
-import astropy.io.fits
-import astropy.wcs
-
-import numpy as np
-from numpy.random import default_rng
-import pandas as pd
-
-from PIL import Image
-import json
-
 import argparse
 import copy
+import json
 import os
+import sys
+
+import astropy.io.fits
+import astropy.wcs
+import numpy as np
+import pandas as pd
+from numpy.random import default_rng
+from PIL import Image
 from torch.nn import functional as F
-import sys 
+
 sys.path.append('../')
 import proceesing
 import val_label_calculator
@@ -161,15 +160,15 @@ def main(args):
 
     print('val_count  ',  val_count)
     
-    if os.path.exists(args.savedir_name):
-        pass
-    else:
-        os.mkdir(args.savedir_name)
+    # if os.path.exists(args.savedir_name):
+    #     pass
+    # else:
+    #     os.mkdir(args.savedir_name)
 
     mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
     for i in range(mwp_ring_list_val.shape[0]):
         pil_image = Image.fromarray(np.uint8(mwp_ring_list_val[i]*255))
-        pil_image.save('/workspace/dataset/val/Ring/Ring_%s.png'%i)
+        pil_image.save('/workspace/dataset/val/Ring_%s.jpg'%i)
     # np.save(args.savedir_name + '/val_ring.npy', mwp_ring_list_val)
 
     for i, row in frame_mwp_val.iterrows():
@@ -183,7 +182,7 @@ def main(args):
         else:
             ll.append({"Confidence":str(0)})
 
-        with open('/workspace/dataset/val/Ring/Ring_%s.json'%i, 'w') as f:
+        with open('/workspace/dataset/val/Ring_%s.json'%i, 'w') as f:
             json.dump(ll, f, indent=4)
     # frame_mwp_val.to_csv(args.savedir_name + '/val_ring_label.csv')
     print('array_count ', mwp_ring_list_val.shape[0])
