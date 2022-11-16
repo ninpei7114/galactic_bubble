@@ -103,9 +103,7 @@ def main(args):
 
                 ## json形式のlabelを作成
                 with open('/workspace/dataset/%s/NonRing_%s.json'%(mode, k*iter+i), 'w') as f:
-                    json.dump([{"Confidence":str(0), 
-                        "XMin": [], "XMax": [], 
-                        "YMin": [], "YMax": []}], f, indent=4)
+                    json.dump([], f, indent=4)
                 
         stop = time.time()
         print((stop-start)/60)

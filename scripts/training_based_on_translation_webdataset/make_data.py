@@ -39,7 +39,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
                         "XMin": str(row['xmin'][la]), "XMax": str(row['xmax'][la]), 
                         "YMin": str(row['ymin'][la]), "YMax": str(row['ymax'][la])})
         else:
-            ll.append({"Confidence":str(0)})
+            pass
 
         with open('/workspace/dataset/train/Ring_%s.json'%i, 'w') as f:
             json.dump(ll, f, indent=4)
