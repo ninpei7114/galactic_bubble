@@ -73,7 +73,7 @@ def main(args):
         name = []
         # print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
         [name.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
-        name = '/workspace/weights_translation_10/'+''.join(name)
+        name = '/workspace/weights_translation_4/'+''.join(name)
         if os.path.exists(name):
             pass
         else:

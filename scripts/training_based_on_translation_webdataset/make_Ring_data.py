@@ -156,7 +156,7 @@ def make_ring(spitzer_path, name, train_cfg):
                         
 
                         if translation:
-                            for _ in range(10):
+                            for _ in range(4):
                                 m2_size = trans_rg.choice(samples)
                                 fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)

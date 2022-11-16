@@ -24,7 +24,6 @@ webdatasetを使用するための、Non-Ringのpng画像を作成する
 
 def parse_args():
     parser = argparse.ArgumentParser(description='make data for SSD')
-
     parser.add_argument('fits_path', metavar='DIR', help='path to Ring_to_circle_nan_fits')
     # parser.add_argument('ring_sentei_path', metavar='DIR', help='path to ring setntei file')
 
@@ -52,7 +51,7 @@ def main(args):
     for mode in ['train', 'val']:
 
         if mode == 'train':
-            epoch = 600
+            epoch = 100
             ref_path_list = train_l
             choice_num = len(train_l)-1
             choice_list = random_uni.integers(0, choice_num, epoch)
@@ -100,10 +99,10 @@ def main(args):
                 pil_image = Image.fromarray(np.uint8(res_data*255))
 
                 ## 2chの画像に
-                pil_image.save('/workspace/dataset/%s/NonRing_%s.jpg'%(mode, k*epoch+i))
+                pil_image.save('/workspace/dataset/%s/NonRing_%s.jpg'%(mode, k*iter+i))
 
                 ## json形式のlabelを作成
-                with open('/workspace/dataset/%s/NonRing_%s.json'%(mode, k*epoch+i), 'w') as f:
+                with open('/workspace/dataset/%s/NonRing_%s.json'%(mode, k*iter+i), 'w') as f:
                     json.dump([{"Confidence":str(0), 
                         "XMin": [], "XMax": [], 
                         "YMin": [], "YMax": []}], f, indent=4)
