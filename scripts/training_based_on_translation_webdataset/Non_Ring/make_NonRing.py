@@ -99,7 +99,7 @@ def main(args):
                 pil_image = Image.fromarray(np.uint8(res_data*255))
 
                 ## 2chの画像に
-                pil_image.save('/workspace/dataset/%s/NonRing_%s.jpg'%(mode, k*iter+i))
+                pil_image.save('/workspace/dataset/%s/NonRing_%s.png'%(mode, k*iter+i))
 
                 ## json形式のlabelを作成
                 with open('/workspace/dataset/%s/NonRing_%s.json'%(mode, k*iter+i), 'w') as f:

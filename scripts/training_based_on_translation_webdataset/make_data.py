@@ -27,7 +27,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     ## Trainデータをpngファイルに変換＋保存
     for i in range(train_data.shape[0]):
         pil_image = Image.fromarray(np.uint8(train_data[i]*255))
-        pil_image.save('/workspace/dataset/train/Ring_%s.jpg'%i)
+        pil_image.save('/workspace/dataset/train/Ring_%s.png'%i)
     
     ## Train labelをjsonに変換＋保存
     for i, row in train_label.iterrows():

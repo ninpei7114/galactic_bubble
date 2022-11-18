@@ -168,7 +168,7 @@ def main(args):
     mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
     for i in range(mwp_ring_list_val.shape[0]):
         pil_image = Image.fromarray(np.uint8(mwp_ring_list_val[i]*255))
-        pil_image.save('/workspace/dataset/val/Ring_%s.jpg'%i)
+        pil_image.save('/workspace/dataset/val/Ring_%s.png'%i)
     # np.save(args.savedir_name + '/val_ring.npy', mwp_ring_list_val)
 
     for i, row in frame_mwp_val.iterrows():

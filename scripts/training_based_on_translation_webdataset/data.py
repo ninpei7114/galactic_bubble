@@ -44,7 +44,7 @@ def od_collate_fn(batch):
 ## webdatasetのために作成
 def preprocess(sample):
     img, json = sample
-    return np.array(img.resize((256, 256))), [(float(x['Confidence']), float(x['XMin']), float(x['XMax']), float(x['YMin']), float(x['YMax'])) for x in json]
+    return np.array(img)/255, [(float(x['Confidence']), float(x['XMin']), float(x['XMax']), float(x['YMin']), float(x['YMax'])) for x in json]
 
 
 class DataSet():

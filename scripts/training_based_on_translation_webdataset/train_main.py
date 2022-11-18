@@ -90,7 +90,7 @@ def main(args):
         batch_size = 32
         
         ds_train = webdataset.WebDataset("/workspace/dataset/bubble_dataset_train.tar").shuffle(1000).decode("pil").to_tuple("jpg", "json").map(preprocess)
-        ds_val = webdataset.WebDataset("/workspace/dataset/bubble_dataset_val.tar").shuffle(1000).decode("pil").to_tuple("jpg", "json").map(preprocess)
+        ds_val = webdataset.WebDataset("/workspace/dataset/bubble_dataset_val.tar").shuffle(100).decode("pil").to_tuple("jpg", "json").map(preprocess)
 
 
         train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, collate_fn=od_collate_fn)
