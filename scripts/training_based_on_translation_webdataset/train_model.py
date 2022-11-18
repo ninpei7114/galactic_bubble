@@ -100,7 +100,6 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                     images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
 
                 images = images.permute(0, 3, 1, 2)[:,:2,:,:]
-                images = F.interpolate(images, (300, 300), mode='bilinear', align_corners=False)
                 images = images.to(device, dtype=torch.float)
                 targets = [ann.to(device, dtype=torch.float) for ann in targets]  # リストの各要素のテンソルをGPUへ
                 # optimizerを初期化
