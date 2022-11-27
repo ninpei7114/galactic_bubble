@@ -35,7 +35,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
         ll = []
         if len(row['xmin'])>=1:
             for la in range(len(row['xmin'])):
-                ll.append({"Confidence":str(1), 
+                ll.append({"Confidence":str(0), 
                         "XMin": str(row['xmin'][la]), "XMax": str(row['xmax'][la]), 
                         "YMin": str(row['ymin'][la]), "YMax": str(row['ymax'][la])})
         else:

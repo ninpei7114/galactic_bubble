@@ -93,11 +93,14 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
                 net.train()  # モデルを訓練モードに
                 print_and_log(f, '（train）')
             else:
+                print('val')
                 net.eval()
     
             for images, targets in dataloaders_dict[phase]:
                 if phase=='train':
                     images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
+                else:
+                    images = torch.from_numpy(images)
 
                 images = images.permute(0, 3, 1, 2)[:,:2,:,:]
                 images = images.to(device, dtype=torch.float)

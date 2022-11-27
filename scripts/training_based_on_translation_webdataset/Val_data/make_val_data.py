@@ -176,7 +176,7 @@ def main(args):
         ll = []
         if len(row['xmin'])>=1:
             for la in range(len(row['xmin'])):
-                ll.append({"Confidence":str(1), 
+                ll.append({"Confidence":str(0), 
                         "XMin": str(row['xmin'][la]), "XMax": str(row['xmax'][la]), 
                         "YMin": str(row['ymin'][la]), "YMax": str(row['ymax'][la])})
         else:
@@ -189,9 +189,9 @@ def main(args):
     
 
     # mwp_ring_list_train_ = np.array(mwp_ring_list_train)
-    mwp_ring_list_val_ = mwp_ring_list_val*255
-    mwp_ring_list_val_ = np.uint8(mwp_ring_list_val_)
-    proceesing.data_view_rectangl(25, mwp_ring_list_val_, frame_mwp_val).save(args.savedir_name + '/val_ring.pdf')
+    # mwp_ring_list_val_ = mwp_ring_list_val*255
+    # mwp_ring_list_val_ = np.uint8(mwp_ring_list_val_)
+    # proceesing.data_view_rectangl(25, mwp_ring_list_val_, frame_mwp_val).save(args.savedir_name + '/val_ring.pdf')
 
     print('val_Ring_num : ', len(mwp_ring_list_val))
     print('val_Ring_label_num : ', len(frame_mwp_val))

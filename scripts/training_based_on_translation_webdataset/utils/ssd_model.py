@@ -341,7 +341,12 @@ def make_vgg():
 #               nn.Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1)))
     
     
-    layers += [Conv2_1, nn.ReLU(inplace=True), Conv2_2, nn.ReLU(inplace=True), Maxpool_1, Conv2_3, nn.ReLU(inplace=True), Conv2_4, nn.ReLU(inplace=True), Maxpool_2, Conv2_5, nn.ReLU(inplace=True), Conv2_6, nn.ReLU(inplace=True), Conv2_7, nn.ReLU(inplace=True), Maxpool_3, Conv2_8, nn.ReLU(inplace=True), Conv2_9, nn.ReLU(inplace=True), Conv2_10, nn.ReLU(inplace=True), Maxpool_4, Conv2_11, nn.ReLU(inplace=True), Conv2_12, nn.ReLU(inplace=True), Conv2_13, nn.ReLU(inplace=True), Maxpool_5, Conv2_14, nn.ReLU(inplace=True), Conv2_15, nn.ReLU(inplace=True)]
+    layers += [
+        Conv2_1, nn.ReLU(), Conv2_2, nn.ReLU(), Maxpool_1, Conv2_3, nn.ReLU(), Conv2_4, 
+        nn.ReLU(), Maxpool_2, Conv2_5, nn.ReLU(), Conv2_6, nn.ReLU(), Conv2_7, nn.ReLU(), 
+        Maxpool_3, Conv2_8, nn.ReLU(), Conv2_9, nn.ReLU(), Conv2_10, nn.ReLU(), Maxpool_4, Conv2_11, 
+        nn.ReLU(), Conv2_12, nn.ReLU(), Conv2_13, nn.ReLU(), Maxpool_5, Conv2_14, nn.ReLU(), 
+        Conv2_15, nn.ReLU()]
     
     return nn.ModuleList(layers)
 
@@ -441,8 +446,7 @@ class L2Norm(nn.Module):
         # 係数をかける。係数はチャネルごとに1つで、512個の係数を持つ
         # self.weightのテンソルサイズはtorch.Size([512])なので
         # torch.Size([batch_num, 512, 38, 38])まで変形します
-        weights = self.weight.unsqueeze(
-            0).unsqueeze(2).unsqueeze(3).expand_as(x)
+        weights = self.weight.unsqueeze(0).unsqueeze(2).unsqueeze(3).expand_as(x)
         out = weights * x
 
         return out
@@ -773,12 +777,15 @@ class SSD(nn.Module):
             x = self.vgg[k](x)
 
         sources.append(x)
+        with open("x.log", "a") as fff:
+            fff.write("----------\n")
+            fff.write(f"x1:: {x}\n")
 
         # extrasのconvとReLUを計算
         # source3～6を、sourcesに追加
         
         for k, v in enumerate(self.extras):
-            x = F.relu(v(x), inplace=True)
+            x = F.relu(v(x))
 
             if k % 2 == 1:  # conv→ReLU→cov→ReLUをしたらsourceに入れる
                 sources.append(x)
@@ -879,9 +886,16 @@ class MultiBoxLoss(nn.Module):
             if len(targets[idx]) == 0:
                 pass
             else:
+                print(type(targets))
                 truths = targets[idx][:, :-1].to(self.device)  # BBox
+                with open("BBox.log", "a") as fff:
+                    fff.write("----------\n")
+                    fff.write(f"{truths}\n")
                 # ラベル [物体1のラベル, 物体2のラベル, …]
                 labels = targets[idx][:, -1].to(self.device)
+                with open("labels.log", "a") as fff:
+                    fff.write("----------\n")
+                    fff.write(f"{labels}\n")
 
                 # デフォルトボックスを新たな変数で用意
                 dbox = dbox_list.to(self.device)
@@ -892,6 +906,9 @@ class MultiBoxLoss(nn.Module):
 
         pos_mask = conf_t_label > 0  # torch.Size([num_batch, 8732])
 
+        with open("conf_t_label.log", "a") as fff:
+            fff.write("----------\n")
+            fff.write(f"conf_t_label1 : {conf_t_label}\n")
         # pos_maskをloc_dataのサイズに変形
         # pos_mask : torch.size([num_batch, 8732]) → torch.size([num_batch, 8732, 1])
         # pos_idx : torch.size([num_batch, 8732, 4])
