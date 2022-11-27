@@ -886,7 +886,7 @@ class MultiBoxLoss(nn.Module):
             if len(targets[idx]) == 0:
                 pass
             else:
-                print(type(targets))
+                # print(type(targets))
                 truths = targets[idx][:, :-1].to(self.device)  # BBox
                 with open("BBox.log", "a") as fff:
                     fff.write("----------\n")
