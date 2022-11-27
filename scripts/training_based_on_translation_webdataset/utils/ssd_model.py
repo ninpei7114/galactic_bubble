@@ -777,9 +777,9 @@ class SSD(nn.Module):
             x = self.vgg[k](x)
 
         sources.append(x)
-        with open("x.log", "a") as fff:
-            fff.write("----------\n")
-            fff.write(f"x1:: {x}\n")
+        # with open("x.log", "a") as fff:
+        #     fff.write("----------\n")
+        #     fff.write(f"x1:: {x}\n")
 
         # extrasのconvとReLUを計算
         # source3～6を、sourcesに追加
@@ -888,14 +888,14 @@ class MultiBoxLoss(nn.Module):
             else:
                 # print(type(targets))
                 truths = targets[idx][:, :-1].to(self.device)  # BBox
-                with open("BBox.log", "a") as fff:
-                    fff.write("----------\n")
-                    fff.write(f"{truths}\n")
+                # with open("BBox.log", "a") as fff:
+                #     fff.write("----------\n")
+                #     fff.write(f"{truths}\n")
                 # ラベル [物体1のラベル, 物体2のラベル, …]
                 labels = targets[idx][:, -1].to(self.device)
-                with open("labels.log", "a") as fff:
-                    fff.write("----------\n")
-                    fff.write(f"{labels}\n")
+                # with open("labels.log", "a") as fff:
+                #     fff.write("----------\n")
+                #     fff.write(f"{labels}\n")
 
                 # デフォルトボックスを新たな変数で用意
                 dbox = dbox_list.to(self.device)
@@ -906,9 +906,9 @@ class MultiBoxLoss(nn.Module):
 
         pos_mask = conf_t_label > 0  # torch.Size([num_batch, 8732])
 
-        with open("conf_t_label.log", "a") as fff:
-            fff.write("----------\n")
-            fff.write(f"conf_t_label1 : {conf_t_label}\n")
+        # with open("conf_t_label.log", "a") as fff:
+        #     fff.write("----------\n")
+        #     fff.write(f"conf_t_label1 : {conf_t_label}\n")
         # pos_maskをloc_dataのサイズに変形
         # pos_mask : torch.size([num_batch, 8732]) → torch.size([num_batch, 8732, 1])
         # pos_idx : torch.size([num_batch, 8732, 4])

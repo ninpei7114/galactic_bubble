@@ -98,7 +98,8 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs, f, name
     
             for images, targets in dataloaders_dict[phase]:
                 if phase=='train':
-                    images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
+                    # images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
+                    images = torch.from_numpy(images)
                 else:
                     images = torch.from_numpy(images)
 
