@@ -32,6 +32,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of SSD')
     parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path')
     parser.add_argument('validation_data_path', metavar='DIR', help='validation data path')
+    parser.add_argument('--savedir_path', metavar='DIR', 
+                        default='/workspace/weights/', help='savedire path  (default: /workspace/weights/)')
     parser.add_argument('--num_epoch', type=int, default=300,
                         help='number of total epochs to run (default: 300)')
     parser.add_argument('--batch_size', default=32, type=int,
@@ -73,7 +75,7 @@ def main(args):
         name = []
         # print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
         [name.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
-        name = '/workspace/weights_translation_1/'+''.join(name)
+        name = args.savedir_path+''.join(name)
         if os.path.exists(name):
             pass
         else:
@@ -84,7 +86,7 @@ def main(args):
 
         ## pngのRing画像とjson形式のlabelを作成
         train_Ring_num, val_Ring_num = make_data(
-            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log)
+            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log, args.savedir_path)
         
 
         batch_size = 32

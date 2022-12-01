@@ -11,23 +11,38 @@ import ast
 import json
 import glob
 import tarfile
+import os
+import shutil
 
 
-def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
+def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedir_path):
     """
     学習に使用するtrain dataを作成する。
     validationは、性能を測るために固定とする。
-    """
 
+    NonRing, Validationデータは毎回作成は高コストなため、
+    事前に作成して、 cpする。
+
+    """
+    NonRing_rg = default_rng(123)
     ## Trainデータの作成
     ## train_dataのshapeは、(Num, 300, 300, 3)
     ## float32
     train_data, train_label = make_ring(spitzer_path, name, train_cfg)
 
+    save_data_path = savedir_path+''.join('dataset')
+    if os.path.exists(save_data_path):
+        pass
+    else:
+        os.mkdir(save_data_path)
+        os.mkdir(save_data_path+'/train')
+        # os.mkdir(save_data_path+'/val')
+
+
     ## Trainデータをpngファイルに変換＋保存
     for i in range(train_data.shape[0]):
         pil_image = Image.fromarray(np.uint8(train_data[i]*255))
-        pil_image.save('/workspace/dataset/train/Ring_%s.png'%i)
+        pil_image.save('%s/train/Ring_%s.png'%(save_data_path, i))
     
     ## Train labelをjsonに変換＋保存
     for i, row in train_label.iterrows():
@@ -41,13 +56,22 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
         else:
             pass
 
-        with open('/workspace/dataset/train/Ring_%s.json'%i, 'w') as f:
+        with open('%s/train/Ring_%s.json'%(save_data_path, i), 'w') as f:
             json.dump(ll, f, indent=4)
-
+    
+    ## NonRingのpngをcopyする。
+    NonRing_origin = glob.glob('/workspace/NonRing_png/train/*.png')
+    Choice_NonRing = NonRing_rg.choice(NonRing_origin, int(train_data.shape[0])*4, replace=False)
+    for i in Choice_NonRing:
+        shutil.copyfile(i, '%s/train/%s'%(save_data_path, i.split('/')[-1]))
+        shutil.copyfile(i[:-3]+'json', '%s/train/%s'%(save_data_path, i.split('/')[-1][:-3]+'json'))
+    
+    ## Validationデータをcopyする。
+    shutil.copytree("/workspace/val", "%s/val"%save_data_path)
 
     ## TrainとValのRingの枚数を取得
-    val_Ring_num = len(glob.glob('/workspace/dataset/val/Ring_*.json'))
-    train_Ring_num = len(glob.glob('/workspace/dataset/train/Ring_*.json'))
+    val_Ring_num = len(glob.glob('%s/val/Ring_*.json'%save_data_path))
+    train_Ring_num = len(glob.glob('%s/train/Ring_*.json'%save_data_path))
 
 
     # logに記入
@@ -59,8 +83,8 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     print_and_log(f_log, ' ')
 
 
-    Train_Non_Ring_num = len(glob.glob('/workspace/dataset/train/NonRing_*.json'))
-    Val_Non_Ring_num = len(glob.glob('/workspace/dataset/val/NonRing_*.json'))
+    Train_Non_Ring_num = len(glob.glob('%s/train/NonRing_*.json'%save_data_path))
+    Val_Non_Ring_num = len(glob.glob('%s/val/NonRing_*.json'%save_data_path))
     print_and_log(f_log, 'Train Ring num  : %s '%train_Ring_num)
     print_and_log(f_log, 'Val Ring num  : %s '%val_Ring_num)
     print_and_log(f_log, ' ')
@@ -70,11 +94,11 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log):
     print_and_log(f_log, 'Total Train num  : %s '%(train_Ring_num + Train_Non_Ring_num))
     print_and_log(f_log, 'Total Val num  : %s '%(val_Ring_num + Val_Non_Ring_num))
    
-    with tarfile.open('/workspace/dataset/bubble_dataset_train.tar', 'w:gz') as tar:
-        tar.add('/workspace/dataset/train')
+    with tarfile.open('%s/bubble_dataset_train.tar'%save_data_path, 'w:gz') as tar:
+        tar.add('%s/train'%save_data_path)
 
-    with tarfile.open('/workspace/dataset/bubble_dataset_val.tar', 'w:gz') as tar:
-        tar.add('/workspace/dataset/val')
+    with tarfile.open('%s/bubble_dataset_val.tar'%save_data_path, 'w:gz') as tar:
+        tar.add('%s/val'%save_data_path)
 
 
     return train_Ring_num, val_Ring_num
