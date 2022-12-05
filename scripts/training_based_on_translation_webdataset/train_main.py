@@ -38,6 +38,8 @@ def parse_args():
                         help='number of total epochs to run (default: 300)')
     parser.add_argument('--batch_size', default=32, type=int,
                         help='mini-batch size (default: 32)')
+    parser.add_argument('--NonRing_ratio', default=3, type=int,
+                        help='Ring / NonRing ratio (default: 3)')
   
     return parser.parse_args()
 
@@ -64,6 +66,11 @@ def main(args):
     scale_list = [False]
     translation_list = [True]
 
+    if os.path.exists(args.savedir_path):
+        pass
+    else:
+        os.mkdir(args.savedir_path)
+
     for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):#, translation_list):
         train_cfg = {
             "flip": flip,
@@ -86,13 +93,13 @@ def main(args):
 
         ## pngのRing画像とjson形式のlabelを作成
         train_Ring_num, val_Ring_num = make_data(
-            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log, args.savedir_path)
+            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log, args.savedir_path, args.NonRing_ratio)
         
 
         batch_size = 32
         
-        ds_train = webdataset.WebDataset("/workspace/dataset/bubble_dataset_train.tar").shuffle(1000).decode("pil").to_tuple("png", "json").map(preprocess)
-        ds_val = webdataset.WebDataset("/workspace/dataset/bubble_dataset_val.tar").shuffle(100).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_train = webdataset.WebDataset("/workspace/dataset/bubble_dataset_train.tar").shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_val = webdataset.WebDataset("/workspace/dataset/bubble_dataset_val.tar").shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
 
 
         train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, collate_fn=od_collate_fn)

@@ -15,7 +15,7 @@ import os
 import shutil
 
 
-def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedir_path):
+def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedir_path, NonRing_ratio):
     """
     学習に使用するtrain dataを作成する。
     validationは、性能を測るために固定とする。
@@ -61,7 +61,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
     
     ## NonRingのpngをcopyする。
     NonRing_origin = glob.glob('/workspace/NonRing_png/train/*.png')
-    Choice_NonRing = NonRing_rg.choice(NonRing_origin, int(train_data.shape[0])*4, replace=False)
+    Choice_NonRing = NonRing_rg.choice(NonRing_origin, int(train_data.shape[0])*NonRing_ratio, replace=False)
     for i in Choice_NonRing:
         shutil.copyfile(i, '%s/train/%s'%(save_data_path, i.split('/')[-1]))
         shutil.copyfile(i[:-3]+'json', '%s/train/%s'%(save_data_path, i.split('/')[-1][:-3]+'json'))
@@ -76,6 +76,8 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
 
     # logに記入
     print_and_log(f_log, '====================================')
+    print_and_log(f_log, 'Ring NonRing ratio = 1 : %s'%NonRing_ratio)
+    print_and_log(f_log, ' ')
     print_and_log(f_log, '(confirm nan in Train)')
     print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(train_data)))
     print_and_log(f_log, ' ')
