@@ -67,7 +67,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
         shutil.copyfile(i[:-3]+'json', '%s/train/%s'%(save_data_path, i.split('/')[-1][:-3]+'json'))
     
     ## Validationデータをcopyする。
-    shutil.copytree("/workspace/val", "%s/val"%save_data_path)
+    shutil.copytree("/workspace/val", "%s/val"%save_data_path, dirs_exist_ok= True)
 
     ## TrainとValのRingの枚数を取得
     val_Ring_num = len(glob.glob('%s/val/Ring_*.json'%save_data_path))
