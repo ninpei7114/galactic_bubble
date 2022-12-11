@@ -35,7 +35,6 @@ def od_collate_fn(batch):
     imgs = []
     for sample in batch:
         imgs.append(sample[0])
-        # print(sample[1])
         targets.append(torch.FloatTensor(sample[1]))
     imgs = np.array(imgs)
         
