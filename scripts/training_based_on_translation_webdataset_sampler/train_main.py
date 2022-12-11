@@ -101,8 +101,8 @@ def main(args):
         
         # ds_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
         # ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)
-        ds_ring_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train_ring.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("jpg", "json").map(preprocess)
-        ds_noring_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train_nonring.tar"%args.savedir_path).rsample(0.1).shuffle(1000000).decode("pil").to_tuple("jpg", "json").map(preprocess)
+        ds_ring_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train_ring.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_noring_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train_nonring.tar"%args.savedir_path).rsample(0.1).shuffle(1000000).decode("png").to_tuple("jpg", "json").map(preprocess)
         ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)
 
 
