@@ -151,17 +151,30 @@ def make_ring(spitzer_path, name, train_cfg):
                         ## データの種類を作成 ##
                         #####################
 
-
-                        ###### 並行移動 ######
-                        
-
                         if translation:
-                            for _ in range(10):
+                            for _ in range(30):
                                 m2_size = trans_rg.choice(samples)
                                 fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
                                 if fl:
-                                    append_data(trans_data, trans_info, mwp_ring_list_train, frame_mwp_train)
+                                    ###### 上下反転 ######
+                                    if 0<= _ <=10:
+                                        data_proc_flip_rot = ring_sub.data_proccessing(trans_data, fits_path, choice, trans_info['name'], 
+                                                            trans_info['xmin'], trans_info['ymin'], 
+                                                            trans_info['xmax'], trans_info['ymax'])
+                                        ud_res_data, lr_res_data, ud_info, lr_info = data_proc_flip_rot.flip_data()
+                                        append_data(ud_res_data, ud_info, mwp_ring_list_train, frame_mwp_train)
+                                        append_data(lr_res_data, lr_info, mwp_ring_list_train, frame_mwp_train)
+                                    
+                                    ###### 回転 ######
+                                    elif 10<= _ <=20:
+                                        for deg in [90, 180, 270]:
+                                            rot_data, rotate_info = data_proc.rotate_data(deg)
+                                        append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
+
+                                    ###### 並行移動 ######
+                                    else:
+                                        append_data(trans_data, trans_info, mwp_ring_list_train, frame_mwp_train)
 
                         
     frame_mwp_train = pd.DataFrame(frame_mwp_train)
