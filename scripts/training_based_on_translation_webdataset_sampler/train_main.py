@@ -40,6 +40,8 @@ def parse_args():
                         help='mini-batch size (default: 32)')
     parser.add_argument('--NonRing_ratio', default=3, type=int,
                         help='Ring / NonRing ratio (default: 3)')
+    parser.add_argument('--augmentation_ratio', default=10, type=int,
+                        help='1 Ring augmentation ratio (default: 10)')
   
     return parser.parse_args()
 
@@ -93,7 +95,8 @@ def main(args):
 
         ## pngのRing画像とjson形式のlabelを作成
         train_Ring_num, val_Ring_num = make_data(
-            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log, args.savedir_path, args.NonRing_ratio)
+            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log, 
+            args.savedir_path, args.augmentation_ratio, args.NonRing_ratio)
         
 
         batch_size_ring = 16

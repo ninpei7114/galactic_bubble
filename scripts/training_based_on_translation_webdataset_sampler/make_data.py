@@ -15,7 +15,7 @@ import os
 import shutil
 
 
-def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedir_path, NonRing_ratio):
+def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedir_path, augmentation_ratio, NonRing_ratio):
     """
     学習に使用するtrain dataを作成する。
     validationは、性能を測るために固定とする。
@@ -28,7 +28,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
     ## Trainデータの作成
     ## train_dataのshapeは、(Num, 300, 300, 3)
     ## float32
-    train_data, train_label = make_ring(spitzer_path, name, train_cfg)
+    train_data, train_label = make_ring(spitzer_path, name, train_cfg, augmentation_ratio)
 
     save_data_path = savedir_path+''.join('dataset')
     if os.path.exists(save_data_path):
