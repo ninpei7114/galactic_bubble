@@ -30,7 +30,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
     ## float32
     train_data, train_label = make_ring(spitzer_path, name, train_cfg, augmentation_ratio)
 
-    save_data_path = savedir_path+''.join('dataset')+name.split('/')[-1]
+    save_data_path = savedir_path+''.join('dataset')+'/'+name.split('/')[-1]
     if os.path.exists(save_data_path):
         pass
     else:
