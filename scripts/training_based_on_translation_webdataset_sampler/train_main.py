@@ -81,10 +81,10 @@ def main(args):
             "translation":translation
         }
 
-        name = []
+        name_ = []
         # print('flip : %s,  rotate : %s,  scale : %s, translation : %s'%(flip, rotate, scale, translation))
-        [name.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
-        name = args.savedir_path+''.join(name)
+        [name_.append(k+'_'+str(v)+'__') for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
+        name = args.savedir_path+''.join(name_)
         if os.path.exists(name):
             pass
         else:
@@ -104,9 +104,9 @@ def main(args):
         
         # ds_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
         # ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)
-        ds_ring_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train_ring.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
-        ds_noring_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train_nonring.tar"%args.savedir_path).rsample(0.1).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
-        ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_ring_train = webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_train_ring.tar"%(args.savedir_path, ''.join(name_))).shuffle(100000000000).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_noring_train = webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_train_nonring.tar"%(args.savedir_path, ''.join(name_))).rsample(0.1).shuffle(100000000000).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_val = webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_val.tar"%(args.savedir_path, ''.join(name_))).decode("pil").to_tuple("png", "json").map(preprocess)
 
 
         dl_ring_train = torch.utils.data.DataLoader(ds_ring_train, collate_fn=od_collate_fn, batch_size=batch_size_ring)
