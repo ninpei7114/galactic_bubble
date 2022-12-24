@@ -34,6 +34,10 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
     if os.path.exists(save_data_path):
         pass
     else:
+        if os.path.exists(savedir_path+''.join('dataset')):
+            pass 
+        else:
+            os.mkdir(savedir_path+''.join('dataset'))
         os.mkdir(save_data_path)
         os.mkdir(save_data_path+'/train')
         os.mkdir(save_data_path+'/train/ring')
