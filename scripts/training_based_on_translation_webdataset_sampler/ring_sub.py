@@ -56,18 +56,17 @@ class data_proccessing(object):
         
         ud_xmin_list, ud_xmax_list, ud_ymin_list, ud_ymax_list = [], [], [], []
         for i in range(len(self.xmin_list)):
-            y_max = -(self.ymin_list[i] - 0.5) + 0.5
+            y_max = 1 - self.ymin_list[i]
             x_min = self.xmin_list[i]
-            y_min = -(self.ymax_list[i] - 0.5) + 0.5
+            y_min = 1 - self.ymax_list[i]
             x_max = self.xmax_list[i]
-            if ((x_max - x_min) == 0 or (y_max - y_min) == 0 or
-                 x_max < x_min or y_max < y_min ):
-                 pass
-            else:
-                ud_xmin_list.append(x_min)
-                ud_xmax_list.append(x_max)
-                ud_ymin_list.append(y_min)
-                ud_ymax_list.append(y_max)
+
+            assert x_max >= x_min and y_max >= y_min
+
+            ud_xmin_list.append(x_min)
+            ud_xmax_list.append(x_max)
+            ud_ymin_list.append(y_min)
+            ud_ymax_list.append(y_max)
     
         ud_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':ud_xmin_list, 'xmax':ud_xmax_list, 
                     'ymin':ud_ymin_list, 'ymax':ud_ymax_list}
@@ -78,18 +77,17 @@ class data_proccessing(object):
 
         lr_xmin_list, lr_xmax_list, lr_ymin_list, lr_ymax_list = [], [], [], []
         for i in range(len(self.xmin_list)):
-            x_max = -(self.xmin_list[i] - 0.5) + 0.5
+            x_max = 1 - self.xmin_list[i]
             y_min = self.ymin_list[i]
-            x_min = -(self.xmax_list[i] - 0.5) + 0.5
+            x_min = 1 - self.xmax_list[i]
             y_max = self.ymax_list[i]
-            if ((x_max - x_min) == 0 or (y_max - y_min) == 0 or
-                 x_max < x_min or y_max < y_min ):
-                 pass
-            else:
-                lr_xmin_list.append(x_min)
-                lr_xmax_list.append(x_max)
-                lr_ymin_list.append(y_min)
-                lr_ymax_list.append(y_max)
+
+            assert x_max >= x_min and y_max >= y_min
+
+            lr_xmin_list.append(x_min)
+            lr_xmax_list.append(x_max)
+            lr_ymin_list.append(y_min)
+            lr_ymax_list.append(y_max)
         
         lr_info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':lr_xmin_list, 'xmax':lr_xmax_list, 
                     'ymin':lr_ymin_list, 'ymax':lr_ymax_list}
