@@ -179,7 +179,7 @@ def calc_collision(ll, box):
         return np.stack(true_positive), box[:,0], True # box[:,0]は、probability
 
 
-def calc_f1score(val_seikai, val_bbbb):
+def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=200):
     """
     TP1=推定したボックスのうち、正解の中心を含む個数
     FP=推定したボックスのうち、正解の中心を含まない個数
@@ -198,7 +198,10 @@ def calc_f1score(val_seikai, val_bbbb):
     threthre_noring = 0
     PRE = []
     RE = []
+    TP1_l = []
+    FP_l = []
 
+    val_bbbb = [x.cpu() for x in val_bbbb]
     for th in thresholds:
         TP1 = 0
         TP2 = 0
@@ -207,8 +210,8 @@ def calc_f1score(val_seikai, val_bbbb):
         TP2_FN = 0
         
         # detectクラスで、nm_suppressionする
-        detect = Detect(conf_thresh=th)
-        output = detect(val_bbbb[0].to('cpu'), val_bbbb[1].to('cpu'), val_bbbb[2].to('cpu'))
+        detect = Detect(conf_thresh=th, nms_thresh=jaccard, top_k=top_k)
+        output = detect(*val_bbbb)
         collisions = [calc_collision(s,b) for s,b in zip(val_seikai, output)]
         # colは面積のあたり判定
         for col, prob, flag in collisions:
@@ -234,16 +237,18 @@ def calc_f1score(val_seikai, val_bbbb):
                 idx = prob > th
                 TP1_FP_non_ring += idx.sum()
         
-        # PRE.append(TP1/TP1_FP)
-        # RE.append(TP2/TP2_FN)
+        PRE.append(TP1/TP1_FP)
+        RE.append(TP2/TP2_FN)
+        TP1_l.append(TP1)
+        FP_l.append(TP1_FP - TP1)
 
         ## f1_score_ = 2*(TP1/TP1_FP)*(TP2/TP2_FN)/(TP1/TP1_FP+TP2/TP2_FN+1e-9) 
         ## f1_score_non_ring_ = 2*(TP1/TP1_FP_non_ring)*(TP2/TP2_FN)/(TP1/TP1_FP_non_ring+TP2/TP2_FN+1e-9)
+        # print(th)
         f1_score_ = calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN)
         f1_score_non_ring_ = calc_f1_sub(TP1, TP2, TP1_FP_non_ring, TP2_FN)
         # if th == 0.2:
         #     print(f'th : {th}, TP1 : {TP1} , TP2 : {TP2}, TP1_FP : {TP1_FP}, TP2_FN  : {TP2_FN}, f1_score_ : {f1_score_}')
-
         if f1_score_>f1_score:
             f1_score = f1_score_
             threthre = th
@@ -252,12 +257,13 @@ def calc_f1score(val_seikai, val_bbbb):
             f1_score_non_ring = f1_score_non_ring_
             threthre_noring = th
     
-    return f1_score, threthre, f1_score_non_ring, threthre_noring
+    return f1_score, threthre, f1_score_non_ring, threthre_noring, PRE, RE, TP1_l, FP_l
 
 
 def calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN):
     r1 = TP1 / (TP1_FP + 1e-9)
     r2 = TP2 / (TP2_FN + 1e-9)
+    # print(f'precision : {r1}, recall : {r2}')
     return 2 * r1 * r2 / (r1 + r2 + 1e-9)
 
 

@@ -16,11 +16,11 @@ import torch
 
 def point_form(boxes):
     """ Convert prior_boxes to (xmin, ymin, xmax, ymax)
-    representation for comparison to point form ground truth data.
-    Args:
-        boxes: (tensor) center-size default boxes from priorbox layers.
-    Return:
-        boxes: (tensor) Converted xmin, ymin, xmax, ymax form of boxes.
+    jaccard係数を計算するために行う
+
+    DBoxは作成時、(cx, cy, width, height)となっている。
+    これを、(cx, cy, width, height) -> (xmin, ymin, xmax, ymax)に変換している。
+    DBoxのshapeは、torch.Size([8732, 4])
     """
     return torch.cat((boxes[:, :2] - boxes[:, 2:]/2,     # xmin, ymin
                      boxes[:, :2] + boxes[:, 2:]/2), 1)  # xmax, ymax
@@ -61,16 +61,17 @@ def intersect(box_a, box_b):
 
 
 def jaccard(box_a, box_b):
-    """Compute the jaccard overlap of two sets of boxes.  The jaccard overlap
-    is simply the intersection over union of two boxes.  Here we operate on
-    ground truth boxes and default boxes.
-    E.g.:
+    """
+    引数:
+        box_a : 正解BBox(正解座標)
+        box_b : (xmin, ymin, xmax, ymax)の並びになったDBox
+
+    正解BBoxとDBoxのjaccard係数の計算方法例：
         A ∩ B / A ∪ B = A ∩ B / (area(A) + area(B) - A ∩ B)
-    Args:
-        box_a: (tensor) Ground truth bounding boxes, Shape: [num_objects,4]
-        box_b: (tensor) Prior boxes from priorbox layers, Shape: [num_priors,4]
-    Return:
-        jaccard overlap: (tensor) Shape: [box_a.size(0), box_b.size(0)]
+
+    jaccard係数を計算する。
+    このjaccard係数を使用して、Positive DBoxとNegative DBoxに分ける。
+    対象は、正解BBoxとDBox
     """
     inter = intersect(box_a, box_b)
     area_a = ((box_a[:, 2]-box_a[:, 0]) *
@@ -82,26 +83,24 @@ def jaccard(box_a, box_b):
 
 
 def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
-    """Match each prior box with the ground truth box of the highest jaccard
-    overlap, encode the bounding boxes, then return the matched indices
-    corresponding to both confidence and location preds.
-    Args:
-        threshold: (float) The overlap threshold used when mathing boxes.
-        truths: (tensor) Ground truth boxes, Shape: [num_obj, num_priors].
-        priors: (tensor) Prior boxes from priorbox layers, Shape: [n_priors,4].
-        variances: (tensor) Variances corresponding to each prior coord,
-            Shape: [num_priors, 4].
-        labels: (tensor) All the class labels for the image, Shape: [num_obj].
-        loc_t: (tensor) Tensor to be filled w/ endcoded location targets.
-        conf_t: (tensor) Tensor to be filled w/ matched indices for conf preds.
-        idx: (int) current batch index
-    Return:
-        The matched indices corresponding to 1)location and 2)confidence preds.
     """
-    # jaccard index　　ジャックカード係数を計算
+    引数:
+        truths → 正解BBox(正解座標), shapeは[num_batch, num_objs, 4]
+        priors → DBox
+        variances → DBoxからBBoxに補正計算する際に使用する係数
+        labels → 正解BBoxのラベル(正解ラベル), shapeは[num_batch, num_objs, 1]
+        loc_t → 0のテンソル、shapeは(num_batch, num_dbox, 4)
+        conf_t → 0のテンソル、shapeは(num_batch, num_dbox)
+
+    SSDの損失関数を定義する際に、
+    まず8732個のDBoxから学習データの画像の正解BBoxと近いDBox（正解と物体クラスが一致かつ、座標情報も近いDBox）
+    を抽出する。
+    """
+    # 正解BBoxと近いジャッカード係数を計算
+    # point_form(priors)は、x_min, y_min, x_max, y_max 
     overlaps = jaccard(
         truths,
-        point_form(priors) #point_form(priors)は、x_min, y_min, x_max, y_max priorsがlabelで一つの時もあれば、二つの時もある。
+        point_form(priors) 
     )
     # (Bipartite Matching)
     # [1,num_objects] best prior for each ground truth
@@ -119,6 +118,8 @@ def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
         best_truth_idx[best_prior_idx[j]] = j
     matches = truths[best_truth_idx]          # Shape: [num_priors,4]
     conf = labels[best_truth_idx] + 1         # Shape: [num_priors]
+    # jaccard係数が0.5以上のとなる正解BBoxを持たないDBoxは、Negative DBoxとする。
+    # つまり、labelを0として背景クラスとして扱う。
     conf[best_truth_overlap < threshold] = 0  # label as background
     loc = encode(matches, priors, variances)
     loc_t[idx] = loc    # [num_priors,4] encoded offsets to learn
@@ -126,16 +127,23 @@ def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
 
 
 def encode(matched, priors, variances):
-    """Encode the variances from the priorbox layers into the ground truth boxes
-    we have matched (based on jaccard overlap) with the prior boxes.
-    Args:
+    """
+    DBoxからSSDの出力の(Δcx, Δcy, Δw, Δh)を使って、BBoxを作成する
+    引数:
         matched: (tensor) Coords of ground truth for each prior in point-form
             Shape: [num_priors, 4].
         priors: (tensor) Prior boxes in center-offset form
             Shape: [num_priors,4].
         variances: (list[float]) Variances of priorboxes
-    Return:
+        
+    返り値:
         encoded boxes (tensor), Shape: [num_priors, 4]
+    
+    cx = cx_d + 0.1* Δcx * w_d
+    cy = cy_d + 0.1* Δcy * h_d
+    w = w_d * exp(0.2 * Δw)
+    h = h_d * exp(0.2 * Δh)
+
     """
 
     # dist b/t match center and prior's center

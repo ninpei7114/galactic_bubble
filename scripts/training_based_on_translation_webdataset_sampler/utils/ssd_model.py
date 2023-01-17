@@ -834,7 +834,7 @@ class SSD(nn.Module):
         # else:  # 学習時
         
         return output, torch.cat([decode(loc[rr].to('cpu'), self.dbox_list)[None] for rr in range(loc.shape[0])], axis=0)
-            # 返り値は(loc, conf, dbox_list)のタプル
+        # 返り値は(loc, conf, dbox_list)のタプル
 
 
 class MultiBoxLoss(nn.Module):
@@ -857,7 +857,7 @@ class MultiBoxLoss(nn.Module):
 
         targets : [num_batch, num_objs, 5]
             5は正解のアノテーション情報[xmin, ymin, xmax, ymax, label_ind]を示す
-
+        targetは、正解ラベル
         Returns
         -------
         loss_l : テンソル
@@ -879,7 +879,9 @@ class MultiBoxLoss(nn.Module):
         # loc_t:各DBoxに一番近い正解のBBoxの位置情報を格納させる
         conf_t_label = torch.zeros(num_batch, num_dbox).to(self.device, dtype=torch.long)
         loc_t = torch.zeros(num_batch, num_dbox, 4).to(self.device)
-            
+        # デフォルトボックスを新たな変数で用意
+        dbox = dbox_list.to(self.device)
+        
         for idx in range(num_batch):  # ミニバッチでループ
 
             # 現在のミニバッチの正解アノテーションのBBoxとラベルを取得
@@ -897,8 +899,6 @@ class MultiBoxLoss(nn.Module):
                 #     fff.write("----------\n")
                 #     fff.write(f"{labels}\n")
 
-                # デフォルトボックスを新たな変数で用意
-                dbox = dbox_list.to(self.device)
                 variance = [0.1, 0.2]
                 # このvarianceはDBoxからBBoxに補正計算する際に使用する式の係数です
                 match(self.jaccard_thresh, truths, dbox,
