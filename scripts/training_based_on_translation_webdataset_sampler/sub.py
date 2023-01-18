@@ -1,24 +1,13 @@
-import pandas as pd
 from math import sqrt as sqrt
 from itertools import product as product
 
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-import torch.nn.functional as F
-from torch.autograd import Function
-from torchsummary import summary
-import torch.utils.data as data
-import torch.optim as optim
 
-import ast
 import numpy as np
-import time
-import random
-import matplotlib.pyplot as plt
-from sklearn.model_selection import KFold
 
-from utils.ssd_model import Detect
+from utils.ssd_model import Detect, decode_all
 
 class EarlyStopping_f1_score:
     """Early stops the training if validation loss doesn't improve after a given patience."""
@@ -100,6 +89,7 @@ class EarlyStopping:
         self.path = path
         self.trace_func = trace_func
         self.flog = flog
+
     def __call__(self, val_loss, model):
 
         score = -val_loss
@@ -201,7 +191,13 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000):
     TP1_l = []
     FP_l = []
 
-    val_bbbb = [x.cpu() for x in val_bbbb]
+    dbox_list = val_bbbb[2].cpu()
+    val_bbbb = [
+        decode_all(val_bbbb[0].cpu(), dbox_list), 
+        nn.Softmax(dim=-1)(val_bbbb[1].cpu()), 
+        dbox_list
+    ]
+
     for th in thresholds:
         TP1 = 0
         TP2 = 0
@@ -211,7 +207,7 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000):
         
         # detectクラスで、nm_suppressionする
         detect = Detect(conf_thresh=th, nms_thresh=jaccard, top_k=top_k)
-        output = detect(*val_bbbb)
+        output = detect(*val_bbbb, decoded=True, softmaxed=True)
         collisions = [calc_collision(s,b) for s,b in zip(val_seikai, output)]
         # colは面積のあたり判定
         for col, prob, flag in collisions:

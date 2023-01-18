@@ -655,7 +655,7 @@ class Detect(Function):
         self.top_k = top_k  # nm_supressionでconfの高いtop_k個を計算に使用する, top_k = 200
         self.nms_thresh = nms_thresh  # nm_supressionでIOUがnms_thresh=0.45より大きいと、同一物体へのBBoxとみなす
 
-    def __call__(self, loc_data, conf_data, dbox_list):
+    def __call__(self, loc_data, conf_data, dbox_list, decoded=False, softmaxed=False):
         """
         順伝搬の計算を実行する。
 
@@ -679,7 +679,9 @@ class Detect(Function):
         num_classes = conf_data.size(2)  # クラス数 = 21
   
         # confはソフトマックスを適用して正規化する
-        conf_data = self.softmax(conf_data)
+        # confはソフトマックスを適用して正規化する
+        if not softmaxed:
+            conf_data = self.softmax(conf_data)
 
         # 出力の型を作成する。テンソルサイズは[minibatch数, 21, 200, 5]
         output = torch.zeros(num_batch, num_classes, self.top_k, 5)
@@ -691,7 +693,10 @@ class Detect(Function):
         for i in range(num_batch):
 
             # 1. locとDBoxから修正したBBox [xmin, ymin, xmax, ymax] を求める
-            decoded_boxes = decode(loc_data[i], dbox_list)
+            if decoded:
+                decoded_boxes = loc_data[i]
+            else:
+                decoded_boxes = decode(loc_data[i], dbox_list)
 
             # confのコピーを作成
             conf_scores = conf_preds[i].clone()
