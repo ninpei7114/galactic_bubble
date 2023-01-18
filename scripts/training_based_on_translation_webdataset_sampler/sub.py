@@ -170,7 +170,7 @@ def calc_collision(ll, box):
         intersect = w*h
         IoU = intersect/(area+l_area-intersect)
 
-        # 重なりが0.75以上のbox
+        # 重なりが0.45以上のbox
         true_positive.append(IoU>0.45)
         
     if len(ll) == 0:
@@ -179,7 +179,7 @@ def calc_collision(ll, box):
         return np.stack(true_positive), box[:,0], True # box[:,0]は、probability
 
 
-def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=200):
+def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000):
     """
     TP1=推定したボックスのうち、正解の中心を含む個数
     FP=推定したボックスのうち、正解の中心を含まない個数
@@ -190,7 +190,7 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=200):
     
     """
     
-    thresholds = [i/20 for i in range(0, 20, 1)]
+    thresholds = [i/20 for i in range(1, 20, 1)]
 
     f1_score = -10000
     f1_score_non_ring = -10000
@@ -218,7 +218,7 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=200):
 
             if flag:
                 idx = prob > th
-                ## 正解boxとDBoxで、重なりが0.75以上でかつ、probが閾値を超えるもの
+                ## 正解boxとDBoxで、重なりが0.45以上でかつ、probが閾値を超えるもの
 
                 tp1 = col.any(axis=0)
                 tp2 = col.any(axis=1) # for tp2
@@ -242,13 +242,9 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=200):
         TP1_l.append(TP1)
         FP_l.append(TP1_FP - TP1)
 
-        ## f1_score_ = 2*(TP1/TP1_FP)*(TP2/TP2_FN)/(TP1/TP1_FP+TP2/TP2_FN+1e-9) 
-        ## f1_score_non_ring_ = 2*(TP1/TP1_FP_non_ring)*(TP2/TP2_FN)/(TP1/TP1_FP_non_ring+TP2/TP2_FN+1e-9)
-        # print(th)
         f1_score_ = calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN)
         f1_score_non_ring_ = calc_f1_sub(TP1, TP2, TP1_FP_non_ring, TP2_FN)
-        # if th == 0.2:
-        #     print(f'th : {th}, TP1 : {TP1} , TP2 : {TP2}, TP1_FP : {TP1_FP}, TP2_FN  : {TP2_FN}, f1_score_ : {f1_score_}')
+
         if f1_score_>f1_score:
             f1_score = f1_score_
             threthre = th
@@ -257,7 +253,7 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=200):
             f1_score_non_ring = f1_score_non_ring_
             threthre_noring = th
     
-    return f1_score, threthre, f1_score_non_ring, threthre_noring, PRE, RE, TP1_l, FP_l
+    return f1_score, threthre, f1_score_non_ring, threthre_noring#, PRE, RE, TP1_l, FP_l
 
 
 def calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN):

@@ -622,23 +622,26 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         # tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
         # tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
 
-        minxy = boxes[i, 0:2].repeat(2)
-        maxxy = boxes[i, 2:4].repeat(2)
-        clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
-        inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
-
-        # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
-        rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
-        union = (rem_areas - inter) + area[i]  # 2つのエリアのANDの面積
-        IoU = inter/union
-
-        # IoUがoverlapより小さいidxのみを残す
-        idx = idx[IoU.le(overlap)]  # leはLess than or Equal toの処理をする演算です
-        # IoUがoverlapより大きいidxは、最初に選んでkeepに格納したidxと同じ物体に対してBBoxを囲んでいるため消去
-
-    # whileのループが抜けたら終了
+        idx = update_index(area, boxes, idx, i, overlap)
 
     return keep, count
+
+
+@torch.jit.script
+def update_index(area, boxes, idx, i:int, overlap:float):
+    minxy = boxes[i,0:2].repeat(2)
+    maxxy = boxes[i,2:4].repeat(2)
+    clamped = boxes[idx].clamp(min=minxy,  max=maxxy)
+    inter = (clamped[:,2] - clamped[:,0]) * (clamped[:,3] - clamped[:,1])
+
+    # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
+    rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
+    union = (rem_areas - inter) + area[i]  # 2つのエリアのANDの面積
+    IoU = inter/union
+
+    # IoUがoverlapより小さいidxのみを残す
+    return idx[IoU.le(overlap)]  # leはLess than or Equal toの処理をする演算です
+    # IoUがoverlapより大きいidxは、最初に選んでkeepに格納したidxと同じ物体に対してBBoxを囲んでいるため消去
 
 
 # SSDの推論時にconfとlocの出力から、被りを除去したBBoxを出力する
@@ -646,7 +649,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
 
 class Detect(Function):
 
-    def __init__(self, conf_thresh=0.01, top_k=50, nms_thresh=0.45):
+    def __init__(self, conf_thresh=0.01, top_k=1000, nms_thresh=0.45):
         self.softmax = nn.Softmax(dim=-1)  # confをソフトマックス関数で正規化するために用意
         self.conf_thresh = conf_thresh  # confがconf_thresh=0.01より高いDBoxのみを扱う
         self.top_k = top_k  # nm_supressionでconfの高いtop_k個を計算に使用する, top_k = 200

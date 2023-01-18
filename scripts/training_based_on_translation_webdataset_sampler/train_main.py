@@ -137,15 +137,6 @@ def main(args):
                                 num_epochs=args.num_epoch, f=f_log, name=name, args=args, train_Ring_num=train_Ring_num)
         f_log.close()
 
-        
-        # 最もval_lossが低かった時の、正解ラベルとモデルのpredict結果
-        # np.save(name+'/train_bbbb.npy', train_bbbb)
-        # np.save(name+'/val_bbbb.npy', val_bbbb_)
-        # f = open(name+'/train_seikai.txt', 'wb')
-        # pickle.dump(train_seikai, f)
-        # f = open(name+'/val_seikai.txt', 'wb')
-        # pickle.dump(val_seikai_, f)
-
 
         ## lossの推移を描画する
         make_figure(name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val,
