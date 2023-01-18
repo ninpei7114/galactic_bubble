@@ -541,6 +541,19 @@ def decode(loc, dbox_list):
 # Non-Maximum Suppressionを行う関数
 
 
+def decode_all(loc_data, dbox_list):
+    """
+    F1 scoreを求める時に使用する。
+    Thresholdごとの計算を一本化する。
+    sub.py/calc_f1scoreで使用
+    """
+    boxes = torch.zeros_like(loc_data)
+    for i, loc in enumerate(loc_data):
+        boxes[i] = decode(loc, dbox_list) 
+    return boxes
+
+
+
 def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     """
     Non-Maximum Suppressionを行う関数。
