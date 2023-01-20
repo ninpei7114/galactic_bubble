@@ -51,22 +51,22 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
     trans_rg = default_rng(123)
 
     ## 目標の分布
-    def func(x):
-        return x**(-2) 
+    # def func(x):
+    #     return x**(-2) 
 
-    def sampling():
-        # とりうる最大値
-        k = func(0.125)
-        # loop until accepted
-        while True:
-            # sampling from the proposed distribution
-            t = trans_rg.uniform(0.125, 0.8)
-            # sampling u from [0, kq(z)]
-            u = k*trans_rg.uniform(0, 1)
-            # judge if accept
-            if(func(t) > u):
-                return t
-    samples = np.array([sampling() for i in range(1000000)])
+    # def sampling():
+    #     # とりうる最大値
+    #     k = func(0.125)
+    #     # loop until accepted
+    #     while True:
+    #         # sampling from the proposed distribution
+    #         t = trans_rg.uniform(0.125, 0.8)
+    #         # sampling u from [0, kq(z)]
+    #         u = k*trans_rg.uniform(0, 1)
+    #         # judge if accept
+    #         if(func(t) > u):
+    #             return t
+    # samples = np.array([sampling() for i in range(1000000)])
 
     for i in pbar: 
         pbar.set_description(l[i])
@@ -154,7 +154,7 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
 
                             ###### 並行移動 ######
                             if translation:                       
-                                m2_size = trans_rg.choice(samples)
+                                m2_size = trans_rg.uniform(0.125, 0.8)
                                 fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
                                 if fl:
@@ -171,7 +171,7 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
                                 if translation:
                                     pass
                                 else:
-                                    m2_size = trans_rg.choice(samples)
+                                    m2_size = trans_rg.uniform(0.125, 0.8)
                                     fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
                                 if fl:               
