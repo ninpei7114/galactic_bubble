@@ -434,8 +434,8 @@ class L2Norm(nn.Module):
         init.constant_(self.weight, self.scale)  # weightの値がすべてscale（=20）になる
 
     def forward(self, x):
-        '''38×38の特徴量に対して、512チャネルにわたって2乗和のルートを求めた
-        38×38個の値を使用し、各特徴量を正規化してから係数をかけ算する層'''
+        '''38x38の特徴量に対して、512チャネルにわたって2乗和のルートを求めた
+        38x38個の値を使用し、各特徴量を正規化してから係数をかけ算する層'''
 
         # 各チャネルにおける38×38個の特徴量のチャネル方向の2乗和を計算し、
         # さらにルートを求め、割り算して正規化する
@@ -554,7 +554,7 @@ def decode_all(loc_data, dbox_list):
 
 
 
-def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
+def nm_suppression(boxes, scores, overlap=0.45, top_k=1000):
     """
     Non-Maximum Suppressionを行う関数。
     boxesのうち被り過ぎ（overlap以上）のBBoxを削除する。
@@ -570,7 +570,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     -------
     keep : リスト
         confの降順にnmsを通過したindexが格納
-    count：int
+    count : int
         nmsを通過したBBoxの数
     """
 

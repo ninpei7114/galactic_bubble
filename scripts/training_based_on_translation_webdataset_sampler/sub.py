@@ -161,7 +161,7 @@ def calc_collision(ll, box):
         IoU = intersect/(area+l_area-intersect)
 
         # 重なりが0.45以上のbox
-        true_positive.append(IoU>0.45)
+        true_positive.append(IoU>0.7)
         
     if len(ll) == 0:
         return 0, box[:,0], False # box[:,0]は、probability

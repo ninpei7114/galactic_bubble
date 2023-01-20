@@ -124,7 +124,7 @@ def main(args):
         
         net = SSD(cfg=ssd_cfg)
 
-        criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=2, device=device)
+        criterion = MultiBoxLoss(jaccard_thresh=0.7, neg_pos=3, device=device)
         optimizer = optim.AdamW(net.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False)
         net.to(device)
 
