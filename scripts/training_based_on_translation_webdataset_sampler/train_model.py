@@ -190,7 +190,7 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
         loss_c_nega_list_train.append(loss_c_negaa_train/iteration)
         
         #### train_f1_score, train_threthre = calc_f1score(train_seikai, train_bbbb)
-        val_f1_score, val_threthre, val_f1_score_non_ring, val_threthre_noring = calc_f1score(val_seikai, val_bbbb)
+        val_f1_score, val_threthre, val_f1_score_non_ring, val_threthre_noring = calc_f1score(val_seikai, val_bbbb, iou=args.True_iou)
         #### print_and_log(f, 'train_f1_score : {:.4f}, threshold : {:.4f}\n'.format(train_f1_score, train_threthre))
         print_and_log(f, 
         'val_f1_score : {:.4f}, threshold : {:.4f}\n'.format(val_f1_score, val_threthre))

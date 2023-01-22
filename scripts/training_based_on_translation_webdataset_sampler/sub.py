@@ -128,7 +128,7 @@ def weights_init(m):
 
 
 # ll , boxは一枚の画像に対する、正解と予想
-def calc_collision(ll, box):
+def calc_collision(ll, box, iou=0.45):
     """
     ll : 正解ラベル  [xmin, ymin, xmax, ymax]。
          複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
@@ -161,7 +161,7 @@ def calc_collision(ll, box):
         IoU = intersect/(area+l_area-intersect)
 
         # 重なりが0.45以上のbox
-        true_positive.append(IoU>0.7)
+        true_positive.append(IoU>iou)
         
     if len(ll) == 0:
         return 0, box[:,0], False # box[:,0]は、probability
@@ -169,7 +169,7 @@ def calc_collision(ll, box):
         return np.stack(true_positive), box[:,0], True # box[:,0]は、probability
 
 
-def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000):
+def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.7):
     """
     TP1=推定したボックスのうち、正解の中心を含む個数
     FP=推定したボックスのうち、正解の中心を含まない個数
@@ -208,7 +208,7 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000):
         # detectクラスで、nm_suppressionする
         detect = Detect(conf_thresh=th, nms_thresh=jaccard, top_k=top_k)
         output = detect(*val_bbbb, decoded=True, softmaxed=True)
-        collisions = [calc_collision(s,b) for s,b in zip(val_seikai, output)]
+        collisions = [calc_collision(s,b, iou=iou) for s,b in zip(val_seikai, output)]
         # colは面積のあたり判定
         for col, prob, flag in collisions:
 

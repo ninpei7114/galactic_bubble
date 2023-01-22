@@ -42,6 +42,8 @@ def parse_args():
                         help='Ring / NonRing ratio (default: 3)')
     parser.add_argument('--augmentation_ratio', default=10, type=int,
                         help='1 Ring augmentation ratio (default: 10)')
+    parser.add_argument('--True_iou', default=0.6, type=float,
+                        help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.7)')
   
     return parser.parse_args()
 
@@ -124,7 +126,7 @@ def main(args):
         
         net = SSD(cfg=ssd_cfg)
 
-        criterion = MultiBoxLoss(jaccard_thresh=0.7, neg_pos=3, device=device)
+        criterion = MultiBoxLoss(jaccard_thresh=args.True_iou, neg_pos=3, device=device)
         optimizer = optim.AdamW(net.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False)
         net.to(device)
 
