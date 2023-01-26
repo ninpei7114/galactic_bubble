@@ -97,18 +97,45 @@ class data_proccessing(object):
 
 
 
-    def rotate_data(self, deg):
+    # def rotate_data(self, deg):
+    #     """
+    #     リングを回転させる。
+    #     """
+    #     tempo = copy.deepcopy(self.source_data)
+    #     rotate_cut_data = transform.rotate(tempo, deg)
+    #     xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
+
+    #     for xy_num in range(len(self.xmin_list)):
+    #         width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
+    #         center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
+    #         center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
+
+    #         new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
+    #         new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
+
+    #         xmin_list_.append(np.clip(new_center_x - width/2, 0, 1))
+    #         ymin_list_.append(np.clip(new_center_y - width/2, 0, 1))
+    #         xmax_list_.append(np.clip(new_center_x + width/2, 0, 1))
+    #         ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
+
+    #     res_data = self.norm_res(rotate_cut_data)
+    #     info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_, 
+    #                         'ymin':ymin_list_, 'ymax':ymax_list_}
+
+    #     return res_data, info
+
+    def rotate_data(self, deg, trans_data, trans_info):
         """
         リングを回転させる。
         """
-        tempo = copy.deepcopy(self.source_data)
+        tempo = copy.deepcopy(trans_data)
         rotate_cut_data = transform.rotate(tempo, deg)
         xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
 
-        for xy_num in range(len(self.xmin_list)):
-            width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
-            center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
-            center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
+        for xy_num in range(len(trans_info['xmin'])):
+            width = trans_info['xmax'][xy_num] - trans_info['xmin'][xy_num]
+            center_x = ((trans_info['xmin'][xy_num] - 0.5) + (trans_info['xmax'][xy_num] - 0.5))/2
+            center_y = ((trans_info['ymin'][xy_num] - 0.5) + (trans_info['yman'][xy_num] - 0.5))/2
 
             new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
             new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
@@ -119,7 +146,7 @@ class data_proccessing(object):
             ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
 
         res_data = self.norm_res(rotate_cut_data)
-        info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_, 
+        info = {'fits':trans_info['fits'], 'name':trans_info['name'], 'xmin':xmin_list_, 'xmax':xmax_list_, 
                             'ymin':ymin_list_, 'ymax':ymax_list_}
 
         return res_data, info

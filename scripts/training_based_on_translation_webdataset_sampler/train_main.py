@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('--augmentation_ratio', default=10, type=int,
                         help='1 Ring augmentation ratio (default: 10)')
     parser.add_argument('--True_iou', default=0.6, type=float,
-                        help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.7)')
+                        help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.6)')
   
     return parser.parse_args()
 

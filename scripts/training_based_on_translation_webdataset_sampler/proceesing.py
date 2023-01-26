@@ -23,8 +23,8 @@ def norm(data):
 
 def normalize(array):
     """
-    入力：（y, x, 2 or 3）
-    出力：（y ,x, 2 or 3）
+    入力 : (y, x, 2 or 3)
+    出力 : (y ,x, 2 or 3)
     """
     gauss_list = []
     s = array.shape[2]

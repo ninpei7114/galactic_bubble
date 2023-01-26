@@ -128,12 +128,19 @@ def weights_init(m):
 
 
 # ll , boxは一枚の画像に対する、正解と予想
-def calc_collision(ll, box, iou=0.45):
+def calc_collision(ll, box, iou=0.5):
     """
-    ll : 正解ラベル  [xmin, ymin, xmax, ymax]。
-         複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
+    1. この関数は、SSDが予想したBBoxと正解labelのBBoxの重なり率を計算する。
+        ll : 正解ラベル  [xmin, ymin, xmax, ymax]。
+             複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
          
-    box : モデルの予想結果、[[conf, xmin, ymin, xmax, ymax], [conf, xmin, ymin, xmax, ymax], -----]の配列
+        box : モデルの予想結果、[[conf, xmin, ymin, xmax, ymax], [conf, xmin, ymin, xmax, ymax], -----]の配列
+
+    2. またNon-Ring領域を正しく判断できているかの計算も行う。
+        0: 正解でも予測でもない
+        1: 正解だが予測ではない
+        2: 正解ではないが予測されている
+        3: 正解かつ予測
     """
     true_positive = []
 
@@ -143,8 +150,15 @@ def calc_collision(ll, box, iou=0.45):
     # 各boxの面積を求める。
     area = (box[:,3] - box[:,1]) * (box[:,4] - box[:,2])
 
+    ### Non-RingのF1 scoreを計算する ###
+    # x = np.zeros((300,300), np.uint8)
+    # for t_box in box:
+    #     x[int(t_box[2]*300):int(t_box[4]*300), int(t_box[1]*300):int(t_box[3]*300)] |= 2
+
     for l in ll:
-        
+
+        ## lのxminなどの順番は上記を参照
+        # x[int(l[3]*300):int(l[1]*300), int(l[2]*300):int(l[0]*300)] |= 1
         # 正解boxの面積
         l_area = (l[2] - l[0])*(l[3] - l[1])
 
@@ -162,6 +176,19 @@ def calc_collision(ll, box, iou=0.45):
 
         # 重なりが0.45以上のbox
         true_positive.append(IoU>iou)
+    
+
+    # Non_Ring_TN = (x==0).sum()
+    # Non_Ring_FN = (x==1).sum()
+    # Non_Ring_FP = (x==2).sum()
+    # Non_Ring_TP = (x==3).sum()
+
+    # Non_Ring_precision = Non_Ring_TP / (Non_Ring_TP + Non_Ring_FP)
+    # Non_Ring_recall = Non_Ring_TP / (Non_Ring_TP + Non_Ring_FN)
+
+    # Non_Ring_judge = [Non_Ring_precision, Non_Ring_recall]
+
+    # Non_Ring_judge = [Non_Ring_TP, Non_Ring_FP, Non_Ring_FN, Non_Ring_TN]
         
     if len(ll) == 0:
         return 0, box[:,0], False # box[:,0]は、probability
@@ -169,12 +196,12 @@ def calc_collision(ll, box, iou=0.45):
         return np.stack(true_positive), box[:,0], True # box[:,0]は、probability
 
 
-def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.7):
+def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.5):
     """
-    TP1=推定したボックスのうち、正解の中心を含む個数
-    FP=推定したボックスのうち、正解の中心を含まない個数
-    TP2=正解のうち、中心が推定したボックスに含まれる個数
-    FN=正解のうち、中心が推定したボックスに含まれない個数
+    TP1=推定したボックスのうち、正解と一定以上のIoUを持つ個数
+    FP=推定したボックスのうち、正解と一定以上のIoUを持たない個数
+    TP2=正解のうち、一定以上のIoUを推定したボックスと持つ個数
+    FN=正解のうち、一定以上のIoUを推定したボックスと持たない個数
     
     TP1_FP : モデルのboxの数（conf閾値適応済み）, predict showした時の赤枠
     
@@ -204,17 +231,22 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.7):
         TP1_FP = 0
         TP1_FP_non_ring = 0
         TP2_FN = 0
+
+        # TP_NonRing = 0
+        # FP_NonRing = 0
+        # FN_NonRing = 0
         
         # detectクラスで、nm_suppressionする
         detect = Detect(conf_thresh=th, nms_thresh=jaccard, top_k=top_k)
         output = detect(*val_bbbb, decoded=True, softmaxed=True)
-        collisions = [calc_collision(s,b, iou=iou) for s,b in zip(val_seikai, output)]
+        collisions = [calc_collision(s, b, iou=iou) for s,b in zip(val_seikai, output)]
         # colは面積のあたり判定
         for col, prob, flag in collisions:
-
+            ## このflagは Ring か NonRingの画像かの判断をしている
             if flag:
+
                 idx = prob > th
-                ## 正解boxとDBoxで、重なりが0.45以上でかつ、probが閾値を超えるもの
+                ## 正解boxとDBoxで、重なりがiou以上でかつ、probが閾値を超えるもの
 
                 tp1 = col.any(axis=0)
                 tp2 = col.any(axis=1) # for tp2
@@ -229,6 +261,10 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.7):
                 TP1_FP_non_ring += tp1_fp
                 TP2_FN += tp2_fn
 
+                # TP_NonRing += non_ring_judge[0]
+                # FP_NonRing += non_ring_judge[1]
+                # FN_NonRing += non_ring_judge[2]
+
             else:
                 idx = prob > th
                 TP1_FP_non_ring += idx.sum()
@@ -238,7 +274,8 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.7):
         TP1_l.append(TP1)
         FP_l.append(TP1_FP - TP1)
 
-        f1_score_ = calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN)
+
+        f1_score_ = calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN)# + calc_f1_sub(TP_NonRing, TP_NonRing, TP_NonRing+FP_NonRing, TP_NonRing+FN_NonRing)
         f1_score_non_ring_ = calc_f1_sub(TP1, TP2, TP1_FP_non_ring, TP2_FN)
 
         if f1_score_>f1_score:
