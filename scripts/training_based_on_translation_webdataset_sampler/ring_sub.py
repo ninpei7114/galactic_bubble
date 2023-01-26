@@ -135,7 +135,7 @@ class data_proccessing(object):
         for xy_num in range(len(trans_info['xmin'])):
             width = trans_info['xmax'][xy_num] - trans_info['xmin'][xy_num]
             center_x = ((trans_info['xmin'][xy_num] - 0.5) + (trans_info['xmax'][xy_num] - 0.5))/2
-            center_y = ((trans_info['ymin'][xy_num] - 0.5) + (trans_info['yman'][xy_num] - 0.5))/2
+            center_y = ((trans_info['ymin'][xy_num] - 0.5) + (trans_info['ymax'][xy_num] - 0.5))/2
 
             new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
             new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
