@@ -170,9 +170,10 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
                                 else:
                                     fl, trans_data, trans_info = data_proc.translation(row, GLON_new_min, GLON_new_max,
                                                                     GLAT_min, GLAT_max, Ring_CATA, data, label_cal, m2_size, trans_rg)
-                                for deg in [90, 180, 270]:
-                                    rot_data, rotate_info = data_proc.rotate_data(deg, trans_data, trans_info)
-                                    append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
+                                if fl:
+                                    for deg in [90, 180, 270]:
+                                        rot_data, rotate_info = data_proc.rotate_data(deg, trans_data, trans_info)
+                                        append_data(rot_data, rotate_info, mwp_ring_list_train, frame_mwp_train)
                             
                             ###### 上下反転 ######
                             if flip:
