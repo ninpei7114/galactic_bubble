@@ -136,8 +136,8 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
                         loss_c_negaa_train += loss_c_nega.to('cpu').item()
                         
                         loss.backward()  # 勾配の計算
-                        # nn.utils.clip_grad_value_(net.parameters(), clip_value=10.0)
-                        nn.utils.clip_grad_norm_(net.parameters(), clip_value=10.0)
+                        nn.utils.clip_grad_value_(net.parameters(), clip_value=10.0)
+                        # nn.utils.clip_grad_norm_(net.parameters(), clip_value=10.0)
                         # 勾配が大きくなりすぎると計算が不安定になるので、clipで最大でも勾配10.0に留める
 
                         optimizer.step()  # パラメータ更新

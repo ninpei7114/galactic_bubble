@@ -40,8 +40,8 @@ def parse_args():
                         help='mini-batch size (default: 32)')
     parser.add_argument('--NonRing_ratio', default=3, type=int,
                         help='Ring / NonRing ratio (default: 3)')
-    parser.add_argument('--augmentation_ratio', default=10, type=int,
-                        help='1 Ring augmentation ratio (default: 10)')
+    parser.add_argument('--augmentation_ratio', default=4, type=int,
+                        help='1 Ring augmentation ratio (default: 4)')
     parser.add_argument('--True_iou', default=0.6, type=float,
                         help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.6)')
   
