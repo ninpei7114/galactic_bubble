@@ -27,12 +27,20 @@ from train_model import train_model
 from sub import print_and_log
 import itertools
 
+"""
+example command:
+python /workspace/galactic_bubble/scripts/training_based_on_translation_webdataset_sampler/train_main.py 
+/dataset/spitzer_data/ /workspace/val 
+--savedir_path /workspace/webdataset_weights/webdataset_Ring_aug_4_add_rotate_try1_5/Try_${i}/ 
+--NonRing_ratio 4 --augmentation_ratio 4
+"""
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of SSD')
-    parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path', required=True, 
+    parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path', 
                         default='/dataset/spitzer_data/')
-    parser.add_argument('validation_data_path', metavar='DIR', help='validation data path', required=True,
+    parser.add_argument('--validation_data_path', metavar='DIR', help='validation data path',
                         default='/workspace/val')
     parser.add_argument('--savedir_path', metavar='DIR', 
                         default='/workspace/weights/', help='savedire path  (default: /workspace/weights/)')
@@ -44,7 +52,7 @@ def parse_args():
                         help='Ring / NonRing ratio (default: 3)')
     parser.add_argument('--augmentation_ratio', default=4, type=int,
                         help='1 Ring augmentation ratio (default: 4)')
-    parser.add_argument('--True_iou', default=0.6, type=float,
+    parser.add_argument('--True_iou', default=0.5, type=float,
                         help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.6)')
 
     parser.add_argument('--region_suffle', '-s', type=bool, required=True)
