@@ -117,7 +117,7 @@ def make_data(name, train_cfg, f_log, args):
     if args.region_suffle:
         ## 領域ごとのNonRingをcopyする。
         NonRing_origin = []
-        _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/i/*.png'%i) for i in train_l]
+        _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/*.png'%i) for i in train_l]
         [NonRing_origin.extend(i) for i in _]
         Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
         for i, k in enumerate(Choice_NonRing):
