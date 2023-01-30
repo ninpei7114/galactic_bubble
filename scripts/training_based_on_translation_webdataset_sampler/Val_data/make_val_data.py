@@ -83,7 +83,7 @@ def main(args):
     #####################
 
     pbar = tqdm(range(len(val_l)))
-    for i in range(pbar): 
+    for i in pbar: 
 
         if args.each_region:
             region_frame_mwp_val = []
