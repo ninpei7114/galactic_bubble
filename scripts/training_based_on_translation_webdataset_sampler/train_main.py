@@ -80,8 +80,8 @@ def main(args):
     }
 
     # 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentatio を作る。
-    flip_list = [False, True]
-    rotate_list = [False, True]
+    flip_list = [False] #[False, True]
+    rotate_list = [True] #[False, True]
     scale_list = [False]
     translation_list = [True]
 
