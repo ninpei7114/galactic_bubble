@@ -20,6 +20,9 @@ import NonRing_sub
 """
 webdatasetを使用するための、Non-Ringのpng画像を作成する
 さらに、json形式のlabelも作成する
+
+example command:
+python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r True
 """
 
 def parse_args():

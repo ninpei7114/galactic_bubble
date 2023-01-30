@@ -3,6 +3,7 @@ import copy
 import json
 import os
 import sys
+from tqdm import tqdm
 
 import astropy.io.fits
 import astropy.wcs
@@ -16,6 +17,12 @@ sys.path.append('../')
 import proceesing
 import val_label_calculator
 import val_ring_sub
+
+"""
+
+example command:
+python make_val_data.py /dataset/spitzer_data/ -r True
+"""
 
 
 def parse_args():
@@ -75,13 +82,15 @@ def main(args):
     ## Val-Ring作成開始 ##
     #####################
 
-    for i in range(len(val_l)): 
+    pbar = tqdm(range(len(val_l)))
+    for i in range(pbar): 
 
         if args.each_region:
             region_frame_mwp_val = []
             region_mwp_ring_list_val = []
 
         fits_path = val_l[i]
+        pbar.set_description(fits_path)
         spitzer_rfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'r.fits')[0]
         spitzer_gfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'g.fits')[0]
         spitzer_bfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'b.fits')[0]
@@ -109,7 +118,7 @@ def main(args):
         # star_listは辞書
         label_cal = val_label_calculator.label_caliculator(choice, 'val', w)
         star_dic = label_cal.all_star(Ring_cata)
-        print(fits_path)
+
         if choice == 'CH':
             Rout = 'Rout'
         else:
