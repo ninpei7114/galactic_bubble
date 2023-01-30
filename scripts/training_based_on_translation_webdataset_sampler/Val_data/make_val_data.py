@@ -21,16 +21,44 @@ import val_ring_sub
 def parse_args():
     parser = argparse.ArgumentParser(description='make validataion data for SSD')
     parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path')
-    parser.add_argument('savedir_name', metavar='DIR', help='savedir_name')
+    # parser.add_argument('savedir_name', metavar='DIR', help='savedir_name')
+    parser.add_argument('--each_region', '-r', type=bool, required=True)
   
     return parser.parse_args()
 
 
 def main(args):
 
-    val_l = ['spitzer_00900+0000_rgb','spitzer_03900+0000_rgb','spitzer_31200+0000_rgb',
-            'spitzer_34200+0000_rgb','spitzer_33900+0000_rgb',]
-    val_l = sorted(val_l)
+    ################################################
+    ## 領域ごとに作るのか、デフォルトの領域で作るのか選択 ##
+    ################################################
+
+    if args.each_region:
+        ## 各領域ごとにVal-Ringを作成する
+        ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+        val_l = [
+        'spitzer_00300+0000_rgb','spitzer_00600+0000_rgb','spitzer_00900+0000_rgb','spitzer_01200+0000_rgb',
+        'spitzer_01500+0000_rgb','spitzer_01800+0000_rgb','spitzer_02100+0000_rgb','spitzer_02400+0000_rgb',
+        'spitzer_02700+0000_rgb','spitzer_03000+0000_rgb','spitzer_03300+0000_rgb','spitzer_03600+0000_rgb',
+        'spitzer_03900+0000_rgb','spitzer_04200+0000_rgb','spitzer_04500+0000_rgb','spitzer_04800+0000_rgb',
+        'spitzer_05100+0000_rgb','spitzer_05400+0000_rgb','spitzer_05700+0000_rgb','spitzer_06000+0000_rgb',
+        'spitzer_29700+0000_rgb','spitzer_30000+0000_rgb','spitzer_30300+0000_rgb','spitzer_30600+0000_rgb',
+        'spitzer_30900+0000_rgb','spitzer_31200+0000_rgb','spitzer_31500+0000_rgb','spitzer_31800+0000_rgb',
+        'spitzer_32100+0000_rgb','spitzer_32400+0000_rgb','spitzer_32700+0000_rgb','spitzer_33000+0000_rgb',
+        'spitzer_33300+0000_rgb','spitzer_33600+0000_rgb','spitzer_33900+0000_rgb','spitzer_34200+0000_rgb',
+        'spitzer_34500+0000_rgb','spitzer_34800+0000_rgb','spitzer_35100+0000_rgb','spitzer_35400+0000_rgb',
+        'spitzer_35700+0000_rgb']
+        val_l = sorted(val_l)
+
+        if os.path.exists('/workspace/val_png/region_val_png'):
+            pass
+        else:
+            os.mkdir('/workspace/val_png/region_val_png')
+    else:
+        ## デフォルトの領域を用いて、Val-Ringを作成する
+        val_l = ['spitzer_00900+0000_rgb','spitzer_03900+0000_rgb','spitzer_31200+0000_rgb',
+                'spitzer_34200+0000_rgb','spitzer_33900+0000_rgb',]
+        val_l = sorted(val_l)
 
     # choice catalogue from 'CH' or 'MWP'
     choice = 'CH'
@@ -41,14 +69,19 @@ def main(args):
 
     frame_mwp_val = []
     mwp_ring_list_val = []
-
-    l = val_l
     val_count = 0
 
-    for i in range(len(l)): 
+    #####################
+    ## Val-Ring作成開始 ##
+    #####################
 
-        fits_path = l[i]
+    for i in range(len(val_l)): 
 
+        if args.each_region:
+            region_frame_mwp_val = []
+            region_mwp_ring_list_val = []
+
+        fits_path = val_l[i]
         spitzer_rfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'r.fits')[0]
         spitzer_gfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'g.fits')[0]
         spitzer_bfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'b.fits')[0]
@@ -58,10 +91,9 @@ def main(args):
                                 proceesing.remove_nan(spitzer_gfits.data[:,:,None]), 
                                 proceesing.remove_nan(spitzer_bfits.data[:,:,None])], axis=2)
 
-
         a = data.shape[0]
         b = data.shape[1]
-#         data[data!=data] = 0
+
         w = astropy.wcs.WCS(spitzer_rfits.header)
         GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
         GLON_max, GLAT_max = w.all_pix2world(0, a, 0) 
@@ -150,54 +182,81 @@ def main(args):
                         xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                         info = {'fits':fits_path, 'name':name_list, 'xmin':xmin_list, 'xmax':xmax_list, 
                                     'ymin':ymin_list, 'ymax':ymax_list}
-    
+                        
+                        #######################
+                        ## 完成したデータを格納 ###
+                        #######################
                         if not np.isnan(res_data.sum()):
-                            mwp_ring_list_val.append(res_data)
-                            frame_mwp_val.append(info)
-
-    frame_mwp_val = pd.DataFrame(frame_mwp_val)
-    frame_mwp_val['id']  = [i for i in range(len(frame_mwp_val))]
-
-    print('val_count  ',  val_count)
-    
-    if os.path.exists(args.savedir_name):
-        pass
-    else:
-        os.mkdir(args.savedir_name)
-
-    mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
-    for i in range(mwp_ring_list_val.shape[0]):
-        pil_image = Image.fromarray(np.uint8(mwp_ring_list_val[i]*255))
-        pil_image.save('%s/Ring_%s.png'%(args.savedir_name, i))
-    # np.save(args.savedir_name + '/val_ring.npy', mwp_ring_list_val)
-
-    for i, row in frame_mwp_val.iterrows():
-    
-        ll = []
-        if len(row['xmin'])>=1:
-            for la in range(len(row['xmin'])):
-                ll.append({"Confidence":str(0), 
-                        "XMin": str(row['xmin'][la]), "XMax": str(row['xmax'][la]), 
-                        "YMin": str(row['ymin'][la]), "YMax": str(row['ymax'][la])})
-        else:
-            ll.append({"Confidence":str(0)})
-
-        with open('%s/Ring_%s.json'%(args.savedir_name, i), 'w') as f:
-            json.dump(ll, f, indent=4)
-    # frame_mwp_val.to_csv(args.savedir_name + '/val_ring_label.csv')
-    print('array_count ', mwp_ring_list_val.shape[0])
-    
-
-    # mwp_ring_list_train_ = np.array(mwp_ring_list_train)
-    # mwp_ring_list_val_ = mwp_ring_list_val*255
-    # mwp_ring_list_val_ = np.uint8(mwp_ring_list_val_)
-    # proceesing.data_view_rectangl(25, mwp_ring_list_val_, frame_mwp_val).save(args.savedir_name + '/val_ring.pdf')
-
-    print('val_Ring_num : ', len(mwp_ring_list_val))
-    print('val_Ring_label_num : ', len(frame_mwp_val))
+                            if args.each_region:
+                                region_mwp_ring_list_val.append(res_data)
+                                region_frame_mwp_val.append(info)
+                            else:
+                                mwp_ring_list_val.append(res_data)
+                                frame_mwp_val.append(info)
         
+        ####################################
+        ## 領域ごとにRingデータを保存していく ###
+        ####################################
+        if args.each_region:
+            region_frame_mwp_val = pd.DataFrame(region_frame_mwp_val)
+            region_frame_mwp_val['id']  = [_ for _ in range(len(region_frame_mwp_val))]   
+            savedir_name = '/workspace/val_png/region_val_png/%s'%fits_path
+            if os.path.exists(savedir_name):
+                pass
+            else:
+                os.mkdir(savedir_name)
 
-        # return mwp_ring_list_val, frame_mwp_val
+            ## dataの作成
+            region_mwp_ring_list_val = np.array(region_mwp_ring_list_val).astype(np.float32)
+            for ind in range(region_mwp_ring_list_val.shape[0]):
+                pil_image = Image.fromarray(np.uint8(region_mwp_ring_list_val[ind]*255))
+                pil_image.save('%s/Ring_%s.png'%(savedir_name, ind))
+            
+            ## labelの作成
+            for ind, row in region_frame_mwp_val.iterrows():
+                ll = []
+                if len(row['xmin'])>=1:
+                    for la in range(len(row['xmin'])):
+                        ll.append({"Confidence":str(0), 
+                                "XMin": str(row['xmin'][la]), "XMax": str(row['xmax'][la]), 
+                                "YMin": str(row['ymin'][la]), "YMax": str(row['ymax'][la])})
+                else:
+                    ll.append({"Confidence":str(0)})
+
+                with open('%s/Ring_%s.json'%(savedir_name, ind), 'w') as f:
+                    json.dump(ll, f, indent=4)
+
+
+    #########################################
+    ## デフォルト領域のRingデータを保存していく ###
+    #########################################
+    if not args.each_region:
+
+        frame_mwp_val = pd.DataFrame(frame_mwp_val)
+        frame_mwp_val['id']  = [i for i in range(len(frame_mwp_val))]
+        savedir_name = '/workspace/val_png/default_val/'
+        if os.path.exists(savedir_name):
+            pass
+        else:
+            os.mkdir(savedir_name)
+
+        mwp_ring_list_val = np.array(mwp_ring_list_val).astype(np.float32)
+        for i in range(mwp_ring_list_val.shape[0]):
+            pil_image = Image.fromarray(np.uint8(mwp_ring_list_val[i]*255))
+            pil_image.save('%s/Ring_%s.png'%(savedir_name, i))
+
+        for i, row in frame_mwp_val.iterrows():
+            ll = []
+            if len(row['xmin'])>=1:
+                for la in range(len(row['xmin'])):
+                    ll.append({"Confidence":str(0), 
+                            "XMin": str(row['xmin'][la]), "XMax": str(row['xmax'][la]), 
+                            "YMin": str(row['ymin'][la]), "YMax": str(row['ymax'][la])})
+            else:
+                ll.append({"Confidence":str(0)})
+
+            with open('%s/Ring_%s.json'%(savedir_name, i), 'w') as f:
+                json.dump(ll, f, indent=4)
 
 
 if __name__ == '__main__':

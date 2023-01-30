@@ -5,7 +5,6 @@ import numpy as np
 from numpy.random import default_rng
 import pandas as pd
 
-
 import copy
 import os
 import tqdm
@@ -17,19 +16,7 @@ import ring_sub
 
 
 
-def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
-
-    train_l = [
-    'spitzer_02100+0000_rgb','spitzer_04200+0000_rgb','spitzer_33300+0000_rgb','spitzer_35400+0000_rgb',
-    'spitzer_00300+0000_rgb','spitzer_02400+0000_rgb','spitzer_04500+0000_rgb','spitzer_31500+0000_rgb',
-    'spitzer_33600+0000_rgb','spitzer_35700+0000_rgb','spitzer_00600+0000_rgb','spitzer_02700+0000_rgb',
-    'spitzer_04800+0000_rgb','spitzer_29700+0000_rgb','spitzer_31800+0000_rgb','spitzer_03000+0000_rgb',
-    'spitzer_05100+0000_rgb','spitzer_30000+0000_rgb','spitzer_32100+0000_rgb','spitzer_01200+0000_rgb',
-    'spitzer_03300+0000_rgb','spitzer_05400+0000_rgb','spitzer_30300+0000_rgb','spitzer_32400+0000_rgb',
-    'spitzer_34500+0000_rgb','spitzer_01500+0000_rgb','spitzer_03600+0000_rgb','spitzer_05700+0000_rgb',
-    'spitzer_30600+0000_rgb','spitzer_32700+0000_rgb','spitzer_34800+0000_rgb','spitzer_01800+0000_rgb',
-    'spitzer_06000+0000_rgb','spitzer_30900+0000_rgb','spitzer_33000+0000_rgb','spitzer_35100+0000_rgb']
-    train_l = sorted(train_l)
+def make_ring(name, train_cfg, args, train_l):
 
     sig1 = 1/(2*(np.log(2))**(1/2))
 
@@ -40,7 +27,6 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
     frame_mwp_train = []
     mwp_ring_list_train = []
 
-    l = train_l
     train_count = 0
     train_nan_count = 0
     pbar = tqdm.tqdm(range(len(l)))
@@ -50,30 +36,12 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
     translation = train_cfg['translation']
     trans_rg = default_rng(123)
 
-    ## 目標の分布
-    # def func(x):
-    #     return x**(-2) 
-
-    # def sampling():
-    #     # とりうる最大値
-    #     k = func(0.125)
-    #     # loop until accepted
-    #     while True:
-    #         # sampling from the proposed distribution
-    #         t = trans_rg.uniform(0.125, 0.8)
-    #         # sampling u from [0, kq(z)]
-    #         u = k*trans_rg.uniform(0, 1)
-    #         # judge if accept
-    #         if(func(t) > u):
-    #             return t
-    # samples = np.array([sampling() for i in range(1000000)])
-
     for i in pbar: 
-        pbar.set_description(l[i])
-        fits_path = l[i]
-        spitzer_rfits = astropy.io.fits.open(spitzer_path+'/'+fits_path+'/'+'r.fits')[0]
-        spitzer_gfits = astropy.io.fits.open(spitzer_path+'/'+fits_path+'/'+'g.fits')[0]
-        spitzer_bfits = astropy.io.fits.open(spitzer_path+'/'+fits_path+'/'+'b.fits')[0]
+        pbar.set_description(train_l[i])
+        fits_path = train_l[i]
+        spitzer_rfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'r.fits')[0]
+        spitzer_gfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'g.fits')[0]
+        spitzer_bfits = astropy.io.fits.open(args.spitzer_path+'/'+fits_path+'/'+'b.fits')[0]
 
         #RGBにしたいため、fitsのdataを重ねる
         data = np.concatenate([proceesing.remove_nan(spitzer_rfits.data[:,:,None]), 
@@ -150,7 +118,7 @@ def make_ring(spitzer_path, name, train_cfg, augmentation_ratio):
                         ########################
                         ## データの複数種類を作成 ##
                         ########################
-                        for _ in range(augmentation_ratio):
+                        for _ in range(args.augmentation_ratio):
                                 
                             m2_size = trans_rg.uniform(0.125, 0.8)
                             ###### 並行移動 ######

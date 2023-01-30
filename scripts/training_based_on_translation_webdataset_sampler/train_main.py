@@ -30,8 +30,10 @@ import itertools
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of SSD')
-    parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path')
-    parser.add_argument('validation_data_path', metavar='DIR', help='validation data path')
+    parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path', required=True, 
+                        default='/dataset/spitzer_data/')
+    parser.add_argument('validation_data_path', metavar='DIR', help='validation data path', required=True,
+                        default='/workspace/val')
     parser.add_argument('--savedir_path', metavar='DIR', 
                         default='/workspace/weights/', help='savedire path  (default: /workspace/weights/)')
     parser.add_argument('--num_epoch', type=int, default=300,
@@ -44,6 +46,11 @@ def parse_args():
                         help='1 Ring augmentation ratio (default: 4)')
     parser.add_argument('--True_iou', default=0.6, type=float,
                         help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.6)')
+
+    parser.add_argument('--region_suffle', '-s', type=bool, required=True)
+    parser.add_argument('--fits_index', '-i', type=int, required=True)
+    parser.add_argument('--n_splits', '-n', type=int, default=8)
+    parser.add_argument('--fits_random_state', '-r', type=int, default=123)
   
     return parser.parse_args()
 
@@ -95,10 +102,9 @@ def main(args):
         f_log = open(name+'/log.txt', 'w')
         print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s,  translation : %s'%(flip, rotate, scale, translation))
 
-        ## pngのRing画像とjson形式のlabelを作成
-        train_Ring_num, val_Ring_num = make_data(
-            args.spitzer_path, args.validation_data_path, name, train_cfg, f_log, 
-            args.savedir_path, args.augmentation_ratio, args.NonRing_ratio)
+        ## png形式のRing画像とjson形式のlabelを作成
+        train_Ring_num = make_data(
+            name, train_cfg, f_log, args)
         
 
         batch_size_ring = 16

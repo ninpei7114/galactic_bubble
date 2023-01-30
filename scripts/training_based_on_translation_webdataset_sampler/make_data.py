@@ -5,9 +5,9 @@ from sub import print_and_log
 import numpy as np
 import pandas as pd
 from numpy.random import default_rng
+from sklearn.model_selection import ShuffleSplit
 from PIL import Image
 
-import ast
 import json
 import glob
 import tarfile
@@ -15,7 +15,7 @@ import os
 import shutil
 
 
-def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedir_path, augmentation_ratio, NonRing_ratio):
+def make_data(name, train_cfg, f_log, args):
     """
     学習に使用するtrain dataを作成する。
     validationは、性能を測るために固定とする。
@@ -24,26 +24,64 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
     事前に作成して、 cpする。
 
     """
-    NonRing_rg = default_rng(123)
+    Data_rg = default_rng(123)
+
+    ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+    fits_name = [
+        'spitzer_00300+0000_rgb','spitzer_00600+0000_rgb','spitzer_00900+0000_rgb','spitzer_01200+0000_rgb',
+        'spitzer_01500+0000_rgb','spitzer_01800+0000_rgb','spitzer_02100+0000_rgb','spitzer_02400+0000_rgb',
+        'spitzer_02700+0000_rgb','spitzer_03000+0000_rgb','spitzer_03300+0000_rgb','spitzer_03600+0000_rgb',
+        'spitzer_03900+0000_rgb','spitzer_04200+0000_rgb','spitzer_04500+0000_rgb','spitzer_04800+0000_rgb',
+        'spitzer_05100+0000_rgb','spitzer_05400+0000_rgb','spitzer_05700+0000_rgb','spitzer_06000+0000_rgb',
+        'spitzer_29700+0000_rgb','spitzer_30000+0000_rgb','spitzer_30300+0000_rgb','spitzer_30600+0000_rgb',
+        'spitzer_30900+0000_rgb','spitzer_31200+0000_rgb','spitzer_31500+0000_rgb','spitzer_31800+0000_rgb',
+        'spitzer_32100+0000_rgb','spitzer_32400+0000_rgb','spitzer_32700+0000_rgb','spitzer_33000+0000_rgb',
+        'spitzer_33300+0000_rgb','spitzer_33600+0000_rgb','spitzer_33900+0000_rgb','spitzer_34200+0000_rgb',
+        'spitzer_34500+0000_rgb','spitzer_34800+0000_rgb','spitzer_35100+0000_rgb','spitzer_35400+0000_rgb',
+        'spitzer_35700+0000_rgb']
+
+    if args.region_suffle:
+        ss = ShuffleSplit(n_splits=args.n_splits, random_state=args.fits_random_state)
+        train_index, val_index = list(ss.split(list(range(len(fits_name)))))[args.fits_index]
+        train_l = [fits_name[i] for i in sorted(train_index)]
+        val_l = [fits_name[i] for i in sorted(val_index)]
+    
+    else:
+        ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+        train_l = [
+        'spitzer_02100+0000_rgb','spitzer_04200+0000_rgb','spitzer_33300+0000_rgb','spitzer_35400+0000_rgb',
+        'spitzer_00300+0000_rgb','spitzer_02400+0000_rgb','spitzer_04500+0000_rgb','spitzer_31500+0000_rgb',
+        'spitzer_33600+0000_rgb','spitzer_35700+0000_rgb','spitzer_00600+0000_rgb','spitzer_02700+0000_rgb',
+        'spitzer_04800+0000_rgb','spitzer_29700+0000_rgb','spitzer_31800+0000_rgb','spitzer_03000+0000_rgb',
+        'spitzer_05100+0000_rgb','spitzer_30000+0000_rgb','spitzer_32100+0000_rgb','spitzer_01200+0000_rgb',
+        'spitzer_03300+0000_rgb','spitzer_05400+0000_rgb','spitzer_30300+0000_rgb','spitzer_32400+0000_rgb',
+        'spitzer_34500+0000_rgb','spitzer_01500+0000_rgb','spitzer_03600+0000_rgb','spitzer_05700+0000_rgb',
+        'spitzer_30600+0000_rgb','spitzer_32700+0000_rgb','spitzer_34800+0000_rgb','spitzer_01800+0000_rgb',
+        'spitzer_06000+0000_rgb','spitzer_30900+0000_rgb','spitzer_33000+0000_rgb','spitzer_35100+0000_rgb']
+        train_l = sorted(train_l)
+
+    #####################
+    ## Trainデータの作成 ##
+    #####################
+
     ## Trainデータの作成
     ## train_dataのshapeは、(Num, 300, 300, 3)
     ## float32
-    train_data, train_label = make_ring(spitzer_path, name, train_cfg, augmentation_ratio)
+    train_data, train_label = make_ring(name, train_cfg, args, train_l)
 
-    save_data_path = savedir_path+''.join('dataset')+'/'+name.split('/')[-1]
+    ## 必要なフォルダの作成
+    save_data_path = args.savedir_path+''.join('dataset')+'/'+name.split('/')[-1]
     if os.path.exists(save_data_path):
         pass
     else:
-        if os.path.exists(savedir_path+''.join('dataset')):
+        if os.path.exists(args.savedir_path+''.join('dataset')):
             pass 
         else:
-            os.mkdir(savedir_path+''.join('dataset'))
+            os.mkdir(args.savedir_path+''.join('dataset'))
         os.mkdir(save_data_path)
         os.mkdir(save_data_path+'/train')
         os.mkdir(save_data_path+'/train/ring')
         os.mkdir(save_data_path+'/train/nonring')
-        # os.mkdir(save_data_path+'/val')
-
 
     ## Trainデータをpngファイルに変換＋保存
     for i in range(train_data.shape[0]):
@@ -52,7 +90,6 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
     
     ## Train labelをjsonに変換＋保存
     for i, row in train_label.iterrows():
-        
         ll = []
         if len(row['xmin'])>=1:
             for la in range(len(row['xmin'])):
@@ -64,16 +101,69 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
 
         with open('%s/train/ring/Ring_%s.json'%(save_data_path, i), 'w') as f:
             json.dump(ll, f, indent=4)
+
+
+    #############################################
+    ## Trainに用いるNon-Ringデータをコピー or 作成 ##
+    #############################################
     
-    ## NonRingのpngをcopyする。
-    NonRing_origin = glob.glob('/workspace/NonRing_png/train/*.png')
-    Choice_NonRing = NonRing_rg.choice(NonRing_origin, int(train_data.shape[0])*NonRing_ratio, replace=False)
-    for i in Choice_NonRing:
-        shutil.copyfile(i, '%s/train/nonring/%s'%(save_data_path, i.split('/')[-1]))
-        shutil.copyfile(i[:-3]+'json', '%s/train/nonring/%s'%(save_data_path, i.split('/')[-1][:-3]+'json'))
+    if args.region_suffle:
+        ## 領域ごとのNonRingをcopyする。
+        NonRing_origin = []
+        _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/i/*.png'%i) for i in train_l]
+        [NonRing_origin.extend(i) for i in _]
+        Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
+        for i, k in enumerate(Choice_NonRing):
+            shutil.copyfile(k, '%s/train/nonring/%s'%(save_data_path, 'NonRing_%s.png'%i))
+            shutil.copyfile(k[:-3]+'json', '%s/train/nonring/%s'%(save_data_path, 'NonRing_%s.json'%i))
+    else:
+        ## デフォルトのNonRingをcopyする。
+        NonRing_origin = glob.glob('/workspace/NonRing_png/default_NonRing_png/train/*.png')
+        Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
+        for i in Choice_NonRing:
+            shutil.copyfile(i, '%s/train/nonring/%s'%(save_data_path, i.split('/')[-1]))
+            shutil.copyfile(i[:-3]+'json', '%s/train/nonring/%s'%(save_data_path, i.split('/')[-1][:-3]+'json'))
     
-    ## Validationデータをcopyする。
-    shutil.copytree("/workspace/val", "%s/val"%save_data_path, dirs_exist_ok= True)
+
+    ###########################################
+    ## Validationに用いるRing / NonRingをコピー ##
+    ###########################################
+
+    ## ********* 各領域ごとに *********
+    if args.region_suffle:
+        ## val_lで作成された、Ring / Non-Ringをコピーしてくる。
+        ## Ringデータをコピーする。
+        Val_origin = []
+        a = [glob.glob('/workspace/val_png/region_val_png/%s/*.png'%i) for i in val_l]
+        [Val_origin.extend(i) for i in a]
+        for i, k in enumerate(Val_origin):
+            shutil.copyfile(k, '%s/val/%s'%(save_data_path, 'Ring_%s.png'%i))
+            shutil.copyfile(k[:-3]+'json', '%s/val/%s'%(save_data_path, 'Ring_%s.json'%i))
+        
+        ## Non-Ringをコピーする
+        NonRing_origin = []
+        a = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/*.png'%i) for i in val_l]
+        [NonRing_origin.extend(i) for i in a]
+        Choice_NonRing = Data_rg.choice(NonRing_origin, int(len(Val_origin))*args.NonRing_ratio, replace=False)
+        for i, k in enumerate(Choice_NonRing):
+            shutil.copyfile(k, '%s/val/%s'%(save_data_path, 'NonRing_%s.png'%i))
+            shutil.copyfile(k[:-3]+'json', '%s/val/%s'%(save_data_path, 'NonRing_%s.json'%i))
+
+
+    ## ********* デフォルト領域で *********
+    else:
+        ## Validationデータをcopyする。
+        ## Ringデータのコピー
+        shutil.copytree("/workspace/val_png/default_val", "%s/val"%save_data_path, dirs_exist_ok= True)
+
+        ## Non-Ringデータのコピー
+        Val_default_path = glob.glob('/workspace/NonRing_png/default_NonRing_png/val/*.png')
+        Choice_NonRing = Data_rg.choice(Val_default_path, 
+                        int(len(glob.glob("%s/val/*"%save_data_path)))*args.NonRing_ratio, replace=False)
+        for i, k in enumerate(Choice_NonRing):
+            shutil.copyfile(k, '%s/val/%s'%(save_data_path, 'NonRing_%s.png'%i))
+            shutil.copyfile(k[:-3]+'json', '%s/val/%s'%(save_data_path, 'NonRing_%s.json'%i))
+
 
     ## TrainとValのRingの枚数を取得
     val_Ring_num = len(glob.glob('%s/val/Ring_*.json'%save_data_path))
@@ -82,7 +172,7 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
 
     # logに記入
     print_and_log(f_log, '====================================')
-    print_and_log(f_log, 'Ring NonRing ratio = 1 : %s'%NonRing_ratio)
+    print_and_log(f_log, 'Ring NonRing ratio = 1 : %s'%args.NonRing_ratio)
     print_and_log(f_log, ' ')
     print_and_log(f_log, '(confirm nan in Train)')
     print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(train_data)))
@@ -112,4 +202,4 @@ def make_data(spitzer_path, validation_data_path, name, train_cfg, f_log, savedi
         tar.add('%s/val'%save_data_path)
 
 
-    return train_Ring_num, val_Ring_num
+    return train_Ring_num
