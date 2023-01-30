@@ -29,7 +29,7 @@ def make_ring(name, train_cfg, args, train_l):
 
     train_count = 0
     train_nan_count = 0
-    pbar = tqdm.tqdm(range(len(l)))
+    pbar = tqdm.tqdm(range(len(train_l)))
     flip = train_cfg['flip']
     rot = train_cfg['rotate']
     scale = train_cfg['scale']
