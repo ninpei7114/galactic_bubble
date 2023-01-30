@@ -138,6 +138,8 @@ def make_data(name, train_cfg, f_log, args):
 
     ## ********* 各領域ごとに *********
     if args.region_suffle:
+
+        os.mkdir('%s/val'%save_data_path)
         ## val_lで作成された、Ring / Non-Ringをコピーしてくる。
         ## Ringデータをコピーする。
         Val_origin = []
