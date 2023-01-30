@@ -47,9 +47,9 @@ def make_data(name, train_cfg, f_log, args):
         val_l = [fits_name[i] for i in sorted(val_index)]
         print_and_log(f_log, '====================================')
         print_and_log(f_log, 'train_region')
-        print_and_log(f_log, train_l)
+        print_and_log(f_log, str(train_l))
         print_and_log(f_log, 'val_region')
-        print_and_log(f_log, val_l)
+        print_and_log(f_log, str(val_l))
         print_and_log(f_log, '====================================')
         print_and_log(f_log, ' ')
     
