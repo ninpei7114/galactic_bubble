@@ -21,7 +21,7 @@ def make_data(name, train_cfg, f_log, args):
     validationは、性能を測るために固定とする。
 
     NonRing, Validationデータは毎回作成は高コストなため、
-    事前に作成して、 cpする。
+    事前に作成して、 copyする。
 
     """
     Data_rg = default_rng(123)

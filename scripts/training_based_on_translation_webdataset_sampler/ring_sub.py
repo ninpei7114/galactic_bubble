@@ -96,34 +96,6 @@ class data_proccessing(object):
 
 
 
-
-    # def rotate_data(self, deg):
-    #     """
-    #     リングを回転させる。
-    #     """
-    #     tempo = copy.deepcopy(self.source_data)
-    #     rotate_cut_data = transform.rotate(tempo, deg)
-    #     xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
-
-    #     for xy_num in range(len(self.xmin_list)):
-    #         width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
-    #         center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
-    #         center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
-
-    #         new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
-    #         new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
-
-    #         xmin_list_.append(np.clip(new_center_x - width/2, 0, 1))
-    #         ymin_list_.append(np.clip(new_center_y - width/2, 0, 1))
-    #         xmax_list_.append(np.clip(new_center_x + width/2, 0, 1))
-    #         ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
-
-    #     res_data = self.norm_res(rotate_cut_data)
-    #     info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_, 
-    #                         'ymin':ymin_list_, 'ymax':ymax_list_}
-
-    #     return res_data, info
-
     def rotate_data(self, deg, trans_data, trans_info):
         """
         リングを回転させる。
@@ -189,14 +161,48 @@ class data_proccessing(object):
 
 
     def translation(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal, m2_size, trans_rg):
+        """
+        並行移動augmentationに用いる関数
+        画像内でランダムな位置（シード値固定）にRingが入るように切り出す。
+
+        (引数)
+        GLON_new_min, GLON_new_max, GLAT_min, GLAT_max : 使用するfitsの両端の銀径銀緯座標
+        MWP       : fits内 の Ringのカタログ (Milky Way Project か Chuchwell のどちらか)
+        data      : fitsのデータ
+        label_cal : labelを求めるための関数（事前にインスタンス化している）
+        m2_size   : カタログに登録されている Ringの半径 の 何倍で切り出すかのランダム値
+        trans_rg  : default_rng
+
+        """
         random_num = 1/m2_size
 
+        ####################################################################
+        ## カタログに登録されている中心座標から半径の何倍で切り出すかをランダムに計算 ##
+        ####################################################################
+
+        ## カタログに登録されている情報は銀径銀緯なため、
+        ## pix情報に変換する必要がある。
+        ## ↓ この状態では、Ringは画像の中心に位置したまま。
         x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag= label_cal.calc_pix(row, GLON_new_min, GLON_new_max,
                                                                                         GLAT_min, GLAT_max, random_num)
-        if flag: #calc_pix時に100回試行してもできなかった場合の場合分け   
+
+        ################################################
+        ## Ringを300 x 300の画像内に、ランダムに移動させる ##
+        ################################################
+
+        ## calc_pix時に400回試行してもできなかった場合の場合分け 
+        ## 例えば、Ringがfitsの端に位置する場合は、上手く切り取れない場合がある。
+        if flag: 
             
+            ## 画像処理のconvolutionをする際に耳ができるため、
+            ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
             half_width = (x_pix_max - x_pix_min)/4
+
+            ## rはRingの半径pixを求めている
             r = int(((x_pix_max - half_width) - (x_pix_min + half_width))/(2*random_num))
+
+            ## Ringが画像にはみ出さないように、切り出す位置をずらし、
+            ## 画像内のRingの位置を変える。
             x_offset = trans_rg.uniform(-(random_num-0.5)*r, (random_num-0.5)*r)
             y_offset = trans_rg.uniform(-(random_num-0.5)*r, (random_num-0.5)*r)
             x_pix_min = x_pix_min + int(x_offset)
@@ -210,12 +216,17 @@ class data_proccessing(object):
                 return False, 0, 0
 
             else:
-            
+                ##################################################
+                ## 切り出す範囲にある他のRingのlabelとデータの画像処理 ##
+                ##################################################              
+
+                ## 切り出す範囲にある他のRingを見つける
                 label_cal.find_cover_for_translation(x_pix_min, x_pix_max, y_pix_min, y_pix_max)
                 sig1 = 1/(2*(np.log(2))**(1/2))
-
+                
+                ## データを切り出し、conv → normalize → resize
                 c_data = data[int(y_pix_min):int(y_pix_max), int(x_pix_min):int(x_pix_max)].view()
-                cut_data = copy.deepcopy(c_data)
+                cut_data = c_data.copy()
                 pi = proceesing.conv(300, sig1, cut_data)
                 res_data = self.norm_res(pi)
 
@@ -223,6 +234,7 @@ class data_proccessing(object):
                     return False, 0,  0
                     
                 else:
+                    ## 学習データに用いるlabelを作成する。
                     label_cal.make_label_for_translation(x_pix_min, y_pix_min, x_pix_max, y_pix_max, 
                                                                                         width, height, MWP)
                     xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
@@ -256,3 +268,34 @@ def catalogue(choice):
 
     else:
         print('this choice catalogu does not exist')
+
+
+
+
+
+    # def rotate_data(self, deg):
+    #     """
+    #     リングを回転させる。
+    #     """
+    #     tempo = copy.deepcopy(self.source_data)
+    #     rotate_cut_data = transform.rotate(tempo, deg)
+    #     xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
+
+    #     for xy_num in range(len(self.xmin_list)):
+    #         width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
+    #         center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
+    #         center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
+
+    #         new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
+    #         new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
+
+    #         xmin_list_.append(np.clip(new_center_x - width/2, 0, 1))
+    #         ymin_list_.append(np.clip(new_center_y - width/2, 0, 1))
+    #         xmax_list_.append(np.clip(new_center_x + width/2, 0, 1))
+    #         ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
+
+    #     res_data = self.norm_res(rotate_cut_data)
+    #     info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_, 
+    #                         'ymin':ymin_list_, 'ymax':ymax_list_}
+
+    #     return res_data, info

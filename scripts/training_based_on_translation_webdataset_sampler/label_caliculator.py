@@ -116,11 +116,13 @@ class label_caliculator(object):
 
     def calc_pix(self, row, GLON_min, GLON_max, GLAT_min, GLAT_max, scale):
         """
-        切り出す画像の範囲をここで決める
-
+        fitsデータから、学習データとして用いる画像の切り出す範囲を
+        ランダム（シード値固定）で決めていく。
         """
-        # import random
 
+        ## ccc, okは、切り出す範囲をうまく決められなかった時の
+        ## ループを抜ける条件として用いる
+        
         ccc = 0
         ok = True
         
@@ -160,65 +162,20 @@ class label_caliculator(object):
         self.height = self.y_pix_max - self.y_pix_min
         
         return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag
-    
-
-    def calc_pix_for_translation(self, row, GLON_min, GLON_max, GLAT_min, GLAT_max, scale):
-        """
-        切り出す画像の範囲をここで決める
-
-        """
-        # import random
-
-        ccc = 0
-        ok = True
-        
-        while ok:
-            if self.mode=='train':
-                # random_num = 1/np.random.uniform(0.3, 0.89) #サイズが一様ver
-                random_num = scale
-            else:
-                random_num = 1/0.89
-            lmax = row['GLON'] + random_num*row[self.Rout]/60
-            bmin = row['GLAT'] - random_num*row[self.Rout]/60
-            #右端
-            lmin = row['GLON'] - random_num*row[self.Rout]/60
-            bmax = row['GLAT'] + random_num*row[self.Rout]/60
-            ccc += 1
-            if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
-                ok = False
-                flag = True
-            if ccc>=400:
-                ok = False
-                flag = False
-            
-        #これは、リングを切り取る範囲　　
-        x_min, y_min = self.world.all_world2pix(lmax, bmin, 0)
-        x_max, y_max = self.world.all_world2pix(lmin, bmax, 0)
-        r = int((x_max - x_min)/(2*random_num))#ringの半径pixel
-        
-        self.width = x_max - x_min
-        self.height = y_max - y_min
-        
-        self.x_pix_min = x_min - self.width/2
-        self.y_pix_min = y_min - self.height/2
-        self.x_pix_max = x_max + self.width/2
-        self.y_pix_max = y_max + self.height/2
-        
-        self.width = self.x_pix_max - self.x_pix_min
-        self.height = self.y_pix_max - self.y_pix_min
-        
-        return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag, r
-
 
 
     def judge_01(self, number):
+        """
+        label付けする際に、位置labelの範囲が0-1になっていないといけない
+        この関数は、位置labelを0-1の範囲に収めるための関数
+        """
+
         if number > 1:
             return 1
         elif number<0:
             return 0
         else:
             return number
-
 
 
     def make_label(self, MWP):
@@ -234,16 +191,28 @@ class label_caliculator(object):
         self.ymax_list = []
         self.named_list = []
         MWP_name_select = MWP.index.tolist()
-        #切り出した画像にたまたま入った天体があるか、ないか
+
+        #############################################
+        ## 主体となるRing と それ以外のRing のlabel付け ##
+        #############################################
+
         if len(self.overlapp_list) == 0:
             pass
         else:
             
             for p, n in zip(self.overlapp_list, self.overlapp_name):
-                # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
-                #                           array(7673.50003014), array(4763.19998004)])
-                #のように、天体名とpostionが入っている
+                ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
+                ## ('2G0020120-0068213', 
+                ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
                 if p[0] in MWP_name_select:
+
+                    ######################################################
+                    ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
+                    ######################################################
+                    
+                    ## p[1][0]は天体の位置であり、x_pix_minはfitsから切り出すpix情報
+                    ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
+                    ## 余分に大きく切り出しているため
                     
                     xmin_c = p[1][0] - (self.x_pix_min+self.width/4)
                     ymin_c = p[1][1] - (self.y_pix_min+self.height/4)
@@ -254,13 +223,14 @@ class label_caliculator(object):
                     self.ymin_list.append(self.judge_01(ymin_c/(self.height/2)))
                     self.ymax_list.append(self.judge_01(ymax_c/(self.height/2)))
                     self.named_list.append(n)
-    
+
+                    ## ↓ この後、以下のdef check_listに入れる ↓
+
 
     def make_label_for_translation(self, x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, height, MWP):
         """
         sは、主体となるringの位置情報
-        x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ
-        主体となるringに重なっているringのindex情報、重なったringの情報はstar_listの中にある。
+        x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、fitsから切り出す際の画像のpix情報
         """
 
         self.xmin_list = []
@@ -269,17 +239,28 @@ class label_caliculator(object):
         self.ymax_list = []
         self.named_list = []
         MWP_name_select = MWP.index.tolist()
-        #切り出した画像にたまたま入った天体があるか、ないか
+
+        #############################################
+        ## 主体となるRing と それ以外のRing のlabel付け ##
+        #############################################
+
         if len(self.overlapp_list) == 0:
             pass
         else:
             
             for p, n in zip(self.overlapp_list, self.overlapp_name):
-                # pは、('2G0020120-0068213', [array(7573.50002914), array(4663.19997904), 
-                #                           array(7673.50003014), array(4763.19998004)])
-                #のように、天体名とpostionが入っている
+                ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
+                ## ('2G0020120-0068213', 
+                ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
                 if p[0] in MWP_name_select:
+
+                    ######################################################
+                    ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
+                    ######################################################
                     
+                    ## p[1][0]は天体の位置であり、x_pix_minはfitsから切り出すpix情報
+                    ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
+                    ## 余分に大きく切り出しているため
                     xmin_c = p[1][0] - (x_pix_min + width/4)
                     ymin_c = p[1][1] - (y_pix_min + height/4)
                     xmax_c = p[1][2] - (x_pix_min + width/4)
@@ -289,26 +270,78 @@ class label_caliculator(object):
                     self.ymin_list.append(self.judge_01(ymin_c/(height/2)))
                     self.ymax_list.append(self.judge_01(ymax_c/(height/2)))
                     self.named_list.append(n)
-                
-        # return xmin_list, ymin_list, xmax_list, ymax_list, named_list
 
-
+                    ## ↓ この後、以下のdef check_listに入れる ↓
+            
 
     def check_list(self):
-        xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
+        """
+        回転や反転などaugmentationのバグなどで、
+        xminとxmax、yminとymaxの大小が反転してしまっている時がある。
+        その場合、モデル学習時にエラーが発生するため、その対処として行う。
+        """
+        xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_ = [], [], [], [], []
         for xy_num in range(len(self.xmin_list)):
-            if ((self.xmax_list[xy_num] - self.xmin_list[xy_num])==0 or
-                (self.ymax_list[xy_num] - self.ymin_list[xy_num])==0):
-                pass
-            else:
-                xmin_list_.append(self.xmin_list[xy_num])
-                ymin_list_.append(self.ymin_list[xy_num])
-                xmax_list_.append(self.xmax_list[xy_num])
-                ymax_list_.append(self.ymax_list[xy_num])
+            
+            #####################################
+            ## xminとxmax, yminとymaxの大小を調査 ##
+            #####################################
+
+            assert self.xmax_list[xy_num] > self.xmin_list[xy_num] and self.ymax_list[xy_num] > self.ymin_list[xy_num]
+            xmin_list_.append(self.xmin_list[xy_num])
+            ymin_list_.append(self.ymin_list[xy_num])
+            xmax_list_.append(self.xmax_list[xy_num])
+            ymax_list_.append(self.ymax_list[xy_num])
+            name_list_.append(self.named_list[xy_num])
         
-        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, self.named_list
+        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_
 
 
+
+    # def calc_pix_for_translation(self, row, GLON_min, GLON_max, GLAT_min, GLAT_max, scale):
+    #     """
+    #     切り出す画像の範囲をここで決める
+
+    #     """
+    #     ccc = 0
+    #     ok = True
+        
+    #     while ok:
+    #         if self.mode=='train':
+    #             # random_num = 1/np.random.uniform(0.3, 0.89) #サイズが一様ver
+    #             random_num = scale
+    #         else:
+    #             random_num = 1/0.89
+    #         lmax = row['GLON'] + random_num*row[self.Rout]/60
+    #         bmin = row['GLAT'] - random_num*row[self.Rout]/60
+    #         #右端
+    #         lmin = row['GLON'] - random_num*row[self.Rout]/60
+    #         bmax = row['GLAT'] + random_num*row[self.Rout]/60
+    #         ccc += 1
+    #         if GLON_min<=lmin and lmax<=GLON_max and GLAT_min<=bmin and bmax<=GLAT_max:
+    #             ok = False
+    #             flag = True
+    #         if ccc>=400:
+    #             ok = False
+    #             flag = False
+            
+    #     #これは、リングを切り取る範囲　　
+    #     x_min, y_min = self.world.all_world2pix(lmax, bmin, 0)
+    #     x_max, y_max = self.world.all_world2pix(lmin, bmax, 0)
+    #     r = int((x_max - x_min)/(2*random_num))#ringの半径pixel
+        
+    #     self.width = x_max - x_min
+    #     self.height = y_max - y_min
+        
+    #     self.x_pix_min = x_min - self.width/2
+    #     self.y_pix_min = y_min - self.height/2
+    #     self.x_pix_max = x_max + self.width/2
+    #     self.y_pix_max = y_max + self.height/2
+        
+    #     self.width = self.x_pix_max - self.x_pix_min
+    #     self.height = self.y_pix_max - self.y_pix_min
+        
+    #     return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag, r
 
 
 
