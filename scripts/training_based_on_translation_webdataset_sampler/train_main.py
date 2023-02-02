@@ -55,8 +55,8 @@ def parse_args():
     parser.add_argument('--True_iou', default=0.5, type=float,
                         help='True IoU in MultiBoxLoss &  calc F1 score (default: 0.5)')
 
-    parser.add_argument('--region_suffle', '-s', type=bool, required=True)
-    parser.add_argument('--fits_index', '-i', type=int, required=True)
+    parser.add_argument('--region_suffle', '-s', action='store_true')
+    parser.add_argument('--fits_index', '-i', type=int)#, required=True)
     parser.add_argument('--n_splits', '-n', type=int, default=8)
     parser.add_argument('--fits_random_state', '-r', type=int, default=123)
   
