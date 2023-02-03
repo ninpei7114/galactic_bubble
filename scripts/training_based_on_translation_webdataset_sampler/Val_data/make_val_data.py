@@ -29,7 +29,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='make validataion data for SSD')
     parser.add_argument('spitzer_path', metavar='DIR', help='spitzer_path')
     # parser.add_argument('savedir_name', metavar='DIR', help='savedir_name')
-    parser.add_argument('--each_region', '-r', type=bool, required=True)
+    parser.add_argument('--each_region', '-r', action='store_true')
   
     return parser.parse_args()
 

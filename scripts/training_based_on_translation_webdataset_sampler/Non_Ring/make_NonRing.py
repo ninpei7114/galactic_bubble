@@ -28,7 +28,7 @@ python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r True
 def parse_args():
     parser = argparse.ArgumentParser(description='make data for SSD')
     parser.add_argument('fits_path', metavar='DIR', help='path to Ring_to_circle_nan_fits')
-    parser.add_argument('--each_region', '-r', type=bool, required=True)
+    parser.add_argument('--each_region', '-r', action='store_true')
     # parser.add_argument('ring_sentei_path', metavar='DIR', help='path to ring setntei file')
 
     return parser.parse_args()
