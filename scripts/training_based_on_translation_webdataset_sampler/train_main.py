@@ -109,6 +109,15 @@ def main(args):
 
         f_log = open(name+'/log.txt', 'w')
         print_and_log(f_log, 'flip : %s,  rotate : %s,  scale : %s,  translation : %s'%(flip, rotate, scale, translation))
+        print_and_log(f_log, '###################')
+        print_and_log(f_log, '  args parameters')
+        print_and_log(f_log, '###################')
+        print_and_log(f_log, 'augmentation_ratio : %s '%args.augmentation_ratio)
+        print_and_log(f_log, 'region shuffle : %s '%args.region_suffle)
+        print_and_log(f_log, 'fits_index : %s '%args.fits_index)
+        print_and_log(f_log, 'n_splits : %s '%args.n_splits)
+        print_and_log(f_log, 'fits_random_state : %s '%args.fits_random_state)
+
 
         ## png形式のRing画像とjson形式のlabelを作成
         train_Ring_num = make_data(

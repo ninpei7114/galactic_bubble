@@ -93,7 +93,7 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
             if phase == 'train':
                 net.train()  # モデルを訓練モードに
                 iter_noring = dl_noring_train.__iter__()
-                print_and_log(f, '（train）')
+                print_and_log(f, ' (train) ')
             else:
                 print('val')
                 net.eval()
