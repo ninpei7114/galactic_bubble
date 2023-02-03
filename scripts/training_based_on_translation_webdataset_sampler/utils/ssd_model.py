@@ -861,7 +861,7 @@ class SSD(nn.Module):
 class MultiBoxLoss(nn.Module):
     """SSDの損失関数のクラスです。"""
 
-    def __init__(self, jaccard_thresh=0.7, neg_pos=1, device='cpu'):
+    def __init__(self, jaccard_thresh=0.5, neg_pos=3, device='cpu'):
         super(MultiBoxLoss, self).__init__()
         self.jaccard_thresh = jaccard_thresh  # 0.5 関数matchのjaccard係数の閾値
         self.negpos_ratio = neg_pos  # 3:1 Hard Negative Miningの負と正の比率
