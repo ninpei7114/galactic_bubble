@@ -11,7 +11,7 @@ from utils.ssd_model import Detect, decode_all
 
 class EarlyStopping_f1_score:
     """Early stops the training if validation loss doesn't improve after a given patience."""
-    def __init__(self, path, flog, patience=7, verbose=False, delta=0, trace_func=print):
+    def __init__(self, path, flog, patience=10, verbose=False, delta=0, trace_func=print):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -207,7 +207,7 @@ def calc_f1score(val_seikai, val_bbbb, jaccard=0.45, top_k=1000, iou=0.5):
     
     """
     
-    thresholds = [i/20 for i in range(1, 20, 1)]
+    thresholds = [i/20 for i in range(6, 14, 1)]
 
     f1_score = -10000
     f1_score_non_ring = -10000
