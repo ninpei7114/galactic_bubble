@@ -231,14 +231,14 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
 
         if early_stopping.counter == 0:
             # np.save('train_bbbb.npy', np.concatenate(train_bbbb, axis=0))
-            f_early_ = open('train_bbbb.txt', 'wb')
+            f_early_ = open(name+'train_bbbb.txt', 'wb')
             pickle.dump(train_bbbb, f_early_)
             # np.save('val_bbbb.npy', np.concatenate(val_bbbb, axis=0))
-            f_early_ = open('val_bbbb.txt', 'wb')
+            f_early_ = open(name+'val_bbbb.txt', 'wb')
             pickle.dump(val_bbbb, f_early_)
-            f_early_ = open('train_seikai.txt', 'wb')
+            f_early_ = open(name+'train_seikai.txt', 'wb')
             pickle.dump(train_seikai, f_early_)
-            f_early_ = open('val_seikai.txt', 'wb')
+            f_early_ = open(name+'val_seikai.txt', 'wb')
             pickle.dump(val_seikai, f_early_)
     
         if early_stopping.early_stop:
