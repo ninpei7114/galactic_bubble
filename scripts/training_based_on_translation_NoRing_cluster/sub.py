@@ -126,6 +126,17 @@ def weights_init(m):
             nn.init.constant_(m.bias, 0.0)
 
 
+# 無限イテレータ
+def InfiniteIterator(loader):
+    iter = loader.__iter__()
+    while True:
+        try:
+            x = next(iter)
+        except StopIteration:
+            iter = loader.__iter__() # 終わっていたら最初に戻る
+            x = next(iter)
+        yield x
+
 
 # ll , boxは一枚の画像に対する、正解と予想
 def calc_collision(ll, box, iou=0.5):

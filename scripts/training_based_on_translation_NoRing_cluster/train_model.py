@@ -18,6 +18,7 @@ from sub import EarlyStopping_f1_score
 from sub import weights_init
 from sub import calc_f1score
 from sub import print_and_log
+from sub import InfiniteIterator
 
 
 def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_epochs, f, name, args, train_Ring_num):
@@ -104,7 +105,7 @@ def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_e
 
             if phase == 'train':
                 net.train()  # モデルを訓練モードに
-                iter_noring_list = [dliter.__iter__() for dliter in NonRing_dl_l]
+                iter_noring_list = [InfiniteIterator(dl) for dl in NonRing_dl_l]
                 # iter_noring = dl_noring_train.__iter__()
                 print_and_log(f, ' (train) ')
             else:
@@ -114,16 +115,15 @@ def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_e
             for images, targets in dataloaders_dict[phase]:
                 if phase=='train':
                     # images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
-                    no_ring_list = [next(iter_noring, None) for iter_noring in iter_noring_list]
                     # noring = next(iter_noring, None)
                     # if noring is None:
-                    if no_ring_list[0] is None:
-                        # iter_noring = dl_noring_train.__iter__() # 最後まで行っていたら最初に戻して
-                        iter_noring_list = [dliter.__iter__() for dliter in NonRing_dl_l]
-                        no_ring_list = [next(iter_noring, None) for iter_noring in iter_noring_list]
+                    # if no_ring_list[0] is None:
+                    #     # iter_noring = dl_noring_train.__iter__() # 最後まで行っていたら最初に戻して
+                    #     iter_noring_list = [dliter.__iter__() for dliter in NonRing_dl_l]
+                    #     no_ring_list = [next(iter_noring, None) for iter_noring in iter_noring_list]
                         # noring = next(iter_noring) 
-                    no_ring_image = [noring[0] for noring in no_ring_list]
-                    no_ring_target = [noring[1] for noring in no_ring_list]
+                    no_ring_image = [noring[0] for noring in iter_noring_list]
+                    no_ring_target = [noring[1] for noring in iter_noring_list]
                     images = np.concatenate((images, np.array(no_ring_image)))
                     targets = targets + no_ring_target
                     images = torch.from_numpy(images)
