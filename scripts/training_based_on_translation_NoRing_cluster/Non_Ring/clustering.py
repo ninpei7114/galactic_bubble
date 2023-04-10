@@ -46,7 +46,7 @@ def main(args):
     torch.backends.cudnn.benchmark = True
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-
+    print('Load Model....')
     net_weights = torch.load(
         args.model_checkpoint)
 
@@ -76,6 +76,7 @@ def main(args):
     net_w = net_w.vgg
     net_w.to(device)
 
+    print('Load data....')
     ## データの取得と形成
     path_list = sorted(glob.glob('%s/*/*.png'%args.NonRing_dir))
     data = []
@@ -89,6 +90,7 @@ def main(args):
     ## 画像をモデルに入力し、得られた特徴量をクラスタリングする ##
     ####################################################
 
+    print('Clustering')
     batch = np.linspace(0, data.shape[0], int(data.shape[0]/32))
 
     ## データをモデルに入力する
@@ -107,13 +109,14 @@ def main(args):
 
     ## 特徴量をクラスタリング
     features_list = np.concatenate(features_list)
-    prediction = KMeans(n_clusters=args.class_num).fit_predict(features_list.reshape(features_list.shape[0], -1))
+    prediction = KMeans(n_clusters=int(args.class_num)).fit_predict(features_list.reshape(features_list.shape[0], -1))
 
 
     ####################################
     ## Non-Ringデータをクラスごとに分ける ##
     ####################################
 
+    print('Move photo')
     for i in glob.glob('%s/*'%args.NonRing_dir):
         for k in range(args.class_num+1):
             if os.path.exists('%s/class%s'%(i, k)):
