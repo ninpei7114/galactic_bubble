@@ -20,7 +20,7 @@ import shutil
 Non-Ringをクラスタリングするためのスクリプト
 
 example command:
-python clustering.py 7 '' ''
+python clustering.py 7 /workspace/earlystopping.pth /workspace/NonRing_png/region_NonRing_png
 """
 
 def parse_args():
@@ -118,7 +118,7 @@ def main(args):
 
     print('Move photo')
     for i in glob.glob('%s/*'%args.NonRing_dir):
-        for k in range(int(args.class_num)+1):
+        for k in range(int(args.class_num)):
             if os.path.exists('%s/class%s'%(i, k)):
                 pass
             else:
