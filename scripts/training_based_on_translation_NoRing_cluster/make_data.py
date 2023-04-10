@@ -127,7 +127,7 @@ def make_data(name, train_cfg, f_log, args):
         ## 領域ごとのNonRingをcopyする。
         for cl in range(args.NonRing_class_num):
             ## NonRingのクラスの内、使用しないクラスは除外する
-            if cl in args.NonRing_remove_class:
+            if cl in args.NonRing_remove_class_list:
                 pass
             else:
                 ## Non-RingのクラスごとにNonRingをコピーしていく
