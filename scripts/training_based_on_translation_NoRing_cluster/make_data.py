@@ -45,9 +45,9 @@ def make_data(name, train_cfg, f_log, args):
         train_index, val_index = list(ss.split(list(range(len(fits_name)))))[args.fits_index]
         train_l = [fits_name[i] for i in sorted(train_index)]
         val_l = [fits_name[i] for i in sorted(val_index)]
-        print_and_log(f_log, 'This train is shuffled Train resion ')
+        print_and_log(f_log, 'This training is shuffled Training region ')
         print_and_log(f_log, '#################')
-        print_and_log(f_log, '  train_region')
+        print_and_log(f_log, '  training_region')
         print_and_log(f_log, '#################')
         print_and_log(f_log, str(train_l))
         print_and_log(f_log, ' ')
@@ -134,7 +134,10 @@ def make_data(name, train_cfg, f_log, args):
                 NonRing_origin = []
                 _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in train_l]
                 [NonRing_origin.extend(i) for i in _]
-                Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
+                if int(train_data.shape[0])*args.NonRing_ratio/(args.NonRing_class_num-len(args.NonRing_remove_class_list)) > len(NonRing_origin):
+                     Choice_NonRing = Data_rg.choice(NonRing_origin, len(NonRing_origin), replace=False)
+                else:
+                    Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
                 for i, k in enumerate(Choice_NonRing):
                     shutil.copyfile(k, '%s/train/nonring/class%s/%s'%(save_data_path, cl, 'NonRing_%s.png'%i))
                     shutil.copyfile(k[:-3]+'json', '%s/train/nonring/class%s/%s'%(save_data_path, cl, 'NonRing_%s.json'%i))
