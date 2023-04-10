@@ -130,6 +130,6 @@ def main(args):
         shutil.move(json, '/'.join(photo.split('/')[:-1])+'/class%s'%pred)
 
 
-    if __name__ == '__main__':
-        args = parse_args()
-        main(args)
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)
