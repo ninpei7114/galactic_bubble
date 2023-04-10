@@ -46,7 +46,7 @@ def main(args):
     torch.backends.cudnn.benchmark = True
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    print('Load Model....')
+    print('Loading Model....')
     net_weights = torch.load(
         args.model_checkpoint)
 
@@ -76,7 +76,7 @@ def main(args):
     net_w = net_w.vgg
     net_w.to(device)
 
-    print('Load data....')
+    print('Loading data....')
     ## データの取得と形成
     path_list = sorted(glob.glob('%s/*/*.png'%args.NonRing_dir))
     data = []
@@ -118,7 +118,7 @@ def main(args):
 
     print('Move photo')
     for i in glob.glob('%s/*'%args.NonRing_dir):
-        for k in range(args.class_num+1):
+        for k in range(int(args.class_num)+1):
             if os.path.exists('%s/class%s'%(i, k)):
                 pass
             else:
