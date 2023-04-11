@@ -131,9 +131,9 @@ def make_data(name, train_cfg, f_log, args):
                 pass
             else:
                 ## Non-RingのクラスごとにNonRingをコピーしていく
-                # NonRing_origin = []
-                NonRing_path = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in train_l]
-                # [NonRing_origin.extend(i) for i in _]
+                NonRing_path = []
+                _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in train_l]
+                [NonRing_path.extend(i) for i in _]
                 # if int(train_data.shape[0])*args.NonRing_ratio/(args.NonRing_class_num-len(args.NonRing_remove_class_list)) > len(NonRing_origin):
                 #      Choice_NonRing = Data_rg.choice(NonRing_origin, len(NonRing_origin), replace=False)
                 # else:
