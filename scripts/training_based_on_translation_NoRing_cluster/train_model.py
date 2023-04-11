@@ -11,6 +11,7 @@ from torch.nn import functional as F
 import numpy as np
 from numpy.random import default_rng
 import time
+import itertools
 
 from utils.ssd_model import Detect
 from sub import EarlyStopping
@@ -115,17 +116,10 @@ def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_e
             for images, targets in dataloaders_dict[phase]:
                 if phase=='train':
                     # images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
-                    # noring = next(iter_noring, None)
-                    # if noring is None:
-                    # if no_ring_list[0] is None:
-                    #     # iter_noring = dl_noring_train.__iter__() # 最後まで行っていたら最初に戻して
-                    #     iter_noring_list = [dliter.__iter__() for dliter in NonRing_dl_l]
-                    #     no_ring_list = [next(iter_noring, None) for iter_noring in iter_noring_list]
-                        # noring = next(iter_noring) 
-                    no_ring_image = [noring[0] for noring in iter_noring_list]
-                    no_ring_target = [noring[1] for noring in iter_noring_list]
+                    no_ring_image = [next(noring)[0] for noring in iter_noring_list]
+                    no_ring_target = [next(noring)[1] for noring in iter_noring_list]
                     images = np.concatenate((images, np.array(no_ring_image)))
-                    targets = targets + no_ring_target
+                    targets = targets + sum(no_ring_target, [])
                     images = torch.from_numpy(images)
                 else:
                     images = torch.from_numpy(images)
