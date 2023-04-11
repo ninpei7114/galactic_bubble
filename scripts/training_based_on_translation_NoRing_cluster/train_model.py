@@ -118,7 +118,7 @@ def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_e
                     # images = torch.from_numpy(train_rng.uniform(0.5, 1.8, size=(images.shape[0],1,1,1))) * images
                     no_ring_image = [next(noring)[0] for noring in iter_noring_list]
                     no_ring_target = [next(noring)[1] for noring in iter_noring_list]
-                    images = np.concatenate((images, np.array(no_ring_image)))
+                    images = np.concatenate((images, np.concatenate(no_ring_image)))
                     targets = targets + sum(no_ring_target, [])
                     images = torch.from_numpy(images)
                 else:
