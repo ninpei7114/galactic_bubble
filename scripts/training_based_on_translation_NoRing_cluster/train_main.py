@@ -122,7 +122,7 @@ def main(args):
 
 
         ## png形式のRing画像とjson形式のlabelを作成
-        train_Ring_num = make_data(
+        train_Ring_num, Non_Ring_class_num = make_data(
             name, train_cfg, f_log, args)
         
 
@@ -133,9 +133,10 @@ def main(args):
         # ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)
         ds_ring_train = webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_train_ring.tar"%(args.savedir_path, ''.join(name_))).shuffle(100000000000).decode("pil").to_tuple("png", "json").map(preprocess)
         NonRing_tar = [glob.glob("/%s/dataset/%s/bubble_dataset_train_nonring_*.tar"%(args.savedir_path, ''.join(name_)))]
+        NonRing_rsample_num  = np.clip(train_Ring_num/batch_size_ring * batch_size_nonring / np.array(Non_Ring_class_num), 0, 1)
         NonRing_web_list = [
-            webdataset.WebDataset(Nonring_tar_path).rsample(0.1).shuffle(100000000000).decode("pil").to_tuple("png", "json").map(preprocess)
-            for Nonring_tar_path in NonRing_tar]
+            webdataset.WebDataset(Nonring_tar_path).rsample(nr_rsample).shuffle(100000000000).decode("pil").to_tuple("png", "json").map(preprocess)
+            for Nonring_tar_path, nr_rsample in zip(NonRing_tar, NonRing_rsample_num)]
         ds_val = webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_val.tar"%(args.savedir_path, ''.join(name_))).decode("pil").to_tuple("png", "json").map(preprocess)
 
 
