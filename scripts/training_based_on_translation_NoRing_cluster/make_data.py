@@ -122,9 +122,10 @@ def make_data(name, train_cfg, f_log, args):
     #############################################
     ## Trainに用いるNon-Ringデータをコピー or 作成 ##
     #############################################
-    
+    Non_Ring_class_num = []
     if args.region_suffle:
         ## 領域ごとのNonRingをcopyする。
+        
         for cl in range(args.NonRing_class_num):
             ## NonRingのクラスの内、使用しないクラスは除外する
             if cl in args.NonRing_remove_class_list:
@@ -134,10 +135,7 @@ def make_data(name, train_cfg, f_log, args):
                 NonRing_path = []
                 _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in train_l]
                 [NonRing_path.extend(i) for i in _]
-                # if int(train_data.shape[0])*args.NonRing_ratio/(args.NonRing_class_num-len(args.NonRing_remove_class_list)) > len(NonRing_origin):
-                #      Choice_NonRing = Data_rg.choice(NonRing_origin, len(NonRing_origin), replace=False)
-                # else:
-                #     Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
+                Non_Ring_class_num.append(len(NonRing_path))
                 for i, k in enumerate(NonRing_path):
                     shutil.copyfile(k, '%s/train/nonring/class%s/%s'%(save_data_path, cl, 'NonRing_%s.png'%i))
                     shutil.copyfile(k[:-3]+'json', '%s/train/nonring/class%s/%s'%(save_data_path, cl, 'NonRing_%s.json'%i))
@@ -145,6 +143,7 @@ def make_data(name, train_cfg, f_log, args):
         ## デフォルトのNonRingをcopyする。
         NonRing_origin = glob.glob('/workspace/NonRing_png/default_NonRing_png/train/*.png')
         Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
+        Non_Ring_class_num.append(len(NonRing_path))
         for i in Choice_NonRing:
             shutil.copyfile(i, '%s/train/nonring/%s'%(save_data_path, i.split('/')[-1]))
             shutil.copyfile(i[:-3]+'json', '%s/train/nonring/%s'%(save_data_path, i.split('/')[-1][:-3]+'json'))
@@ -241,4 +240,4 @@ def make_data(name, train_cfg, f_log, args):
         tar.add('%s/val'%save_data_path)
 
 
-    return train_Ring_num
+    return train_Ring_num, Non_Ring_class_num
