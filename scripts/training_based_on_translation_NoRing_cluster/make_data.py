@@ -131,14 +131,14 @@ def make_data(name, train_cfg, f_log, args):
                 pass
             else:
                 ## Non-RingのクラスごとにNonRingをコピーしていく
-                NonRing_origin = []
-                _ = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in train_l]
-                [NonRing_origin.extend(i) for i in _]
-                if int(train_data.shape[0])*args.NonRing_ratio/(args.NonRing_class_num-len(args.NonRing_remove_class_list)) > len(NonRing_origin):
-                     Choice_NonRing = Data_rg.choice(NonRing_origin, len(NonRing_origin), replace=False)
-                else:
-                    Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
-                for i, k in enumerate(Choice_NonRing):
+                # NonRing_origin = []
+                NonRing_path = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in train_l]
+                # [NonRing_origin.extend(i) for i in _]
+                # if int(train_data.shape[0])*args.NonRing_ratio/(args.NonRing_class_num-len(args.NonRing_remove_class_list)) > len(NonRing_origin):
+                #      Choice_NonRing = Data_rg.choice(NonRing_origin, len(NonRing_origin), replace=False)
+                # else:
+                #     Choice_NonRing = Data_rg.choice(NonRing_origin, int(train_data.shape[0])*args.NonRing_ratio, replace=False)
+                for i, k in enumerate(NonRing_path):
                     shutil.copyfile(k, '%s/train/nonring/class%s/%s'%(save_data_path, cl, 'NonRing_%s.png'%i))
                     shutil.copyfile(k[:-3]+'json', '%s/train/nonring/class%s/%s'%(save_data_path, cl, 'NonRing_%s.json'%i))
     else:
