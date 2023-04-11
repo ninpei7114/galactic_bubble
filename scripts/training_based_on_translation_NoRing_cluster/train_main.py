@@ -30,10 +30,9 @@ import itertools
 
 """
 example command:
-python /workspace/galactic_bubble/scripts/training_based_on_translation_webdataset_sampler/train_main.py 
-/dataset/spitzer_data/ /workspace/val 
---savedir_path /workspace/webdataset_weights/webdataset_Ring_aug_4_add_rotate_try1_5/Try_${i}/ 
---NonRing_ratio 4 --augmentation_ratio 4
+python /workspace/galactic_bubble/scripts/training_based_on_translation_NoRing_cluster/train_main.py /dataset/spitzer_data/
+ --savedir_path /workspace/webdataset_weights/NonRing_clustering/change_train_Region_3_split/change_train_Region_seed_123/Change_region_0/ 
+ --NonRing_ratio 4 --augmentation_ratio 4 -s -i 0 -n 3 -r 125 --NonRing_class_num 7 --NonRing_remove_class_list 1 2 5
 """
 
 
