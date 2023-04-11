@@ -94,7 +94,7 @@ def make_data(name, train_cfg, f_log, args):
         os.mkdir(save_data_path+'/train/ring')
         os.mkdir(save_data_path+'/train/nonring')
         for cl in range(args.NonRing_class_num):
-            if cl in args.NonRing_remove_class:
+            if cl in args.NonRing_remove_class_list:
                 pass
             else:
                 os.mkdir(save_data_path+'/train/nonring/class%s'%cl)
@@ -170,7 +170,7 @@ def make_data(name, train_cfg, f_log, args):
         ## Non-Ringをコピーする
         for cl in range(args.NonRing_class_num):
             ## NonRingのクラスの内、使用しないクラスは除外する
-            if cl in args.NonRing_remove_class:
+            if cl in args.NonRing_remove_class_list:
                 pass
             else:
                 NonRing_origin = []
@@ -229,7 +229,7 @@ def make_data(name, train_cfg, f_log, args):
     
     for cl in range(args.NonRing_class_num):
         ## NonRingのクラスの内、使用しないクラスは除外する
-        if cl in args.NonRing_remove_class:
+        if cl in args.NonRing_remove_class_list:
             pass
         else:
             with tarfile.open('%s/bubble_dataset_train_nonring_class%s.tar'%(save_data_path, cl), 'w:gz') as tar:
