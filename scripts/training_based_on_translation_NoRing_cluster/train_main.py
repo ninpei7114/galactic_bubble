@@ -48,8 +48,8 @@ def parse_args():
                         help='number of total epochs to run (default: 300)')
     parser.add_argument('--batch_size', default=32, type=int,
                         help='mini-batch size (default: 32)')
-    parser.add_argument('--NonRing_ratio', default=3, type=int,
-                        help='Ring / NonRing ratio (default: 3)')
+    parser.add_argument('--NonRing_ratio', default=4, type=int,
+                        help='Ring / NonRing ratio (default: 4)')
     parser.add_argument('--augmentation_ratio', default=4, type=int,
                         help='1 Ring augmentation ratio (default: 4)')
     parser.add_argument('--True_iou', default=0.5, type=float,
@@ -61,7 +61,7 @@ def parse_args():
     parser.add_argument('--fits_random_state', '-r', type=int, default=123)
     parser.add_argument('--NonRing_class_num', type=int, default=7)
     parser.add_argument('--NonRing_remove_class_list', nargs='*', type=int)
-    parser.add_argument('--NonRing_mini_batch', type=int, default=32)
+    parser.add_argument('--NonRing_mini_batch', type=int, default=48)
   
     return parser.parse_args()
 
