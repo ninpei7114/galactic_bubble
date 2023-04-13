@@ -208,7 +208,11 @@ def make_data(name, train_cfg, f_log, args):
     print_and_log(f_log, 'Ring NonRing ratio = 1 : %s'%args.NonRing_ratio)
     print_and_log(f_log, ' ')
     print_and_log(f_log, '(confirm nan in Train)')
-    print_and_log(f_log, 'Ring_data : %s'%np.isnan(np.sum(train_data)))
+    if np.isnan(np.sum(train_data)):
+        mg = 'These data include Nan'
+    else:
+        mg = 'These data dont include Nan'
+    print_and_log(f_log, 'Ring_data : %s'%mg)
     print_and_log(f_log, ' ')
     print_and_log(f_log, '(confirm nan in Val)')
     print_and_log(f_log, ' ')
