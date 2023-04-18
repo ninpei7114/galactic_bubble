@@ -177,7 +177,11 @@ def make_data(name, train_cfg, f_log, args):
                 NonRing_origin = []
                 a = [glob.glob('/workspace/NonRing_png/region_NonRing_png/%s/class%s/*.png'%(i, cl)) for i in val_l]
                 [NonRing_origin.extend(i) for i in a]
-                Choice_NonRing = Data_rg.choice(NonRing_origin, int(len(Val_origin))*args.NonRing_ratio, replace=False)
+                if len(NonRing_origin) >= int(len(Val_origin))*args.NonRing_ratio:
+                    Choice_NonRing = Data_rg.choice(NonRing_origin, int(len(Val_origin))*args.NonRing_ratio, replace=False)
+                else:
+                    Choice_NonRing = NonRing_origin
+
                 for i, k in enumerate(Choice_NonRing):
                     shutil.copyfile(k, '%s/val/%s'%(save_data_path, 'NonRing_%s.png'%i))
                     shutil.copyfile(k[:-3]+'json', '%s/val/%s'%(save_data_path, 'NonRing_%s.json'%i))
