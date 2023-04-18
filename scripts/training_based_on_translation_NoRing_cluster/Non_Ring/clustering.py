@@ -27,8 +27,8 @@ def parse_args():
 
     ## クラス数、モデルのcheckpoint、Non-Ring画像の場所
     parser = argparse.ArgumentParser(description='make data for SSD')
-    parser.add_argument('class_num',  help='clusteringの個数 (default: 7)', 
-                        default=7)
+    parser.add_argument('class_num',  help='clusteringの個数 (default: 9)', 
+                        default=9)
     parser.add_argument('model_checkpoint',  help='特徴量を生成するためのモデルのcheckpointの場所')
     parser.add_argument('NonRing_dir',  help='NonRing画像の場所')
 
@@ -109,7 +109,7 @@ def main(args):
 
     ## 特徴量をクラスタリング
     features_list = np.concatenate(features_list)
-    prediction = KMeans(n_clusters=int(args.class_num)).fit_predict(features_list.reshape(features_list.shape[0], -1))
+    prediction = KMeans(n_clusters=int(args.class_num), random_state=123).fit_predict(features_list.reshape(features_list.shape[0], -1))
 
 
     ####################################
