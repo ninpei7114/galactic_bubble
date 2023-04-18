@@ -59,7 +59,7 @@ def parse_args():
     parser.add_argument('--fits_index', '-i', type=int)#, required=True)
     parser.add_argument('--n_splits', '-n', type=int, default=8)
     parser.add_argument('--fits_random_state', '-r', type=int, default=123)
-    parser.add_argument('--NonRing_class_num', type=int, default=7)
+    parser.add_argument('--NonRing_class_num', type=int, default=9)
     parser.add_argument('--NonRing_remove_class_list', nargs='*', type=int)
     parser.add_argument('--NonRing_mini_batch', type=int, default=48)
   
