@@ -21,7 +21,7 @@ def make_ring(name, train_cfg, args, train_l):
     sig1 = 1/(2*(np.log(2))**(1/2))
 
     # choice catalogue from 'CH' or 'MWP'
-    choice = 'CH'
+    choice = 'MWP'
     Ring_CATA = ring_sub.catalogue(choice)
 
     frame_mwp_train = []
