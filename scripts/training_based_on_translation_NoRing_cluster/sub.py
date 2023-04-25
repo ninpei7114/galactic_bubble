@@ -207,7 +207,7 @@ def calc_collision(ll, box, iou=0.5):
         return np.stack(true_positive), box[:,0], True # box[:,0]は、probability
 
 
-def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=1000, iou=0.5):
+def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=50, iou=0.5):
     """
     TP1=推定したボックスのうち、正解と一定以上のIoUを持つ個数
     FP=推定したボックスのうち、正解と一定以上のIoUを持たない個数
@@ -218,9 +218,9 @@ def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=1000, iou=0.5):
     
     """
     if mode == 'train':
-        thresholds = [i/20 for i in range(6, 14, 1)]
+        thresholds = [i/20 for i in range(6, 16, 1)]
     else:
-        thresholds = [i/20 for i in range(1, 19, 1)]
+        thresholds = [i/20 for i in range(6, 16, 1)]
 
     f1_score = -10000
     f1_score_non_ring = -10000
