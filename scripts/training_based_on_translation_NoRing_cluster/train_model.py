@@ -62,7 +62,7 @@ def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_e
     early_stopping = EarlyStopping_f1_score(patience=10, verbose=True, path=name+'/earlystopping.pth', flog=f)
     # イテレーションカウンタをセット
     logs = []
-    train_rng = default_rng(123)
+    # train_rng = default_rng(123)
 
     # epochのループ
     for epoch in range(num_epochs):
@@ -207,7 +207,7 @@ def train_model(net, dataloaders_dict, NonRing_dl_l, criterion, optimizer, num_e
         loss_c_posi_list_train.append(loss_c_posii_train/iteration)
         loss_c_nega_list_train.append(loss_c_negaa_train/iteration)
         
-        train_f1_score, train_threthre, train_f1_score_non_ring, train_threthre_noring = calc_f1score(train_seikai, train_bbbb, mode='train',iou=args.True_iou, top_k=100)
+        train_f1_score, train_threthre, train_f1_score_non_ring, train_threthre_noring = calc_f1score(train_seikai, train_bbbb, mode='train',iou=args.True_iou, top_k=50)
         val_f1_score, val_threthre, val_f1_score_non_ring, val_threthre_noring = calc_f1score(val_seikai, val_bbbb, mode='val', iou=args.True_iou)
 
         print_and_log(f, 
