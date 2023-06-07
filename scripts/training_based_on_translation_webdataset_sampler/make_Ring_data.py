@@ -120,7 +120,7 @@ def make_ring(name, train_cfg, args, train_l):
                         ########################
                         for _ in range(args.augmentation_ratio):
                                 
-                            m2_size = trans_rg.uniform(0.125, 0.8)
+                            m2_size = trans_rg.uniform(0.125, 1)
                             ###### 並行移動 ######
                             if translation:                       
                                 
