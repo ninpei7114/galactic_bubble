@@ -108,11 +108,6 @@ def make_ring(name, train_cfg, args, train_l):
                             "ymax": ymax_list,
                         }
 
-                        def append_data(data, info, data_list, frame):
-                            if not np.isnan(data.sum()):
-                                data_list.append(data)
-                                frame.append(info)
-
                         #######################
                         ## Ring augmentation ##
                         #######################
@@ -136,11 +131,12 @@ def make_ring(name, train_cfg, args, train_l):
                             ###### 並行移動 ######
                             if translation:
                                 fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
+                                trans_data_ = trans_data.copy()
                                 ## データやlabelの作成に不備があれば、fl=False(例えば、xmin<0や、xmin=xmaxなど)
                                 ## 問題がなければ、fl=True
                                 if fl:
                                     append_data(
-                                        processing.norm_res(trans_data),
+                                        processing.norm_res(trans_data_),
                                         trans_info,
                                         mwp_ring_list_train,
                                         frame_mwp_train,
@@ -240,3 +236,9 @@ def make_ring(name, train_cfg, args, train_l):
     print("train_Ring_label_num : ", len(frame_mwp_train))
 
     return mwp_ring_list_train, frame_mwp_train
+
+
+def append_data(data, info, data_list, frame):
+    if not np.isnan(data.sum()):
+        data_list.append(data)
+        frame.append(info)

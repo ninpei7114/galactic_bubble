@@ -21,7 +21,7 @@ def translation(
 
     (引数)
     GLON_new_min, GLON_new_max, GLAT_min, GLAT_max : 使用するfitsの両端の銀径銀緯座標
-    MWP       : fits内 の Ringのカタログ (Milky Way Project か Chuchwell のどちらか)
+    Ring_catalogue       : fits内 の Ringのカタログ (Milky Way Project か Chuchwell のどちらか)
     data      : fitsのデータ
     label_cal : labelを求めるための関数（事前にインスタンス化している）
     m2_size   : カタログに登録されている Ringの半径 の 何倍で切り出すかのランダム値
@@ -50,7 +50,6 @@ def translation(
         ## 画像処理のconvolutionをする際に耳ができるため、
         ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
         half_width = (x_pix_max - x_pix_min) / 4
-
         ## rはRingの半径pixを求めている
         r = int(((x_pix_max - half_width) - (x_pix_min + half_width)) / (2 * random_num))
 
@@ -73,7 +72,13 @@ def translation(
 
             ## 切り出す範囲にある他のRingを見つける
             # label_cal.find_cover_for_translation(x_pix_min, x_pix_max, y_pix_min, y_pix_max)
-            label_cal.find_cover()
+            pix_info = {
+                "x_pix_min": x_pix_min,
+                "x_pix_max": x_pix_max,
+                "y_pix_min": y_pix_min,
+                "y_pix_max": y_pix_max,
+            }
+            label_cal.find_cover(pix_info)
             sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
 
             ## データを切り出し、conv → normalize → resize
