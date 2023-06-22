@@ -41,7 +41,9 @@ def parse_args():
     parser.add_argument("--batch_size", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--NonRing_ratio", default=3, type=int, help="Ring / NonRing ratio (default: 3)")
     parser.add_argument("--augmentation_ratio", default=4, type=int, help="1 Ring augmentation ratio (default: 4)")
-    parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss &  calc F1 score (default: 0.5)")
+    parser.add_argument(
+        "--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss &  calc F1 score (default: 0.5)"
+    )
 
     parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
@@ -67,8 +69,8 @@ def main(args):
     }
 
     # 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentatio を作る。
-    flip_list = [True, False]  # [False, True]
-    rotate_list = [True, False]  # [False, True]
+    flip_list = [True]  # [False, True]
+    rotate_list = [True]  # [False, True]
     scale_list = [False]
     translation_list = [True]
 
@@ -77,7 +79,9 @@ def main(args):
     else:
         os.mkdir(args.savedir_path)
 
-    for flip, rotate, scale, translation in itertools.product(flip_list, rotate_list, scale_list, translation_list):  # , translation_list):
+    for flip, rotate, scale, translation in itertools.product(
+        flip_list, rotate_list, scale_list, translation_list
+    ):  # , translation_list):
         train_cfg = {"flip": flip, "rotate": rotate, "scale": scale, "translation": translation}
 
         name_ = []
@@ -90,7 +94,9 @@ def main(args):
             os.mkdir(name)
 
         f_log = open(name + "/log.txt", "w")
-        print_and_log(f_log, "flip : %s,  rotate : %s,  scale : %s,  translation : %s" % (flip, rotate, scale, translation))
+        print_and_log(
+            f_log, "flip : %s,  rotate : %s,  scale : %s,  translation : %s" % (flip, rotate, scale, translation)
+        )
         print_and_log(f_log, "###################")
         print_and_log(f_log, "  args parameters")
         print_and_log(f_log, "###################")
@@ -109,20 +115,35 @@ def main(args):
         # ds_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
         # ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)
         ds_ring_train = (
-            webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_train_ring.tar" % (args.savedir_path, "".join(name_))).shuffle(100000000000).decode("pil").to_tuple("png", "json").map(preprocess)
+            webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_train_ring.tar" % (args.savedir_path, "".join(name_)))
+            .shuffle(100000000000)
+            .decode("pil")
+            .to_tuple("png", "json")
+            .map(preprocess)
         )
         ds_noring_train = (
-            webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_train_nonring.tar" % (args.savedir_path, "".join(name_)))
+            webdataset.WebDataset(
+                "/%s/dataset/%s/bubble_dataset_train_nonring.tar" % (args.savedir_path, "".join(name_))
+            )
             .rsample(0.1)
             .shuffle(100000000000)
             .decode("pil")
             .to_tuple("png", "json")
             .map(preprocess)
         )
-        ds_val = webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_val.tar" % (args.savedir_path, "".join(name_))).decode("pil").to_tuple("png", "json").map(preprocess)
+        ds_val = (
+            webdataset.WebDataset("/%s/dataset/%s/bubble_dataset_val.tar" % (args.savedir_path, "".join(name_)))
+            .decode("pil")
+            .to_tuple("png", "json")
+            .map(preprocess)
+        )
 
-        dl_ring_train = torch.utils.data.DataLoader(ds_ring_train, collate_fn=od_collate_fn, batch_size=batch_size_ring)
-        dl_noring_train = torch.utils.data.DataLoader(ds_noring_train, collate_fn=od_collate_fn, batch_size=batch_size_nonring)
+        dl_ring_train = torch.utils.data.DataLoader(
+            ds_ring_train, collate_fn=od_collate_fn, batch_size=batch_size_ring
+        )
+        dl_noring_train = torch.utils.data.DataLoader(
+            ds_noring_train, collate_fn=od_collate_fn, batch_size=batch_size_nonring
+        )
         dl_val = torch.utils.data.DataLoader(ds_val, collate_fn=od_collate_fn, batch_size=32)
 
         print_and_log(f_log, " ")
@@ -135,7 +156,9 @@ def main(args):
         net = SSD(cfg=ssd_cfg)
 
         criterion = MultiBoxLoss(jaccard_thresh=args.True_iou, neg_pos=3, device=device)
-        optimizer = optim.AdamW(net.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False)
+        optimizer = optim.AdamW(
+            net.parameters(), lr=1e-4, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.001, amsgrad=False
+        )
         net.to(device)
 
         # train_bbbb, val_bbbb_, train_seikai, val_seikai_,\
@@ -162,7 +185,9 @@ def main(args):
         f_log.close()
 
         ## lossの推移を描画する
-        make_figure(name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val, train_f1_score, val_f1_score)
+        make_figure(
+            name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val, train_f1_score, val_f1_score
+        )
 
 
 if __name__ == "__main__":

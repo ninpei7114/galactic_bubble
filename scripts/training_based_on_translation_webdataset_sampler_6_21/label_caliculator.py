@@ -17,14 +17,13 @@ class label_caliculator(object):
         """
 
         self.star_dic = {}
-
         for _, row in dataframe.iterrows():
             lmax = row["GLON"] + row[self.Rout] / 60
             bmin = row["GLAT"] - row[self.Rout] / 60
-            # 右端
+            ## 右端
             lmin = row["GLON"] - row[self.Rout] / 60
             bmax = row["GLAT"] + row[self.Rout] / 60
-            # これは、リングを切り取る範囲　　切り取る範囲はRoutの3倍
+            ## これは、リングを切り取る範囲　　切り取る範囲はRoutの3倍
             x_pix_min, y_pix_min = self.world.all_world2pix(lmax, bmin, 0)
             x_pix_max, y_pix_max = self.world.all_world2pix(lmin, bmax, 0)
 
@@ -61,7 +60,6 @@ class label_caliculator(object):
         # これは、リングを切り取る範囲
         x_min, y_min = self.world.all_world2pix(lmax, bmin, 0)
         x_max, y_max = self.world.all_world2pix(lmin, bmax, 0)
-        r = int((x_max - x_min) / (2 * random_num))  # ringの半径pixel
 
         self.width = x_max - x_min
         self.height = y_max - y_min
@@ -178,7 +176,6 @@ class label_caliculator(object):
                     self.ymin_list.append(self.judge_01(ymin_c / (self.height / 2)))
                     self.ymax_list.append(self.judge_01(ymax_c / (self.height / 2)))
                     self.named_list.append(n)
-                ## ↓ この後、以下のdef check_listに入れる ↓
 
     def check_list(self):
         """

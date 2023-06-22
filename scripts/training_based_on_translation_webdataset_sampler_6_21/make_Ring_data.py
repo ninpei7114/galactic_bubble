@@ -118,6 +118,8 @@ def make_ring(name, train_cfg, args, train_l):
                         #######################
                         for _ in range(args.augmentation_ratio):
                             # m2_size = trans_rg.uniform(0.125, 1)
+                            label_cal_for_trans = label_caliculator.label_caliculator(choice_catalogue, w)
+                            label_cal_for_trans.all_star(Ring_cata)
                             trans_params = {
                                 "row": row,
                                 "fits_path": fits_path,
@@ -127,7 +129,7 @@ def make_ring(name, train_cfg, args, train_l):
                                 "GLAT_max": GLAT_max,
                                 "MWP": Ring_CATA,
                                 "data": data,
-                                "label_cal": label_cal,
+                                "label_cal": label_cal_for_trans,
                                 "trans_rg": trans_rg,
                             }
 
@@ -147,12 +149,6 @@ def make_ring(name, train_cfg, args, train_l):
                             ###### 回転 ######
                             if rot:
                                 if translation:
-                                    rotate_fl_count = 0
-                                    while not fl:
-                                        fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
-                                        rotate_fl_count += 1
-                                        if rotate_fl_count > 100:
-                                            break
                                     if fl:
                                         for deg in [90, 180, 270]:
                                             rot_data, rotate_info = ring_augmentation.rotate_data(
@@ -179,12 +175,6 @@ def make_ring(name, train_cfg, args, train_l):
                             ###### 上下反転 ######
                             if flip:
                                 if translation:
-                                    flip_fl_count = 0
-                                    while not fl:
-                                        fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
-                                        flip_fl_count += 1
-                                        if flip_fl_count > 100:
-                                            break
                                     if fl:
                                         ud_res_data, lr_res_data, ud_info, lr_info = ring_augmentation.flip_data(
                                             trans_data, trans_info

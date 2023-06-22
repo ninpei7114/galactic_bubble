@@ -78,7 +78,6 @@ def translation(row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, 
             c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
             cut_data = c_data.copy()
             pi = processing.conv(300, sig1, cut_data)
-            # res_data = self.norm_res(pi)
 
             if np.isnan(pi.sum()):
                 return False, 0, 0
