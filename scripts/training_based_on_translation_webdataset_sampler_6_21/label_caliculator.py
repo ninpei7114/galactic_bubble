@@ -78,40 +78,44 @@ class label_caliculator(object):
         """
         切り出した画像の中に、他のリングが入っていないか確かめる。
         入っていたら、ラベル付けする
-        star_listはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
+        star_dicはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
         """
         ## x_pix_maxなどは、convolutionを考えて幅の1/4大きめに設定しているため
         ## widthを計算して、正確な切り出し範囲を算出する
         width = (self.x_pix_max - self.x_pix_min) / 4
-        hight = (self.y_pix_max - self.y_pix_min) / 4
+        height = (self.y_pix_max - self.y_pix_min) / 4
         ## 切り出す全体の面積
-        g_area = ((self.x_pix_max - width) - (self.x_pix_min + width)) * (
-            (self.y_pix_max - hight) - (self.y_pix_min + hight)
-        )
+        # g_area = ((self.x_pix_max - width) - (self.x_pix_min + width)) * (
+        #     (self.y_pix_max - height) - (self.y_pix_min + height)
+        # )
 
         self.overlapp_list = []
         self.overlapp_name = []
         for d in self.star_dic.items():
-            s_xmin = d[1][0]
-            s_xmax = d[1][2]
-            s_ymin = d[1][1]
-            s_ymax = d[1][3]
-            xx = np.array([s_xmin, s_xmax])
-            yy = np.array([s_ymin, s_ymax])
+            ## 各リングの位置情報
+            star_xmin = d[1][0]
+            star_xmax = d[1][2]
+            star_ymin = d[1][1]
+            star_ymax = d[1][3]
+            xx = np.array([star_xmin, star_xmax])
+            yy = np.array([star_ymin, star_ymax])
+            ## リングの本当の面積
+            star_area = (xx[1] - xx[0]) * (yy[1] - yy[0])
 
-            ## それぞれのリングが、切り出す範囲に入っているかを見る
-            c_xx = np.clip(xx, self.x_pix_min + width, self.x_pix_max - width)
-            c_yy = np.clip(yy, self.y_pix_min + hight, self.y_pix_max - hight)
-            s_width = c_xx[1] - c_xx[0] + 1e-9
-            s_height = c_yy[1] - c_yy[0] + 1e-9
-            c_area = (c_xx[1] - c_xx[0]) * (c_yy[1] - c_yy[0])
+            ## 切り出す範囲内での対象リングの面積
+            ## リングが切り出す範囲外なら、0になる
+            clip_xx = np.clip(xx, self.x_pix_min + width, self.x_pix_max - width)
+            clip_yy = np.clip(yy, self.y_pix_min + height, self.y_pix_max - height)
+            clip_width = clip_xx[1] - clip_xx[0] + 1e-9
+            clip_height = clip_yy[1] - clip_yy[0] + 1e-9
+            clip_area = (clip_xx[1] - clip_xx[0]) * (clip_yy[1] - clip_yy[0])
 
-            ## 場合分け、全体に対してringが1/9以上入っていないといけない
+            ## 場合分け、全体に対してringが1/3以上入っていないといけない
             ## width/height比が1/3以上でないとlabel付けしない
             if (
-                c_area >= g_area * 1 / 9
-                and s_height / (s_width + 1e-9) > 1 / 3
-                and s_width / (s_height + 1e-9) > 1 / 3
+                clip_area >= star_area * 1 / 3
+                and clip_height / (clip_width + 1e-9) > 1 / 3
+                and clip_width / (clip_height + 1e-9) > 1 / 3
             ):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
