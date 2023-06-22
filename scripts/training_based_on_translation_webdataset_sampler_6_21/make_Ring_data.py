@@ -131,10 +131,10 @@ def make_ring(name, train_cfg, args, train_l):
                             ###### 並行移動 ######
                             if translation:
                                 fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
-                                trans_data_ = trans_data.copy()
                                 ## データやlabelの作成に不備があれば、fl=False(例えば、xmin<0や、xmin=xmaxなど)
                                 ## 問題がなければ、fl=True
                                 if fl:
+                                    trans_data_ = trans_data.copy()
                                     append_data(
                                         processing.norm_res(trans_data_),
                                         trans_info,
