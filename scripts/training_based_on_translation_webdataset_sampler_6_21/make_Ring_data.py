@@ -60,7 +60,7 @@ def make_ring(name, train_cfg, args, train_l):
         GLON_new_max = GLON_center + 1.5
 
         Ring_catalogue = Ring_CATALOGUE.query("@GLON_new_min < GLON <= @GLON_new_max")
-        Ring_catalogue = Ring_cata.reset_index()
+        Ring_catalogue = Ring_catalogue.reset_index()
         train_count += len(Ring_catalogue)
 
         ## star_listは辞書
