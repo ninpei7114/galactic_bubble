@@ -12,7 +12,9 @@ import processing
 """
 
 
-def translation(row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, MWP, data, label_cal, trans_rg):
+def translation(
+    row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, Ring_catalogue, data, label_cal, trans_rg
+):
     """
     並行移動augmentationに用いる関数
     画像内でランダムな位置（シード値固定）にRingが入るように切り出す。
@@ -84,7 +86,7 @@ def translation(row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, 
 
             else:
                 ## 学習データに用いるlabelを作成する。
-                label_cal.make_label(MWP)
+                label_cal.make_label(Ring_catalogue)
                 xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                 # xmin_list, ymin_list, xmax_list, ymax_list, name_list, label_flag = label_cal.check_list()
                 # if label_flag:

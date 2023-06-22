@@ -18,7 +18,7 @@ def make_ring(name, train_cfg, args, train_l):
 
     ## choice catalogue from 'CH' or 'MWP'
     choice_catalogue = "CH"
-    Ring_CATA = ring_augmentation.catalogue(choice_catalogue)
+    Ring_CATALOGUE = ring_augmentation.catalogue(choice_catalogue)
 
     frame_mwp_train = []
     mwp_ring_list_train = []
@@ -59,15 +59,15 @@ def make_ring(name, train_cfg, args, train_l):
         GLON_new_min = GLON_center - 1.5
         GLON_new_max = GLON_center + 1.5
 
-        Ring_cata = Ring_CATA.query("@GLON_new_min < GLON <= @GLON_new_max")
-        Ring_cata = Ring_cata.reset_index()
-        train_count += len(Ring_cata)
+        Ring_catalogue = Ring_CATALOGUE.query("@GLON_new_min < GLON <= @GLON_new_max")
+        Ring_catalogue = Ring_cata.reset_index()
+        train_count += len(Ring_catalogue)
 
         ## star_listは辞書
         label_cal = label_caliculator.label_caliculator(choice_catalogue, w)
-        label_cal.all_star(Ring_cata)
+        label_cal.all_star(Ring_catalogue)
 
-        for _, row in Ring_cata.iterrows():
+        for _, row in Ring_catalogue.iterrows():
             x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
                 row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, 1
             )
@@ -90,7 +90,7 @@ def make_ring(name, train_cfg, args, train_l):
                         ########################
                         pi = processing.conv(300, sig1, cut_data)
                         pi_ = copy.deepcopy(pi)
-                        label_cal.make_label(Ring_CATA)
+                        label_cal.make_label(Ring_catalogue)
                         r_shape_y = pi_.shape[0]
                         r_shape_x = pi_.shape[1]
                         res_data = pi_[
@@ -119,7 +119,7 @@ def make_ring(name, train_cfg, args, train_l):
                         for _ in range(args.augmentation_ratio):
                             # m2_size = trans_rg.uniform(0.125, 1)
                             label_cal_for_trans = label_caliculator.label_caliculator(choice_catalogue, w)
-                            label_cal_for_trans.all_star(Ring_cata)
+                            label_cal_for_trans.all_star(Ring_catalogue)
                             trans_params = {
                                 "row": row,
                                 "fits_path": fits_path,
@@ -127,7 +127,7 @@ def make_ring(name, train_cfg, args, train_l):
                                 "GLON_new_max": GLON_new_max,
                                 "GLAT_min": GLAT_min,
                                 "GLAT_max": GLAT_max,
-                                "MWP": Ring_CATA,
+                                "Ring_catalogue": Ring_catalogue,
                                 "data": data,
                                 "label_cal": label_cal_for_trans,
                                 "trans_rg": trans_rg,
