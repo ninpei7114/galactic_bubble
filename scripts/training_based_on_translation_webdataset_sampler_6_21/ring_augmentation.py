@@ -87,6 +87,8 @@ def translation(row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, 
                 ## 学習データに用いるlabelを作成する。
                 label_cal.make_label(MWP)
                 xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
+                # xmin_list, ymin_list, xmax_list, ymax_list, name_list, label_flag = label_cal.check_list()
+                # if label_flag:
                 info = {
                     "fits": fits_path,
                     "name": name_list,
@@ -96,6 +98,9 @@ def translation(row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, 
                     "ymax": ymax_list,
                 }
                 return True, pi, info
+                # else:
+                #     return False, 0, 0
+
     else:
         return False, 0, 0
 

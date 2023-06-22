@@ -81,7 +81,6 @@ def make_ring(name, train_cfg, args, train_l):
                 else:
                     c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
                     cut_data = copy.deepcopy(c_data)
-
                     if np.isnan(cut_data.sum()):
                         pass
 
@@ -89,7 +88,6 @@ def make_ring(name, train_cfg, args, train_l):
                         ########################
                         ## 普通に切り出したリング ##
                         ########################
-
                         pi = processing.conv(300, sig1, cut_data)
                         pi_ = copy.deepcopy(pi)
                         label_cal.make_label(Ring_CATA)

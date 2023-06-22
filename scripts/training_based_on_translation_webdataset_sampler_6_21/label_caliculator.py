@@ -86,8 +86,10 @@ class label_caliculator(object):
         ## widthを計算して、正確な切り出し範囲を算出する
         width = (self.x_pix_max - self.x_pix_min) / 4
         hight = (self.y_pix_max - self.y_pix_min) / 4
-
-        # g_area = ((x_pix_max-width)-(x_pix_min+width))*((y_pix_max-hight)-(y_pix_min+hight))
+        ## 切り出す全体の面積
+        g_area = ((self.x_pix_max - width) - (self.x_pix_min + width)) * (
+            (self.y_pix_max - hight) - (self.y_pix_min + hight)
+        )
 
         self.overlapp_list = []
         self.overlapp_name = []
@@ -96,27 +98,25 @@ class label_caliculator(object):
             s_xmax = d[1][2]
             s_ymin = d[1][1]
             s_ymax = d[1][3]
-
             xx = np.array([s_xmin, s_xmax])
             yy = np.array([s_ymin, s_ymax])
+
             ## それぞれのリングが、切り出す範囲に入っているかを見る
             c_xx = np.clip(xx, self.x_pix_min + width, self.x_pix_max - width)
             c_yy = np.clip(yy, self.y_pix_min + hight, self.y_pix_max - hight)
             s_width = c_xx[1] - c_xx[0] + 1e-9
             s_height = c_yy[1] - c_yy[0] + 1e-9
-            s_area = (xx[1] - xx[0]) * (yy[1] - yy[0])
             c_area = (c_xx[1] - c_xx[0]) * (c_yy[1] - c_yy[0])
 
-            # 場合分け、全体に対してringが1/9以上入っていないといけない
-            # width/height比が1/3以上でないとlabel付けしない
+            ## 場合分け、全体に対してringが1/9以上入っていないといけない
+            ## width/height比が1/3以上でないとlabel付けしない
             if (
-                c_area >= s_area * 1 / 9
+                c_area >= g_area * 1 / 9
                 and s_height / (s_width + 1e-9) > 1 / 3
                 and s_width / (s_height + 1e-9) > 1 / 3
             ):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
-
             else:
                 pass
 
@@ -125,7 +125,6 @@ class label_caliculator(object):
         label付けする際に、位置labelの範囲が0-1になっていないといけない
         この関数は、位置labelを0-1の範囲に収めるための関数
         """
-
         if number > 1:
             return 1
         elif number < 0:
@@ -150,34 +149,35 @@ class label_caliculator(object):
         #############################################
         ## 主体となるRing と それ以外のRing のlabel付け ##
         #############################################
-        # ## overlapp_listには主体となるRingとそれ以外のRingが入っている。
-        # if len(self.overlapp_list) == 0:
-        #     pass
-        # else:
-        assert len(self.overlapp_list) == 0
-        for p, n in zip(self.overlapp_list, self.overlapp_name):
-            ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
-            ## ('2G0020120-0068213',
-            ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
-            if p[0] in MWP_name_select:
-                ######################################################
-                ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
-                ######################################################
+        ## overlapp_listには主体となるRingとそれ以外のRingが入っている。
+        if len(self.overlapp_list) == 0:
+            # self.flag = False
+            pass
+        else:
+            # assert len(self.overlapp_list) == 0
+            # self.flag = True
+            for p, n in zip(self.overlapp_list, self.overlapp_name):
+                ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
+                ## ('2G0020120-0068213',
+                ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
+                if p[0] in MWP_name_select:
+                    ######################################################
+                    ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
+                    ######################################################
 
-                ## p[1][0]は天体の位置であり、x_pix_minはfitsから切り出すpix情報
-                ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
-                ## 余分に大きく切り出しているため
+                    ## p[1][0]は天体の位置であり、x_pix_minはfitsから切り出すpix情報
+                    ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
+                    ## 余分に大きく切り出しているため
 
-                xmin_c = p[1][0] - (self.x_pix_min + self.width / 4)
-                ymin_c = p[1][1] - (self.y_pix_min + self.height / 4)
-                xmax_c = p[1][2] - (self.x_pix_min + self.width / 4)
-                ymax_c = p[1][3] - (self.y_pix_min + self.height / 4)
-                self.xmin_list.append(self.judge_01(xmin_c / (self.width / 2)))
-                self.xmax_list.append(self.judge_01(xmax_c / (self.width / 2)))
-                self.ymin_list.append(self.judge_01(ymin_c / (self.height / 2)))
-                self.ymax_list.append(self.judge_01(ymax_c / (self.height / 2)))
-                self.named_list.append(n)
-
+                    xmin_c = p[1][0] - (self.x_pix_min + self.width / 4)
+                    ymin_c = p[1][1] - (self.y_pix_min + self.height / 4)
+                    xmax_c = p[1][2] - (self.x_pix_min + self.width / 4)
+                    ymax_c = p[1][3] - (self.y_pix_min + self.height / 4)
+                    self.xmin_list.append(self.judge_01(xmin_c / (self.width / 2)))
+                    self.xmax_list.append(self.judge_01(xmax_c / (self.width / 2)))
+                    self.ymin_list.append(self.judge_01(ymin_c / (self.height / 2)))
+                    self.ymax_list.append(self.judge_01(ymax_c / (self.height / 2)))
+                    self.named_list.append(n)
                 ## ↓ この後、以下のdef check_listに入れる ↓
 
     def check_list(self):
@@ -199,7 +199,7 @@ class label_caliculator(object):
             ymax_list_.append(self.ymax_list[xy_num])
             name_list_.append(self.named_list[xy_num])
 
-        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_
+        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_  # , self.flag
 
     # def find_cover_for_translation(self, x_pix_min, x_pix_max, y_pix_min, y_pix_max):
     #     """
