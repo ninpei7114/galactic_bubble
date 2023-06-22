@@ -47,7 +47,7 @@ def make_data(name, train_cfg, f_log, args):
         train_index, val_index = list(ss.split(list(range(len(fits_name)))))[args.fits_index]
         train_l = [fits_name[i] for i in sorted(train_index)]
         val_l = [fits_name[i] for i in sorted(val_index)]
-        print_and_log(f_log, "This train is shuffled Train resion ")
+        print_and_log(f_log, "This train is shuffled Train region ")
         print_and_log(f_log, "#################")
         print_and_log(f_log, "  train_region")
         print_and_log(f_log, "#################")
