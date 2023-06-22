@@ -150,11 +150,11 @@ def flip_data(trans_data, trans_info):
     tempo = copy.deepcopy(trans_data)
     ud = np.flipud(tempo)
 
-    xmin_list = trans_info["xmin_list"]
-    ymin_list = trans_info["ymin_list"]
-    xmax_list = trans_info["xmax_list"]
-    ymax_list = trans_info["ymax_list"]
-    name_list = trans_info["name_list"]
+    xmin_list = trans_info["xmin"]
+    ymin_list = trans_info["ymin"]
+    xmax_list = trans_info["xmax"]
+    ymax_list = trans_info["ymax"]
+    name_list = trans_info["name"]
 
     ud_xmin_list, ud_xmax_list, ud_ymin_list, ud_ymax_list = [], [], [], []
     for i in range(len(xmin_list)):
