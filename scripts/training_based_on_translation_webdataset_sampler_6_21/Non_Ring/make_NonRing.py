@@ -6,14 +6,13 @@ import time
 
 import astropy.io.fits
 import astropy.wcs
-import NonRing_sub
 import numpy as np
-import proceesing
-
-# from npy_append_array import NpyAppendArray
 from numpy.random import default_rng
 from PIL import Image
 from tqdm import tqdm
+
+import NonRing_sub
+import processing
 
 """
 webdatasetを使用するための、Non-Ringのpng画像を作成する
@@ -26,9 +25,7 @@ python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r True
 
 def parse_args():
     parser = argparse.ArgumentParser(description="make data for SSD")
-    parser.add_argument(
-        "fits_path", metavar="DIR", help="path to Ring_to_circle_nan_fits"
-    )
+    parser.add_argument("fits_path", metavar="DIR", help="path to Ring_to_circle_nan_fits")
     parser.add_argument("--each_region", "-r", action="store_true")
     # parser.add_argument('ring_sentei_path', metavar='DIR', help='path to ring setntei file')
 
@@ -43,49 +40,20 @@ def main(args):
     if args.each_region:
         ## 各領域ごとにNon-Ringを作成する
         ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+        # fmt: off
         all_l = [
-            "spitzer_00300+0000_rgb",
-            "spitzer_00600+0000_rgb",
-            "spitzer_00900+0000_rgb",
-            "spitzer_01200+0000_rgb",
-            "spitzer_01500+0000_rgb",
-            "spitzer_01800+0000_rgb",
-            "spitzer_02100+0000_rgb",
-            "spitzer_02400+0000_rgb",
-            "spitzer_02700+0000_rgb",
-            "spitzer_03000+0000_rgb",
-            "spitzer_03300+0000_rgb",
-            "spitzer_03600+0000_rgb",
-            "spitzer_03900+0000_rgb",
-            "spitzer_04200+0000_rgb",
-            "spitzer_04500+0000_rgb",
-            "spitzer_04800+0000_rgb",
-            "spitzer_05100+0000_rgb",
-            "spitzer_05400+0000_rgb",
-            "spitzer_05700+0000_rgb",
-            "spitzer_06000+0000_rgb",
-            "spitzer_29700+0000_rgb",
-            "spitzer_30000+0000_rgb",
-            "spitzer_30300+0000_rgb",
-            "spitzer_30600+0000_rgb",
-            "spitzer_30900+0000_rgb",
-            "spitzer_31200+0000_rgb",
-            "spitzer_31500+0000_rgb",
-            "spitzer_31800+0000_rgb",
-            "spitzer_32100+0000_rgb",
-            "spitzer_32400+0000_rgb",
-            "spitzer_32700+0000_rgb",
-            "spitzer_33000+0000_rgb",
-            "spitzer_33300+0000_rgb",
-            "spitzer_33600+0000_rgb",
-            "spitzer_33900+0000_rgb",
-            "spitzer_34200+0000_rgb",
-            "spitzer_34500+0000_rgb",
-            "spitzer_34800+0000_rgb",
-            "spitzer_35100+0000_rgb",
-            "spitzer_35400+0000_rgb",
-            "spitzer_35700+0000_rgb",
+            "spitzer_00300+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_00900+0000_rgb", "spitzer_01200+0000_rgb",
+            "spitzer_01500+0000_rgb", "spitzer_01800+0000_rgb", "spitzer_02100+0000_rgb", "spitzer_02400+0000_rgb",
+            "spitzer_02700+0000_rgb", "spitzer_03000+0000_rgb", "spitzer_03300+0000_rgb", "spitzer_03600+0000_rgb",
+            "spitzer_03900+0000_rgb", "spitzer_04200+0000_rgb", "spitzer_04500+0000_rgb", "spitzer_04800+0000_rgb",
+            "spitzer_05100+0000_rgb", "spitzer_05400+0000_rgb", "spitzer_05700+0000_rgb", "spitzer_06000+0000_rgb",
+            "spitzer_29700+0000_rgb", "spitzer_30000+0000_rgb", "spitzer_30300+0000_rgb", "spitzer_30600+0000_rgb",
+            "spitzer_30900+0000_rgb", "spitzer_31200+0000_rgb", "spitzer_31500+0000_rgb", "spitzer_31800+0000_rgb",
+            "spitzer_32100+0000_rgb", "spitzer_32700+0000_rgb", "spitzer_33000+0000_rgb", "spitzer_33300+0000_rgb",
+            "spitzer_33600+0000_rgb", "spitzer_33900+0000_rgb", "spitzer_34200+0000_rgb", "spitzer_34500+0000_rgb",
+            "spitzer_34800+0000_rgb", "spitzer_35100+0000_rgb", "spitzer_35400+0000_rgb", "spitzer_35700+0000_rgb",
         ]
+        # fmt: on
 
         mode_l = ["all"]
         if os.path.exists("/workspace/NonRing_png/region_NonRing_png"):
@@ -104,45 +72,19 @@ def main(args):
             "spitzer_33900+0000_rgb",
         ]
         val_l = sorted(val_l)
-
+        # fmt: off
         train_l = [
-            "spitzer_02100+0000_rgb",
-            "spitzer_04200+0000_rgb",
-            "spitzer_33300+0000_rgb",
-            "spitzer_35400+0000_rgb",
-            "spitzer_00300+0000_rgb",
-            "spitzer_02400+0000_rgb",
-            "spitzer_04500+0000_rgb",
-            "spitzer_31500+0000_rgb",
-            "spitzer_33600+0000_rgb",
-            "spitzer_35700+0000_rgb",
-            "spitzer_00600+0000_rgb",
-            "spitzer_02700+0000_rgb",
-            "spitzer_04800+0000_rgb",
-            "spitzer_29700+0000_rgb",
-            "spitzer_31800+0000_rgb",
-            "spitzer_03000+0000_rgb",
-            "spitzer_05100+0000_rgb",
-            "spitzer_30000+0000_rgb",
-            "spitzer_32100+0000_rgb",
-            "spitzer_01200+0000_rgb",
-            "spitzer_03300+0000_rgb",
-            "spitzer_05400+0000_rgb",
-            "spitzer_30300+0000_rgb",
-            "spitzer_32400+0000_rgb",
-            "spitzer_34500+0000_rgb",
-            "spitzer_01500+0000_rgb",
-            "spitzer_03600+0000_rgb",
-            "spitzer_05700+0000_rgb",
-            "spitzer_30600+0000_rgb",
-            "spitzer_32700+0000_rgb",
-            "spitzer_34800+0000_rgb",
-            "spitzer_01800+0000_rgb",
-            "spitzer_06000+0000_rgb",
-            "spitzer_30900+0000_rgb",
-            "spitzer_33000+0000_rgb",
-            "spitzer_35100+0000_rgb",
+            "spitzer_02100+0000_rgb", "spitzer_04200+0000_rgb", "spitzer_33300+0000_rgb", "spitzer_35400+0000_rgb",
+            "spitzer_00300+0000_rgb", "spitzer_02400+0000_rgb", "spitzer_04500+0000_rgb", "spitzer_31500+0000_rgb",
+            "spitzer_33600+0000_rgb", "spitzer_35700+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_02700+0000_rgb",
+            "spitzer_04800+0000_rgb", "spitzer_29700+0000_rgb", "spitzer_31800+0000_rgb", "spitzer_03000+0000_rgb",
+            "spitzer_05100+0000_rgb", "spitzer_30000+0000_rgb", "spitzer_32100+0000_rgb", "spitzer_01200+0000_rgb",
+            "spitzer_03300+0000_rgb", "spitzer_05400+0000_rgb", "spitzer_30300+0000_rgb", "spitzer_32400+0000_rgb",
+            "spitzer_34500+0000_rgb", "spitzer_01500+0000_rgb", "spitzer_03600+0000_rgb", "spitzer_05700+0000_rgb",
+            "spitzer_30600+0000_rgb", "spitzer_32700+0000_rgb", "spitzer_34800+0000_rgb", "spitzer_01800+0000_rgb",
+            "spitzer_06000+0000_rgb", "spitzer_30900+0000_rgb", "spitzer_33000+0000_rgb", "spitzer_35100+0000_rgb",
         ]
+        # fmt: on
         train_l = sorted(train_l)
 
         mode_l = ["train", "val"]
@@ -179,9 +121,7 @@ def main(args):
         for k in pbar:
             if args.each_region:
                 path = ref_path_list[k]
-                if os.path.exists(
-                    "/workspace/NonRing_png/region_NonRing_png/%s" % path
-                ):
+                if os.path.exists("/workspace/NonRing_png/region_NonRing_png/%s" % path):
                     pass
                 else:
                     os.mkdir("/workspace/NonRing_png/region_NonRing_png/%s" % path)
@@ -211,15 +151,14 @@ def main(args):
 
             for i in range(iter):
                 cut_data = NonRing_sub_c.no_nan_ring()
-                pi = proceesing.conv(300, sig1, cut_data)
+                pi = processing.conv(300, sig1, cut_data)
                 r_shape_y = pi.shape[0]
                 r_shape_x = pi.shape[1]
                 res_data = pi[
                     int(r_shape_y / 4) : int(r_shape_y * 3 / 4),
                     int(r_shape_x / 4) : int(r_shape_x * 3 / 4),
                 ]
-                res_data = proceesing.normalize(res_data)
-                res_data = proceesing.resize(res_data, 300)
+                res_data = processing.norm_res(res_data)
                 pil_image = Image.fromarray(np.uint8(res_data * 255))
 
                 #########################
@@ -229,24 +168,20 @@ def main(args):
                 if args.each_region:
                     ## 領域ごとに保存していく
                     pil_image.save(
-                        "/workspace/NonRing_png/region_NonRing_png/%s/NonRing_%s.png"
-                        % (path, k * iter + i)
+                        "/workspace/NonRing_png/region_NonRing_png/%s/NonRing_%s.png" % (path, k * iter + i)
                     )
                     with open(
-                        "/workspace/NonRing_png/region_NonRing_png/%s/NonRing_%s.json"
-                        % (path, k * iter + i),
+                        "/workspace/NonRing_png/region_NonRing_png/%s/NonRing_%s.json" % (path, k * iter + i),
                         "w",
                     ) as f:
                         json.dump([], f, indent=4)
                 else:
                     ## デフォルトフォルダに保存
                     pil_image.save(
-                        "/workspace/NonRing_png/default_NonRing_png/%s/NonRing_%s.png"
-                        % (mode, k * iter + i)
+                        "/workspace/NonRing_png/default_NonRing_png/%s/NonRing_%s.png" % (mode, k * iter + i)
                     )
                     with open(
-                        "/workspace/NonRing_png/default_NonRing_png/%s/NonRing_%s.json"
-                        % (mode, k * iter + i),
+                        "/workspace/NonRing_png/default_NonRing_png/%s/NonRing_%s.json" % (mode, k * iter + i),
                         "w",
                     ) as f:
                         json.dump([], f, indent=4)
