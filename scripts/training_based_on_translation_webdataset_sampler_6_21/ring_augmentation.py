@@ -233,6 +233,7 @@ def catalogue(choice):
         viz.ROW_LIMIT = -1
         MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
         MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
+        MWP = MWP.set_index("MWP")
         return MWP
 
     else:

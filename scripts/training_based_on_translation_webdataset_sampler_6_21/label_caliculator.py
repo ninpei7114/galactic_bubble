@@ -73,7 +73,7 @@ class label_caliculator(object):
 
         return self.x_pix_min, self.y_pix_min, self.x_pix_max, self.y_pix_max, flag
 
-    def find_cover(self, pix_info=None):
+    def find_cover(self, trans_pix_info=None):
         """
         切り出した画像の中に、他のリングが入っていないか確かめる。
         入っていたら、ラベル付けする
@@ -81,16 +81,16 @@ class label_caliculator(object):
         """
         ## x_pix_maxなどは、convolutionを考えて幅の1/4大きめに設定しているため
         ## widthを計算して、正確な切り出し範囲を算出する
-        if pix_info is not None:
-            self.x_pix_min = pix_info["x_pix_min"]
-            self.x_pix_max = pix_info["x_pix_max"]
-            self.y_pix_min = pix_info["y_pix_min"]
-            self.y_pix_max = pix_info["y_pix_max"]
+        if trans_pix_info is not None:
+            self.x_pix_min = trans_pix_info["x_pix_min"]
+            self.x_pix_max = trans_pix_info["x_pix_max"]
+            self.y_pix_min = trans_pix_info["y_pix_min"]
+            self.y_pix_max = trans_pix_info["y_pix_max"]
             self.width = self.x_pix_max - self.x_pix_min
             self.height = self.y_pix_max - self.y_pix_min
 
-        harf_width = self.width / 4
-        harf_height = self.height / 4
+        half_width = self.width / 4
+        half_height = self.height / 4
 
         self.overlapp_list = []
         self.overlapp_name = []
@@ -107,8 +107,8 @@ class label_caliculator(object):
 
             ## 切り出す範囲内での対象リングの面積
             ## リングが切り出す範囲外なら、0になる
-            clip_xx = np.clip(xx, self.x_pix_min + harf_width, self.x_pix_max - harf_width)
-            clip_yy = np.clip(yy, self.y_pix_min + harf_height, self.y_pix_max - harf_height)
+            clip_xx = np.clip(xx, self.x_pix_min + half_width, self.x_pix_max - half_width)
+            clip_yy = np.clip(yy, self.y_pix_min + half_height, self.y_pix_max - half_height)
             clip_width = clip_xx[1] - clip_xx[0] + 1e-9
             clip_height = clip_yy[1] - clip_yy[0] + 1e-9
             clip_area = (clip_xx[1] - clip_xx[0]) * (clip_yy[1] - clip_yy[0])
@@ -137,7 +137,7 @@ class label_caliculator(object):
         else:
             return number
 
-    def make_label(self, MWP):
+    def make_label(self, Ring_catalogue):
         """
         sは、主体となるringの位置情報
         x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ
@@ -149,7 +149,7 @@ class label_caliculator(object):
         self.xmax_list = []
         self.ymax_list = []
         self.named_list = []
-        MWP_name_select = MWP.index.tolist()
+        Ring_catalogue_name_select = Ring_catalogue.index.tolist()
 
         #############################################
         ## 主体となるRing と それ以外のRing のlabel付け ##
@@ -165,7 +165,7 @@ class label_caliculator(object):
                 ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
                 ## ('2G0020120-0068213',
                 ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
-                if p[0] in MWP_name_select:
+                if p[0] in Ring_catalogue_name_select:
                     ######################################################
                     ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
                     ######################################################
@@ -204,48 +204,6 @@ class label_caliculator(object):
             name_list_.append(self.named_list[xy_num])
 
         return xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_  # , self.flag
-
-    # def find_cover_for_translation(self, x_pix_min, x_pix_max, y_pix_min, y_pix_max):
-    #     """
-    #     translationのためのfind cover
-    #     切り出した画像の中に、他のリングが入っていないか確かめる。
-    #     入っていたら、ラベル付けする
-    #     star_listはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
-    #     """
-    #     ## x_pix_maxなどは、convolutionを考えて幅の1/4大きめに設定しているため
-    #     ## widthを計算して、正確な切り出し範囲を算出する
-    #     width = (x_pix_max - x_pix_min) / 4
-    #     hight = (y_pix_max - y_pix_min) / 4
-
-    #     self.overlapp_list = []
-    #     self.overlapp_name = []
-    #     for d in self.star_dic.items():
-    #         s_xmin = d[1][0]
-    #         s_xmax = d[1][2]
-    #         s_ymin = d[1][1]
-    #         s_ymax = d[1][3]
-
-    #         xx = np.array([s_xmin, s_xmax])
-    #         yy = np.array([s_ymin, s_ymax])
-    #         c_xx = np.clip(xx, x_pix_min + width, x_pix_max - width)
-    #         c_yy = np.clip(yy, y_pix_min + hight, y_pix_max - hight)
-    #         s_width = c_xx[1] - c_xx[0] + 1e-9
-    #         s_height = c_yy[1] - c_yy[0] + 1e-9
-    #         s_area = (xx[1] - xx[0]) * (yy[1] - yy[0])
-    #         c_area = (c_xx[1] - c_xx[0]) * (c_yy[1] - c_yy[0])
-
-    #         # 場合分け、全体に対してringが1/4以上入っていないといけない
-    #         # width/height比が1/3以上でないとlabel付けしない
-    #         if (
-    #             c_area >= s_area * 1 / 4
-    #             and s_height / (s_width + 1e-9) > 1 / 3
-    #             and s_width / (s_height + 1e-9) > 1 / 3
-    #         ):
-    #             self.overlapp_list.append(d)
-    #             self.overlapp_name.append(d[0])
-
-    #         else:
-    #             pass
 
     # def find_cover_for_translation(self, x_pix_min, x_pix_max, y_pix_min, y_pix_max):
     #     """
