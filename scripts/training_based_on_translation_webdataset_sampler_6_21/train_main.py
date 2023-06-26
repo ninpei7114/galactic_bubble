@@ -49,6 +49,7 @@ def parse_args():
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
+    parser.add_argument("--NonRing_mini_batch", type=int, default=32)
 
     return parser.parse_args()
 
@@ -110,7 +111,7 @@ def main(args):
         train_Ring_num = make_data(name, train_cfg, f_log, args)
 
         batch_size_ring = 16
-        batch_size_nonring = 32
+        batch_size_nonring = args.NonRing_mini_batch
 
         # ds_train = webdataset.WebDataset("/%s/dataset/bubble_dataset_train.tar"%args.savedir_path).shuffle(1000000).decode("pil").to_tuple("png", "json").map(preprocess)
         # ds_val = webdataset.WebDataset("/%s/dataset/bubble_dataset_val.tar"%args.savedir_path).decode("pil").to_tuple("png", "json").map(preprocess)

@@ -16,7 +16,9 @@ from utils.ssd_model import Detect
 # from torchvision.models.resnet import resnet18
 
 
-def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, num_epochs, f, name, args, train_Ring_num):
+def train_model(
+    net, dataloaders_dict, dl_noring_train, criterion, optimizer, num_epochs, f, name, args, train_Ring_num
+):
     loss_l_list_val = []
     loss_c_list_val = []
     loss_c_nega_list_val = []
@@ -45,7 +47,6 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
     early_stopping = EarlyStopping_f1_score(patience=10, verbose=True, path=name + "/earlystopping.pth", flog=f)
     # イテレーションカウンタをセット
     logs = []
-    train_rng = default_rng(123)
 
     # epochのループ
     for epoch in range(num_epochs):
@@ -141,7 +142,11 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
                         optimizer.step()  # パラメータ更新
                         epoch_train_loss += loss.item()
                         print(
-                            "\r" + str(iteration) + "/" + str(int((int(train_Ring_num) + int(train_Ring_num * 3)) / args.batch_size)) + "       ",
+                            "\r"
+                            + str(iteration)
+                            + "/"
+                            + str(int((int(train_Ring_num) + int(train_Ring_num * 3)) / args.batch_size))
+                            + "       ",
                             end="",
                         )
                         iteration += 1
@@ -168,7 +173,9 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
 
         print_and_log(
             f,
-            "\nepoch {} || Epoch_TRAIN_Loss:{:.4f} ||Epoch_VAL_Loss:{:.4f} ".format(epoch + 1, avg_train_loss, avg_val_loss),
+            "\nepoch {} || Epoch_TRAIN_Loss:{:.4f} ||Epoch_VAL_Loss:{:.4f} ".format(
+                epoch + 1, avg_train_loss, avg_val_loss
+            ),
         )
 
         # epochのphaseごとのlossと正解率
@@ -179,7 +186,10 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
             f,
             "avarage_loss_l:{:.4f} ||avarage_loss_c:{:.4f} ||avarage_loss_c_posi:{:.4f} \
 ||avarage_loss_c_nega:{:.4f}".format(
-                loss_ll_val / val_iter, loss_cc_val / val_iter, loss_c_posii_val / val_iter, loss_c_negaa_val / val_iter
+                loss_ll_val / val_iter,
+                loss_cc_val / val_iter,
+                loss_c_posii_val / val_iter,
+                loss_c_negaa_val / val_iter,
             ),
         )
 
@@ -193,18 +203,26 @@ def train_model(net, dataloaders_dict, dl_noring_train, criterion, optimizer, nu
         loss_c_posi_list_train.append(loss_c_posii_train / iteration)
         loss_c_nega_list_train.append(loss_c_negaa_train / iteration)
 
-        train_f1_score, train_threthre, train_f1_score_non_ring, train_threthre_noring = calc_f1score(train_seikai, train_bbbb, mode="train", iou=args.True_iou, top_k=100)
-        val_f1_score, val_threthre, val_f1_score_non_ring, val_threthre_noring = calc_f1score(val_seikai, val_bbbb, mode="val", iou=args.True_iou)
+        train_f1_score, train_threthre, train_f1_score_non_ring, train_threthre_noring = calc_f1score(
+            train_seikai, train_bbbb, mode="train", iou=args.True_iou, top_k=50
+        )
+        val_f1_score, val_threthre, val_f1_score_non_ring, val_threthre_noring = calc_f1score(
+            val_seikai, val_bbbb, mode="val", iou=args.True_iou
+        )
 
         print_and_log(f, "train_f1_score : {:.4f}, threshold : {:.4f}".format(train_f1_score, train_threthre))
         print_and_log(
             f,
-            "train_f1_score_add_non_ring : {:.4f}, threshold : {:.4f}\n".format(train_f1_score_non_ring, train_threthre_noring),
+            "train_f1_score_add_non_ring : {:.4f}, threshold : {:.4f}\n".format(
+                train_f1_score_non_ring, train_threthre_noring
+            ),
         )
         print_and_log(f, "val_f1_score : {:.4f}, threshold : {:.4f}".format(val_f1_score, val_threthre))
         print_and_log(
             f,
-            "val_f1_score_add_non_ring : {:.4f}, threshold_add_non_ring : {:.4f}\n".format(val_f1_score_non_ring, val_threthre_noring),
+            "val_f1_score_add_non_ring : {:.4f}, threshold_add_non_ring : {:.4f}\n".format(
+                val_f1_score_non_ring, val_threthre_noring
+            ),
         )
         train_f1_score_l.append(train_f1_score)
         train_f1_score_l_non_ring.append(train_f1_score_non_ring)

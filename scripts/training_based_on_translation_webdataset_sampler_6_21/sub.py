@@ -111,8 +111,12 @@ class EarlyStopping:
     def save_checkpoint(self, val_loss, model):
         """Saves model when validation loss decrease."""
         if self.verbose:
-            self.trace_func(f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...")
-            self.flog.write(f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...\n")
+            self.trace_func(
+                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
+            )
+            self.flog.write(
+                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...\n"
+            )
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
 
@@ -191,7 +195,7 @@ def calc_collision(ll, box, iou=0.5):
         return np.stack(true_positive), box[:, 0], True  # box[:,0]は、probability
 
 
-def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=1000, iou=0.5):
+def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=50, iou=0.5):
     """
     TP1=推定したボックスのうち、正解と一定以上のIoUを持つ個数
     FP=推定したボックスのうち、正解と一定以上のIoUを持たない個数
@@ -202,9 +206,9 @@ def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=1000, iou=0.5):
 
     """
     if mode == "train":
-        thresholds = [i / 20 for i in range(6, 14, 1)]
+        thresholds = [i / 20 for i in range(6, 16, 1)]
     else:
-        thresholds = [i / 20 for i in range(1, 19, 1)]
+        thresholds = [i / 20 for i in range(6, 16, 1)]
 
     f1_score = -10000
     f1_score_non_ring = -10000
@@ -266,7 +270,9 @@ def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=1000, iou=0.5):
         TP1_l.append(TP1)
         FP_l.append(TP1_FP - TP1)
 
-        f1_score_ = calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN)  # + calc_f1_sub(TP_NonRing, TP_NonRing, TP_NonRing+FP_NonRing, TP_NonRing+FN_NonRing)
+        f1_score_ = calc_f1_sub(
+            TP1, TP2, TP1_FP, TP2_FN
+        )  # + calc_f1_sub(TP_NonRing, TP_NonRing, TP_NonRing+FP_NonRing, TP_NonRing+FN_NonRing)
         f1_score_non_ring_ = calc_f1_sub(TP1, TP2, TP1_FP_non_ring, TP2_FN)
 
         if f1_score_ > f1_score:
@@ -327,7 +333,9 @@ def transfer_resnet(net, param_path):
     net.vgg[12][0].bias = nn.Parameter(deepcluster_weight["state_dict"]["features.12.0.bias"])
     net.vgg[12][0].running_mean = deepcluster_weight["state_dict"]["features.12.0.running_mean"].to("cpu")
     net.vgg[12][0].running_var = deepcluster_weight["state_dict"]["features.12.0.running_var"].to("cpu")
-    net.vgg[12][0].num_batches_tracked = deepcluster_weight["state_dict"]["features.12.0.num_batches_tracked"].to("cpu")
+    net.vgg[12][0].num_batches_tracked = deepcluster_weight["state_dict"]["features.12.0.num_batches_tracked"].to(
+        "cpu"
+    )
     net.vgg[12][1].weight = nn.Parameter(deepcluster_weight["state_dict"]["features.12.1.weight"])
     net.vgg[12][1].bias = nn.Parameter(deepcluster_weight["state_dict"]["features.12.1.bias"])
     # net.vgg[12].weight = nn.Parameter(deepcluster_weight['state_dict']['features.12.1.weight'])
@@ -340,7 +348,9 @@ def transfer_resnet(net, param_path):
     net.vgg[19][0].bias = nn.Parameter(deepcluster_weight["state_dict"]["features.19.0.bias"])
     net.vgg[19][0].running_mean = deepcluster_weight["state_dict"]["features.19.0.running_mean"].to("cpu")
     net.vgg[19][0].running_var = deepcluster_weight["state_dict"]["features.19.0.running_var"].to("cpu")
-    net.vgg[19][0].num_batches_tracked = deepcluster_weight["state_dict"]["features.19.0.num_batches_tracked"].to("cpu")
+    net.vgg[19][0].num_batches_tracked = deepcluster_weight["state_dict"]["features.19.0.num_batches_tracked"].to(
+        "cpu"
+    )
     net.vgg[19][1].weight = nn.Parameter(deepcluster_weight["state_dict"]["features.19.1.weight"])
     net.vgg[19][1].bias = nn.Parameter(deepcluster_weight["state_dict"]["features.19.1.bias"])
     # net.vgg[19].weight = nn.Parameter(deepcluster_weight['state_dict']['features.19.1.weight'])
@@ -356,7 +366,9 @@ def transfer_resnet(net, param_path):
     net.vgg[26][0].bias = nn.Parameter(deepcluster_weight["state_dict"]["features.26.0.bias"])
     net.vgg[26][0].running_mean = deepcluster_weight["state_dict"]["features.26.0.running_mean"].to("cpu")
     net.vgg[26][0].running_var = deepcluster_weight["state_dict"]["features.26.0.running_var"].to("cpu")
-    net.vgg[26][0].num_batches_tracked = deepcluster_weight["state_dict"]["features.26.0.num_batches_tracked"].to("cpu")
+    net.vgg[26][0].num_batches_tracked = deepcluster_weight["state_dict"]["features.26.0.num_batches_tracked"].to(
+        "cpu"
+    )
     net.vgg[26][1].weight = nn.Parameter(deepcluster_weight["state_dict"]["features.26.1.weight"])
     net.vgg[26][1].bias = nn.Parameter(deepcluster_weight["state_dict"]["features.26.1.bias"])
     # net.vgg[26].weight = nn.Parameter(deepcluster_weight['state_dict']['features.26.1.weight'])
