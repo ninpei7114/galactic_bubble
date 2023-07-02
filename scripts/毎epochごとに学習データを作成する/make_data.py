@@ -101,6 +101,9 @@ class make_training_val_data:
             train_cfg (list):どのaugmentationを使用するか
         """
         ## train_dataのshapeは、(Num, 300, 300, 3)/ typeはfloat32型
+        os.makedirs(self.save_data_path + "/train", exist_ok=True)
+        os.makedirs(self.save_data_path + "/train/ring", exist_ok=True)
+        os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
         self.train_data, train_label = make_ring(
             self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch
         )
