@@ -236,7 +236,7 @@ class make_training_val_data:
             self.f_log,
             [
                 "====================================",
-                f"Ring NonRing ratio = 1 : {self.rgs.NonRing_ratio}",
+                f"Ring NonRing ratio = 1 : {self.args.NonRing_ratio}",
                 " ",
                 "confirm nan in Training Data",
                 f">>> Ring_data: {mg}",
