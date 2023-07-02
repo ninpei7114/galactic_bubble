@@ -127,8 +127,8 @@ class make_training_val_data:
             else:
                 pass
 
-        with open(f"{self.save_data_path}/train/ring/Ring_{i}.json", "w") as f:
-            json.dump(ll, f, indent=4)
+            with open(f"{self.save_data_path}/train/ring/Ring_{i}.json", "w") as f:
+                json.dump(ll, f, indent=4)
 
         ########################################
         ## Trainingに用いるNon-Ringデータをコピー ##
