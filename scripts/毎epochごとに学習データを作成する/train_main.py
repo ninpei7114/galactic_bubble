@@ -24,7 +24,7 @@ def parse_args():
         help="savedire path  (default: /workspace/weights/)",
     )
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
-    parser.add_argument("--batch_size", default=32, type=int, help="mini-batch size (default: 32)")
+    parser.add_argument("--batch_size", default=16, type=int, help="mini-batch size (default: 16)")
     parser.add_argument("--NonRing_ratio", default=3, type=int, help="Ring / NonRing ratio (default: 3)")
     parser.add_argument("--augmentation_ratio", default=4, type=int, help="1 Ring augmentation ratio (default: 4)")
     parser.add_argument(
