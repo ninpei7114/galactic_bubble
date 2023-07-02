@@ -206,7 +206,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
         slice = 10
     else:
         slice = 1
-    os.makedirs(savedir_name + "train_ring_pdf", exist_ok=True)
+    os.makedirs(savedir_name + "/train_ring_pdf", exist_ok=True)
     processing.data_view_rectangl(25, mwp_ring_list_train_[::slice], frame_mwp_train[::slice]).save(
         savedir_name + "/train_ring_pdf" + f"/train_ring_{epoch}.pdf"
     )
