@@ -16,9 +16,6 @@ rgb_imageも変更した
 """
 import numpy as np
 import matplotlib.pyplot as plt 
-from matplotlib.backends.backend_pdf import PdfPages
-import tqdm
-import cv2  # OpenCVライブラリ
 import torch
 import copy
 
@@ -38,7 +35,7 @@ class SSDPredictShow():
         input_size = 300  # 画像のinputサイズを300×300にする
         self.transform = DataTransform(input_size, color_mean)  # 前処理クラス
 
-    def show(self, img, data_confidence_level):
+    def show(self, img, data_confidence_level, label):
         """
         物体検出の予測結果を表示をする関数。
 
@@ -48,6 +45,7 @@ class SSDPredictShow():
             画像のファイルパス
         data_confidence_level: float
             予測で発見とする確信度の閾値
+        label : 正解ラベル
 
         Returns
         -------
@@ -66,29 +64,26 @@ class SSDPredictShow():
             batch, width, height, channel = img.shape
         if channel==3:
             img = img[:,:,:,:2]
-            
-        scores_list = []
-        pp = PdfPages('multiple_fig.pdf')
-        width_list = []
-        for bat in tqdm.tqdm(range(batch)):
+        predict_bbox_list = []
+        for bat in range(batch):
 
             img_ = copy.deepcopy(img[bat])
             rgb_img, predict_bbox, pre_dict_label_index, scores = self.ssd_predict(
                 img_, width, height, data_confidence_level)
-
-
-            fig, box_width = self.vis_bbox(rgb_img, bbox=predict_bbox, label_index=pre_dict_label_index,
-                          scores=scores, label_names=self.eval_categories)
             
-            width_list.append(box_width)
-            scores_list.append(scores[0])
-            pp.savefig(fig)
+#             np.where(scores>=data_confidence_level)
+            tempo_l = []
+#             print(np.where(np.array(scores)>=data_confidence_level))
+            for thre_s in np.where(np.array(scores)>=data_confidence_level)[0]:
+                print(thre_s)
+                tempo_l.append(predict_bbox[thre_s]/300)
+            predict_bbox_list.append(tempo_l)
+            
+            fig = self.vis_bbox(rgb_img, bbox=predict_bbox, label_index=pre_dict_label_index,
+                          scores=scores, label_names=self.eval_categories, label=label.iloc[bat])
 #             plt.imshow(fig)
-            plt.close()
-        pp.close()
-        return scores_list, width_list
-    
-    
+        return predict_bbox_list
+
     def ssd_predict(self, image, width, height, data_confidence_level=0.5):
         """
         SSDで予測させる関数。
@@ -145,9 +140,9 @@ class SSDPredictShow():
             detections = self.detect(output[0], output[1], output[2])
         # detectionsの形は、torch.Size([1, 21, 200, 5])  ※200はtop_kの値
 #         print(detections.shape)
-#         for i in range(1, 2):
-#             for k in range(0, 20):
-#                 print(detections[0, i][k])
+        for i in range(1, 2):
+            for k in range(0, 20):
+                print(detections[0, i][k])
 
         # confidence_levelが基準以上を取り出す
         predict_bbox = []
@@ -174,10 +169,10 @@ class SSDPredictShow():
                 predict_bbox.append(bbox)
                 pre_dict_label_index.append(lable_ind)
                 scores.append(sc)
-#         print('scores:'+str(scores))
+        print('scores:'+str(scores))
         return rgb_img, predict_bbox, pre_dict_label_index, scores
 
-    def vis_bbox(self, rgb_img, bbox, label_index, scores, label_names):
+    def vis_bbox(self, rgb_img, bbox, label_index, scores, label_names, label):
         """
         物体検出の予測結果を画像で表示させる関数。
 
@@ -213,7 +208,6 @@ class SSDPredictShow():
         currentAxis.imshow(rgb_img)
 #         plt.show()
         # BBox分のループ
-        width_list = []
         for i, bb in enumerate(bbox):
 
             # ラベル名
@@ -231,7 +225,6 @@ class SSDPredictShow():
             xy = (bb[0], bb[1])
             width = bb[2] - bb[0]
             height = bb[3] - bb[1]
-            width_list.append(width)
 
             # 長方形を描画する
             currentAxis.add_patch(plt.Rectangle(
@@ -240,6 +233,14 @@ class SSDPredictShow():
             # 長方形の枠の左上にラベルを描画する
             currentAxis.text(xy[0], xy[1], display_txt, bbox={
                              'facecolor': color, 'alpha': 0.5})
-#         plt.show()
-        plt.grid(False)
-        return fig, width_list
+        for k in range(len(label[('xmin')])):
+            width = (label['xmax'][k]*300 - label['xmin'][k]*300)/2
+            xy = [label['xmin'][k]*300, label['ymin'][k]*300]
+            width = label['xmax'][k]*300 - label['xmin'][k]*300
+            height = label['ymax'][k]*300 - label['ymin'][k]*300
+
+            currentAxis.add_patch(plt.Rectangle(
+                xy, width, height, fill=False, edgecolor='w', linewidth=2))
+            
+        plt.show()
+        return fig 
