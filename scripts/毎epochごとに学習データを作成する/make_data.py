@@ -13,7 +13,7 @@ from make_Ring_data import make_ring
 from sub import print_and_log
 
 
-class make_data:
+class make_training_val_data:
     """学習に使用するRraining_data, Validation dataを作成する。
 
     Params:

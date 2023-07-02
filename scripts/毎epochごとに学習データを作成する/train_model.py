@@ -12,7 +12,7 @@ import torch.nn as nn
 import webdataset
 
 from data import od_collate_fn, preprocess
-from make_data import make_data
+from make_data import make_training_val_data
 from sub import EarlyStopping_f1_score, calc_f1score, print_and_log, weights_init
 
 
@@ -28,15 +28,15 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     net.to(device)
     print_and_log(f_log, f"使用デバイス： {device}")
     ## パラメータを初期化
-    for net_sub in [net.vgg, net.extra, net.loc, net.conf]:
+    for net_sub in [net.vgg, net.extras, net.loc, net.conf]:
         net_sub.apply(weights_init)
 
     logs = []
     loss_l_list_val, loss_c_list_val, loss_c_nega_list_val, loss_c_posi_list_val = [], [], [], []
     loss_l_list_train, loss_c_list_train, loss_c_nega_list_train, loss_c_posi_list_train = [], [], [], []
 
-    make_data = make_data(augmentation_name, f_log, args)
-    Validation_data_path = make_data.make_validation_data()
+    Make_data = make_training_val_data(augmentation_name, f_log, args)
+    Validation_data_path = Make_data.make_validation_data()
     Dataset_val = webdataset.WebDataset(Validation_data_path).decode("pil").to_tuple("png", "json").map(preprocess)
     dl_val = torch.utils.data.DataLoader(Dataset_val, collate_fn=od_collate_fn, batch_size=32)
 
@@ -48,8 +48,8 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ## Training dataの作成 ##
         ########################
         ## png形式のRing画像とjson形式のlabelを作成
-        Ring_path, NonRing_path = make_data.make_training_data(train_cfg)
-        train_Ring_num = make_data.data_logger()
+        Ring_path, NonRing_path = Make_data.make_training_data(train_cfg)
+        train_Ring_num = Make_data.data_logger()
 
         Train_Ring_path = (
             webdataset.WebDataset(Ring_path).shuffle(10000000).decode("pil").to_tuple("png", "json").map(preprocess)
