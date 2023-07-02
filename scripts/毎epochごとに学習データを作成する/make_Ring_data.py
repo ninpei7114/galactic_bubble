@@ -12,7 +12,7 @@ import processing
 import ring_augmentation
 
 
-def make_ring(savedir_name, train_cfg, args, train_l, trans_rng):
+def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
 
     ## choice catalogue from 'CH' or 'MWP'
@@ -206,8 +206,9 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng):
         slice = 10
     else:
         slice = 1
+    os.makedirs(savedir_name + "train_ring_pdf", exist_ok=True)
     processing.data_view_rectangl(25, mwp_ring_list_train_[::slice], frame_mwp_train[::slice]).save(
-        savedir_name + "/train_ring.pdf"
+        savedir_name + "/train_ring_pdf" + f"/train_ring_{epoch}.pdf"
     )
     frame_mwp_train.to_csv(savedir_name + "/train_label.csv")
 

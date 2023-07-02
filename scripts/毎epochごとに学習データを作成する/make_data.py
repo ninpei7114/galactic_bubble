@@ -94,7 +94,7 @@ class make_training_val_data:
         os.makedirs(self.save_data_path + "/train/ring", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
 
-    def make_training_data(self, train_cfg):
+    def make_training_data(self, train_cfg, epoch):
         """Trainingデータを作成する関数。
 
         Params:
@@ -102,7 +102,7 @@ class make_training_val_data:
         """
         ## train_dataのshapeは、(Num, 300, 300, 3)/ typeはfloat32型
         self.train_data, train_label = make_ring(
-            self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg
+            self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch
         )
 
         ## Trainingデータをpngファイルに変換＋保存
@@ -221,7 +221,7 @@ class make_training_val_data:
 
     def data_logger(self):
         ## TrainingとValidationの Ring & NonRing の枚数を取得
-        train_Ring_num = len(glob.glob(f"{self.save_data_path}/train/Ring_*.json"))
+        train_Ring_num = len(glob.glob(f"{self.save_data_path}/train/ring/Ring_*.json"))
         val_Ring_num = len(glob.glob(f"{self.save_data_path}/val/Ring_*.json"))
         Train_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/train/nonring/NonRing_*.json"))
         Val_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/val/NonRing_*.json"))

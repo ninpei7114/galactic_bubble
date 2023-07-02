@@ -3,7 +3,6 @@ import pickle
 import shutil
 import time
 from itertools import product as product
-from math import sqrt as sqrt
 
 import numpy as np
 import pandas as pd
@@ -19,7 +18,6 @@ from sub import EarlyStopping_f1_score, calc_f1score, print_and_log, weights_ini
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg):
     torch.manual_seed(123)
     torch.backends.cudnn.benchmark = False
-    batch_size_ring = 16
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
@@ -48,7 +46,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ## Training dataの作成 ##
         ########################
         ## png形式のRing画像とjson形式のlabelを作成
-        Ring_path, NonRing_path = Make_data.make_training_data(train_cfg)
+        Ring_path, NonRing_path = Make_data.make_training_data(train_cfg, epoch)
         train_Ring_num = Make_data.data_logger()
 
         Train_Ring_path = (
@@ -63,7 +61,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             .map(preprocess)
         )
         dl_ring_train = torch.utils.data.DataLoader(
-            Train_Ring_path, collate_fn=od_collate_fn, batch_size=batch_size_ring
+            Train_Ring_path, collate_fn=od_collate_fn, batch_size=args.batch_size
         )
         dl_noring_train = torch.utils.data.DataLoader(
             Train_NonRing_path, collate_fn=od_collate_fn, batch_size=args.NonRing_mini_batch
@@ -71,13 +69,13 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
 
         t_epoch_start = time.time()
-        print_and_log(f_log, ["-------------", f"Epoch {epoch + 1}/{num_epochs}", "-------------"])
+        print_and_log(f_log, ["-------------", "Epoch {}/{}".format(epoch + 1, num_epochs), "-------------"])
 
         train_bbbb_loc, train_bbbb_conf, train_bbbb_b, train_seikai = [], [], [], []
         val_bbbb_loc, val_bbbb_conf, val_bbbb_b, val_seikai = [], [], [], []
         train_f1_score_l, train_f1_score_l_non_ring, val_f1_score_l, val_f1_score_l_non_ring = [], [], [], []
 
-        iteration, val_iter, epoch_train_loss, epoch_val_loss = 0.0, 0.0, 0.0, 0.0
+        iteration, val_iter, epoch_train_loss, epoch_val_loss = 0, 0.0, 0.0, 0.0
         loss_ll_val, loss_cc_val, loss_c_posii_val, loss_c_negaa_val = 0.0, 0.0, 0.0, 0.0
         loss_ll_train, loss_cc_train, loss_c_posii_train, loss_c_negaa_train = 0.0, 0.0, 0.0, 0.0
 
@@ -140,6 +138,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                             + "       ",
                             end="",
                         )
+
                         iteration += 1
 
                     else:
