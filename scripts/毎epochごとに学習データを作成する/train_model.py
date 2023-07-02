@@ -18,6 +18,7 @@ from sub import EarlyStopping_f1_score, calc_f1score, print_and_log, weights_ini
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg):
     torch.manual_seed(123)
     torch.backends.cudnn.benchmark = False
+    NonRing_mini_batch = args.NonRing_mini_batch * args.NonRing_ratio
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
@@ -64,7 +65,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             Train_Ring_path, collate_fn=od_collate_fn, batch_size=args.batch_size
         )
         dl_noring_train = torch.utils.data.DataLoader(
-            Train_NonRing_path, collate_fn=od_collate_fn, batch_size=args.NonRing_mini_batch
+            Train_NonRing_path, collate_fn=od_collate_fn, batch_size=NonRing_mini_batch
         )
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
 
@@ -134,7 +135,12 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                             "\r"
                             + str(iteration)
                             + "/"
-                            + str(int((int(train_Ring_num) + int(train_Ring_num * 3)) / args.batch_size))
+                            + str(
+                                int(
+                                    (int(train_Ring_num) + int(train_Ring_num * args.NonRing_ratio))
+                                    / (args.batch_size + NonRing_mini_batch)
+                                )
+                            )
                             + "       ",
                             end="",
                         )
