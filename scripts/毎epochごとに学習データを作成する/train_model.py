@@ -37,7 +37,9 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     Make_data = make_training_val_data(augmentation_name, f_log, args)
     Validation_data_path = Make_data.make_validation_data()
     Dataset_val = webdataset.WebDataset(Validation_data_path).decode("pil").to_tuple("png", "json").map(preprocess)
-    dl_val = torch.utils.data.DataLoader(Dataset_val, collate_fn=od_collate_fn, batch_size=32)
+    dl_val = torch.utils.data.DataLoader(
+        Dataset_val, collate_fn=od_collate_fn, batch_size=32, num_workers=2, pin_memory=True
+    )
 
     #############
     ## 学習開始 ##
@@ -62,10 +64,10 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             .map(preprocess)
         )
         dl_ring_train = torch.utils.data.DataLoader(
-            Train_Ring_path, collate_fn=od_collate_fn, batch_size=args.batch_size
+            Train_Ring_path, collate_fn=od_collate_fn, batch_size=args.batch_size, num_workers=2, pin_memory=True
         )
         dl_noring_train = torch.utils.data.DataLoader(
-            Train_NonRing_path, collate_fn=od_collate_fn, batch_size=NonRing_mini_batch
+            Train_NonRing_path, collate_fn=od_collate_fn, batch_size=NonRing_mini_batch, num_workers=2, pin_memory=True
         )
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
 
