@@ -89,11 +89,11 @@ class label_caliculator(object):
             self.width = self.x_pix_max - self.x_pix_min
             self.height = self.y_pix_max - self.y_pix_min
 
-        half_width = self.width * 5 / 7
-        half_height = self.height * 5 / 7
-
+        extra_width = self.width * 1 / 7
+        extra_height = self.height * 1 / 7
         self.overlapp_list = []
         self.overlapp_name = []
+
         for d in self.star_dic.items():
             ## 各リングの位置情報
             star_xmin = d[1][0]
@@ -107,8 +107,8 @@ class label_caliculator(object):
 
             ## 切り出す範囲内での対象リングの面積
             ## リングが切り出す範囲外なら、0になる
-            clip_xx = np.clip(xx, self.x_pix_min + half_width, self.x_pix_max - half_width)
-            clip_yy = np.clip(yy, self.y_pix_min + half_height, self.y_pix_max - half_height)
+            clip_xx = np.clip(xx, self.x_pix_min + extra_width, self.x_pix_max - extra_width)
+            clip_yy = np.clip(yy, self.y_pix_min + extra_height, self.y_pix_max - extra_height)
             clip_width = clip_xx[1] - clip_xx[0] + 1e-9
             clip_height = clip_yy[1] - clip_yy[0] + 1e-9
             clip_area = (clip_xx[1] - clip_xx[0]) * (clip_yy[1] - clip_yy[0])
