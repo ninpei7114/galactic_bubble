@@ -89,8 +89,8 @@ class label_caliculator(object):
             self.width = self.x_pix_max - self.x_pix_min
             self.height = self.y_pix_max - self.y_pix_min
 
-        half_width = self.width * 5 / 14
-        half_height = self.height * 5 / 14
+        half_width = self.width * 5 / 7
+        half_height = self.height * 5 / 7
 
         self.overlapp_list = []
         self.overlapp_name = []

@@ -71,22 +71,19 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
                 else:
                     c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
                     cut_data = copy.deepcopy(c_data)
-                    if np.isnan(cut_data.sum()):
+                    pi = processing.conv(300, sig1, cut_data)
+                    label_cal.make_label(Ring_catalogue)
+                    r_shape_y = pi.shape[0]
+                    r_shape_x = pi.shape[1]
+                    res_data = pi[
+                        int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)
+                    ]
+                    if np.isnan(res_data.sum()):
                         pass
-
                     else:
                         ########################
                         ## 普通に切り出したリング ##
                         ########################
-                        pi = processing.conv(300, sig1, cut_data)
-                        pi_ = copy.deepcopy(pi)
-                        label_cal.make_label(Ring_catalogue)
-                        r_shape_y = pi_.shape[0]
-                        r_shape_x = pi_.shape[1]
-                        res_data = pi_[
-                            int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)
-                        ]
-
                         xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                         info = {
                             "fits": fits_path,
