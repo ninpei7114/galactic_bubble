@@ -86,7 +86,6 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
                         res_data = pi_[
                             int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)
                         ]
-                        res_data = processing.norm_res(res_data)
 
                         xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
                         info = {
@@ -97,6 +96,12 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
                             "ymin": ymin_list,
                             "ymax": ymax_list,
                         }
+                        append_data(
+                            processing.norm_res(res_data),
+                            info,
+                            mwp_ring_list_train,
+                            frame_mwp_train,
+                        )
 
                         #######################
                         ## Ring augmentation ##

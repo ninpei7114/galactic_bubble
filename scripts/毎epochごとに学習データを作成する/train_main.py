@@ -65,8 +65,8 @@ def main(args):
     }
 
     ## 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentationをする。
-    flip_list = [True]
-    rotate_list = [True]
+    flip_list = [True, False]
+    rotate_list = [True, False]
     scale_list = [False]
     translation_list = [True]
 

@@ -12,7 +12,8 @@ import webdataset
 
 from data import od_collate_fn, preprocess
 from make_data import make_training_val_data
-from sub import EarlyStopping_f1_score, calc_f1score, print_and_log, weights_init
+from sub import (EarlyStopping_f1_score, calc_f1score, print_and_log,
+                 weights_init)
 
 
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg):

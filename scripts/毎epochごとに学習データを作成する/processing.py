@@ -1,5 +1,6 @@
+import copy
+
 import numpy as np
-import pandas as pd
 import scipy.ndimage
 import torch
 from scipy import signal
@@ -58,13 +59,14 @@ def norm_res(data):
     データを切り取り、
     normalizeとresizeをする。
     """
-    shape_y = data.shape[0]
-    shape_x = data.shape[1]
-    data = data[int(shape_y / 4) : int(shape_y * 3 / 4), int(shape_x / 4) : int(shape_x * 3 / 4)]
-    data = normalize(data)
-    data = resize(data, 300)
+    # shape_y = data.shape[0]
+    # shape_x = data.shape[1]
+    # data = data[int(shape_y / 4) : int(shape_y * 3 / 4), int(shape_x / 4) : int(shape_x * 3 / 4)]
+    data_ = copy.deepcopy(data)
+    data_ = normalize(data_)
+    data_ = resize(data_, 300)
 
-    return data
+    return data_
 
 
 def conv(obj_size, obj_sig, data):
