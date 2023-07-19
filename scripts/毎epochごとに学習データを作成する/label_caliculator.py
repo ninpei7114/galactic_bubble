@@ -63,10 +63,10 @@ class label_caliculator(object):
         width = x_max - x_min
         height = y_max - y_min
 
-        self.x_pix_min = x_min - width / 2
-        self.y_pix_min = y_min - height / 2
-        self.x_pix_max = x_max + width / 2
-        self.y_pix_max = y_max + height / 2
+        self.x_pix_min = x_min - width / 5
+        self.y_pix_min = y_min - height / 5
+        self.x_pix_max = x_max + width / 5
+        self.y_pix_max = y_max + height / 5
 
         self.width = self.x_pix_max - self.x_pix_min
         self.height = self.y_pix_max - self.y_pix_min
@@ -174,14 +174,14 @@ class label_caliculator(object):
                     ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
                     ## 余分に大きく切り出しているため
 
-                    xmin_c = p[1][0] - (self.x_pix_min + self.width / 4)
-                    ymin_c = p[1][1] - (self.y_pix_min + self.height / 4)
-                    xmax_c = p[1][2] - (self.x_pix_min + self.width / 4)
-                    ymax_c = p[1][3] - (self.y_pix_min + self.height / 4)
-                    self.xmin_list.append(self.judge_01(xmin_c / (self.width / 2)))
-                    self.xmax_list.append(self.judge_01(xmax_c / (self.width / 2)))
-                    self.ymin_list.append(self.judge_01(ymin_c / (self.height / 2)))
-                    self.ymax_list.append(self.judge_01(ymax_c / (self.height / 2)))
+                    xmin_c = p[1][0] - (self.x_pix_min + self.width / 7)
+                    ymin_c = p[1][1] - (self.y_pix_min + self.height / 7)
+                    xmax_c = p[1][2] - (self.x_pix_min + self.width / 7)
+                    ymax_c = p[1][3] - (self.y_pix_min + self.height / 7)
+                    self.xmin_list.append(self.judge_01(xmin_c / (self.width * 5 / 7)))
+                    self.xmax_list.append(self.judge_01(xmax_c / (self.width * 5 / 7)))
+                    self.ymin_list.append(self.judge_01(ymin_c / (self.height * 5 / 7)))
+                    self.ymax_list.append(self.judge_01(ymax_c / (self.height * 5 / 7)))
                     self.named_list.append(n)
 
     def check_list(self):
@@ -204,136 +204,3 @@ class label_caliculator(object):
             name_list_.append(self.named_list[xy_num])
 
         return xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_  # , self.flag
-
-    # def find_cover_for_translation(self, x_pix_min, x_pix_max, y_pix_min, y_pix_max):
-    #     """
-    #     translationのためのfind cover
-    #     切り出した画像の中に、他のリングが入っていないか確かめる。
-    #     入っていたら、ラベル付けする
-    #     star_listはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
-    #     """
-    #     ## x_pix_maxなどは、convolutionを考えて幅の1/4大きめに設定しているため
-    #     ## widthを計算して、正確な切り出し範囲を算出する
-    #     width = (x_pix_max - x_pix_min) / 4
-    #     hight = (y_pix_max - y_pix_min) / 4
-
-    #     # g_area = ((x_pix_max-width)-(x_pix_min+width))*((y_pix_max-hight)-(y_pix_min+hight))
-
-    #     self.overlapp_list = []
-    #     self.overlapp_name = []
-    #     for d in self.star_dic.items():
-    #         s_xmin = d[1][0]
-    #         s_xmax = d[1][2]
-    #         s_ymin = d[1][1]
-    #         s_ymax = d[1][3]
-
-    #         xx = np.array([s_xmin, s_xmax])
-    #         yy = np.array([s_ymin, s_ymax])
-    #         c_xx = np.clip(xx, x_pix_min + width, x_pix_max - width)
-    #         c_yy = np.clip(yy, y_pix_min + hight, y_pix_max - hight)
-    #         s_width = c_xx[1] - c_xx[0] + 1e-9
-    #         s_height = c_yy[1] - c_yy[0] + 1e-9
-    #         s_area = (xx[1] - xx[0]) * (yy[1] - yy[0])
-    #         c_area = (c_xx[1] - c_xx[0]) * (c_yy[1] - c_yy[0])
-
-    #         # 場合分け、全体に対してringが1/4以上入っていないといけない
-    #         # width/height比が1/3以上でないとlabel付けしない
-    #         if (
-    #             c_area >= s_area * 1 / 4
-    #             and s_height / (s_width + 1e-9) > 1 / 3
-    #             and s_width / (s_height + 1e-9) > 1 / 3
-    #         ):
-    #             self.overlapp_list.append(d)
-    #             self.overlapp_name.append(d[0])
-
-    #         else:
-    #             pass
-
-    # def make_label_for_translation(self, x_pix_min, y_pix_min, x_pix_max, y_pix_max, width, height, MWP):
-    #     """
-    #     sは、主体となるringの位置情報
-    #     x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、fitsから切り出す際の画像のpix情報
-    #     """
-
-    #     self.xmin_list = []
-    #     self.ymin_list = []
-    #     self.xmax_list = []
-    #     self.ymax_list = []
-    #     self.named_list = []
-    #     MWP_name_select = MWP.index.tolist()
-
-    #     #############################################
-    #     ## 主体となるRing と それ以外のRing のlabel付け ##
-    #     #############################################
-
-    #     if len(self.overlapp_list) == 0:
-    #         pass
-    #     else:
-    #         for p, n in zip(self.overlapp_list, self.overlapp_name):
-    #             ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
-    #             ## ('2G0020120-0068213',
-    #             ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
-    #             if p[0] in MWP_name_select:
-    #                 ######################################################
-    #                 ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
-    #                 ######################################################
-
-    #                 ## p[1][0]は天体の位置であり、x_pix_minはfitsから切り出すpix情報
-    #                 ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
-    #                 ## 余分に大きく切り出しているため
-    #                 xmin_c = p[1][0] - (x_pix_min + width / 4)
-    #                 ymin_c = p[1][1] - (y_pix_min + height / 4)
-    #                 xmax_c = p[1][2] - (x_pix_min + width / 4)
-    #                 ymax_c = p[1][3] - (y_pix_min + height / 4)
-    #                 self.xmin_list.append(self.judge_01(xmin_c / (width / 2)))
-    #                 self.xmax_list.append(self.judge_01(xmax_c / (width / 2)))
-    #                 self.ymin_list.append(self.judge_01(ymin_c / (height / 2)))
-    #                 self.ymax_list.append(self.judge_01(ymax_c / (height / 2)))
-    #                 self.named_list.append(n)
-
-    ## ↓ この後、以下のdef check_listに入れる ↓
-
-
-### MWPカタログを選定する時の関数
-#
-# def rank_catalogue(sentei_path, mwp_catalogu_path):
-#     nishimoto = pd.read_csv(sentei_path)
-#     nishimoto = nishimoto.drop('Unnamed: 0', axis=1)
-#     nishimoto = nishimoto.fillna(0)
-
-
-#     rank1 = []
-#     rank2 = []
-#     rank3 = []
-#     rank4 = []
-#     rank5 = []
-#     for i in range(len(nishimoto)):
-#         nishimoto_s = nishimoto.loc[i]
-#         Q = np.where(np.array(nishimoto_s.tolist())==1)[0]
-#     #     print(Q)
-#         if Q == 0:
-#             rank1.append(i)
-#         elif Q == 1:
-#             rank2.append(i)
-#         elif Q == 2:
-#             rank3.append(i)
-#         elif Q == 3:
-#             rank4.append(i)
-#         elif Q == 4:
-#             rank5.append(i)
-
-
-#     catalogue = pd.read_csv(mwp_catalogu_path)
-
-#     each_rank = []
-#     for i in range(len(nishimoto)):
-#         nishimoto_s = nishimoto.loc[i]
-#         Q = np.where(np.array(nishimoto_s.tolist())==1)[0][0]
-#         each_rank.append(Q+1)
-
-#     catalogue['rank'] = each_rank
-#     catalogue_ = pd.concat([catalogue.iloc[rank3], catalogue.iloc[rank4], catalogue.iloc[rank5]])
-#     catalogue_ = catalogue_.rename(columns={'Unnamed: 0':'MWP'})
-#     MWP = catalogue_.set_index('MWP')
-
-#     return MWP

@@ -84,7 +84,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
                         r_shape_y = pi_.shape[0]
                         r_shape_x = pi_.shape[1]
                         res_data = pi_[
-                            int(r_shape_y / 4) : int(r_shape_y * 3 / 4), int(r_shape_x / 4) : int(r_shape_x * 3 / 4)
+                            int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)
                         ]
                         res_data = processing.norm_res(res_data)
 
@@ -102,7 +102,6 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
                         ## Ring augmentation ##
                         #######################
                         for _ in range(args.augmentation_ratio):
-                            # m2_size = trans_rg.uniform(0.125, 1)
                             label_cal_for_trans = label_caliculator.label_caliculator(choice_catalogue, w)
                             label_cal_for_trans.all_star(Ring_catalogue)
                             trans_params = {

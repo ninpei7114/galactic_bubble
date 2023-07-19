@@ -49,7 +49,7 @@ def translation(
     if flag:
         ## 画像処理のconvolutionをする際に耳ができるため、
         ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
-        half_width = (x_pix_max - x_pix_min) / 4
+        half_width = (x_pix_max - x_pix_min) * 5 / 14
         ## rはRingの半径pixを求めている
         r = int(((x_pix_max - half_width) - (x_pix_min + half_width)) / (2 * random_num))
 
@@ -85,8 +85,12 @@ def translation(
             c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
             cut_data = c_data.copy()
             pi = processing.conv(300, sig1, cut_data)
+            pi_ = copy.deepcopy(pi)
+            r_shape_y = pi_.shape[0]
+            r_shape_x = pi_.shape[1]
+            pi_conv = pi_[int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)]
 
-            if np.isnan(pi.sum()):
+            if np.isnan(pi_conv.sum()):
                 return False, 0, 0
 
             else:
@@ -103,7 +107,7 @@ def translation(
                     "ymin": ymin_list,
                     "ymax": ymax_list,
                 }
-                return True, pi, info
+                return True, pi_conv, info
                 # else:
                 #     return False, 0, 0
 
