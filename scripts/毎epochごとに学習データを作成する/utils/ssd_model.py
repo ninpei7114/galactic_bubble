@@ -580,7 +580,7 @@ def decode_all(loc_data, dbox_list):
     return boxes
 
 
-def nm_suppression(boxes, scores, overlap=0.45, top_k=1000):
+def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     """
     Non-Maximum Suppressionを行う関数。
     boxesのうち被り過ぎ（overlap以上）のBBoxを削除する。
@@ -687,7 +687,7 @@ def update_index(area, boxes, idx, i: int, overlap: float):
 
 
 class Detect(Function):
-    def __init__(self, conf_thresh=0.01, top_k=1000, nms_thresh=0.45):
+    def __init__(self, conf_thresh=0.3, top_k=200, nms_thresh=0.45):
         self.softmax = nn.Softmax(dim=-1)  # confをソフトマックス関数で正規化するために用意
         self.conf_thresh = conf_thresh  # confがconf_thresh=0.01より高いDBoxのみを扱う
         self.top_k = top_k  # nm_supressionでconfの高いtop_k個を計算に使用する, top_k = 200
