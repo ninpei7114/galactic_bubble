@@ -82,8 +82,6 @@ def main(args):
     choice = "CH"
     Ring_CATALOGUE = ring_augmentation.catalogue(choice)
     trans_rng = default_rng(123)
-    frame_mwp_val = []
-    mwp_ring_list_val = []
     val_count = 0
 
     #####################
@@ -92,9 +90,8 @@ def main(args):
 
     pbar = tqdm(range(len(val_l)))
     for i in pbar:
-        # if args.each_region:
-        #     region_frame_mwp_val = []
-        #     region_mwp_ring_list_val = []
+        frame_mwp_val = []
+        mwp_ring_list_val = []
 
         fits_path = val_l[i]
         pbar.set_description(fits_path)
