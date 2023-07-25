@@ -76,7 +76,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
                     r_shape_y = pi.shape[0]
                     r_shape_x = pi.shape[1]
                     res_data = pi[
-                        int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)
+                        int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
                     ]
                     if np.isnan(res_data.sum()):
                         pass

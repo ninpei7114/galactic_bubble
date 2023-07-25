@@ -63,10 +63,10 @@ class label_caliculator(object):
         width = x_max - x_min
         height = y_max - y_min
 
-        self.x_pix_min = x_min - width / 5
-        self.y_pix_min = y_min - height / 5
-        self.x_pix_max = x_max + width / 5
-        self.y_pix_max = y_max + height / 5
+        self.x_pix_min = x_min - width / 50
+        self.y_pix_min = y_min - height / 50
+        self.x_pix_max = x_max + width / 50
+        self.y_pix_max = y_max + height / 50
 
         self.width = self.x_pix_max - self.x_pix_min
         self.height = self.y_pix_max - self.y_pix_min
@@ -89,8 +89,8 @@ class label_caliculator(object):
             self.width = self.x_pix_max - self.x_pix_min
             self.height = self.y_pix_max - self.y_pix_min
 
-        extra_width = self.width * 1 / 7
-        extra_height = self.height * 1 / 7
+        extra_width = self.width * 1 / 52
+        extra_height = self.height * 1 / 52
         self.overlapp_list = []
         self.overlapp_name = []
 
@@ -174,14 +174,14 @@ class label_caliculator(object):
                     ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
                     ## 余分に大きく切り出しているため
 
-                    xmin_c = p[1][0] - (self.x_pix_min + self.width / 7)
-                    ymin_c = p[1][1] - (self.y_pix_min + self.height / 7)
-                    xmax_c = p[1][2] - (self.x_pix_min + self.width / 7)
-                    ymax_c = p[1][3] - (self.y_pix_min + self.height / 7)
-                    self.xmin_list.append(self.judge_01(xmin_c / (self.width * 5 / 7)))
-                    self.xmax_list.append(self.judge_01(xmax_c / (self.width * 5 / 7)))
-                    self.ymin_list.append(self.judge_01(ymin_c / (self.height * 5 / 7)))
-                    self.ymax_list.append(self.judge_01(ymax_c / (self.height * 5 / 7)))
+                    xmin_c = p[1][0] - (self.x_pix_min + self.width / 52)
+                    ymin_c = p[1][1] - (self.y_pix_min + self.height / 52)
+                    xmax_c = p[1][2] - (self.x_pix_min + self.width / 52)
+                    ymax_c = p[1][3] - (self.y_pix_min + self.height / 52)
+                    self.xmin_list.append(self.judge_01(xmin_c / (self.width * 51 / 52)))
+                    self.xmax_list.append(self.judge_01(xmax_c / (self.width * 51 / 52)))
+                    self.ymin_list.append(self.judge_01(ymin_c / (self.height * 51 / 52)))
+                    self.ymax_list.append(self.judge_01(ymax_c / (self.height * 51 / 52)))
                     self.named_list.append(n)
 
     def check_list(self):

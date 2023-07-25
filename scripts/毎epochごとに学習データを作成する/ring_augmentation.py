@@ -49,7 +49,7 @@ def translation(
     if flag:
         ## 画像処理のconvolutionをする際に耳ができるため、
         ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
-        half_width = (x_pix_max - x_pix_min) * 5 / 14
+        half_width = (x_pix_max - x_pix_min) * 25 / 52
         ## rはRingの半径pixを求めている
         r = int(((x_pix_max - half_width) - (x_pix_min + half_width)) / (2 * random_num))
 
@@ -88,7 +88,9 @@ def translation(
             pi_ = copy.deepcopy(pi)
             r_shape_y = pi_.shape[0]
             r_shape_x = pi_.shape[1]
-            pi_conv = pi_[int(r_shape_y / 7) : int(r_shape_y * 6 / 7), int(r_shape_x / 7) : int(r_shape_x * 6 / 7)]
+            pi_conv = pi_[
+                int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
+            ]
 
             if np.isnan(pi_conv.sum()):
                 return False, 0, 0
@@ -126,6 +128,7 @@ def rotate_data(deg, trans_data, trans_info):
 
     for xy_num in range(len(trans_info["xmin"])):
         width = trans_info["xmax"][xy_num] - trans_info["xmin"][xy_num]
+        height = trans_info["ymax"][xy_num] - trans_info["ymin"][xy_num]
         center_x = ((trans_info["xmin"][xy_num] - 0.5) + (trans_info["xmax"][xy_num] - 0.5)) / 2
         center_y = ((trans_info["ymin"][xy_num] - 0.5) + (trans_info["ymax"][xy_num] - 0.5)) / 2
 
@@ -133,9 +136,9 @@ def rotate_data(deg, trans_data, trans_info):
         new_center_y = center_x * np.sin(np.deg2rad(-deg)) + center_y * np.cos(np.deg2rad(-deg)) + 0.5
 
         xmin_list_.append(np.clip(new_center_x - width / 2, 0, 1))
-        ymin_list_.append(np.clip(new_center_y - width / 2, 0, 1))
+        ymin_list_.append(np.clip(new_center_y - height / 2, 0, 1))
         xmax_list_.append(np.clip(new_center_x + width / 2, 0, 1))
-        ymax_list_.append(np.clip(new_center_y + width / 2, 0, 1))
+        ymax_list_.append(np.clip(new_center_y + height / 2, 0, 1))
 
     info = {
         "fits": trans_info["fits"],
@@ -240,7 +243,7 @@ def catalogue(choice):
         return MWP
 
     else:
-        print("this choice catalogu does not exist")
+        print("this choice catalogue does not exist")
 
 
 # class data_proccessing(object):
