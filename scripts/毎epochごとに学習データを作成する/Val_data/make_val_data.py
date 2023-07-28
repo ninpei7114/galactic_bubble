@@ -182,7 +182,8 @@ def main(args):
                         }
                     )
             else:
-                ll.append({"Confidence": str(0)})
+                # ll.append({"Confidence": str(0)})
+                pass
 
             with open("%s/Ring_%s.json" % (savedir_name, i), "w") as f:
                 json.dump(ll, f, indent=4)
