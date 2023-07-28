@@ -6,9 +6,9 @@ import sys
 import astropy.io.fits
 import astropy.wcs
 import numpy as np
+import pandas as pd
 from PIL import Image
 from tqdm import tqdm
-import pandas as pd
 
 sys.path.append("../")
 import label_caliculator
@@ -58,7 +58,8 @@ def main(args):
     'spitzer_35700+0000_rgb']
     # fmt: on
     val_l = sorted(val_l)
-    os.makedirs("/workspace/val_png/region_val_png", exist_ok=True)
+    os.makedirs("/workspace/cut_val_png/", exist_ok=True)
+    os.makedirs("/workspace/cut_val_png/region_val_png", exist_ok=True)
 
     ## choice catalogue from 'CH' or 'MWP'
     choice = "MWP"
@@ -70,7 +71,8 @@ def main(args):
     #####################
     pbar = tqdm(range(len(val_l)))
     for i in pbar:
-        cut_count = 0
+        ring_count = 0
+        non_ring_count = 0
 
         fits_path = val_l[i]
         pbar.set_description(fits_path)
@@ -99,14 +101,14 @@ def main(args):
 
         size_list = [150, 300, 600, 900, 1200, 1800, 2500, 3000]
         fragment = 3
-        savedir_name = "/workspace/val_png/region_val_png/%s" % fits_path
+        savedir_name = "/workspace/cut_val_png/region_val_png/%s" % fits_path
         os.makedirs(savedir_name, exist_ok=True)
         os.makedirs(savedir_name + "/Ring", exist_ok=True)
         os.makedirs(savedir_name + "/NonRing", exist_ok=True)
 
         ring_data = []
         ring_row = []
-        non_ring_data = []
+        # non_ring_data = []
         for kk in range(len(size_list)):
             size = size_list[kk]
 
@@ -143,17 +145,20 @@ def main(args):
                             }
                         )
                     Ring_or_NonRing = "Ring"
+                    ring_count += 1
                     ring_data.append(cut_region)
                     ring_row.append(row)
+                    cut_count = ring_count
                 else:
                     Ring_or_NonRing = "NonRing"
-                    non_ring_data.append(cut_region)
+                    non_ring_count += 1
+                    cut_count = ring_count
 
-                with open(f"{savedir_name}/{Ring_or_NonRing}/cut_region_{cut_count}.json", "w") as f:
+                with open(f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}.json", "w") as f:
                     json.dump(ll, f, indent=4)
 
                 pil_image = Image.fromarray(np.uint8(cut_region * 255))
-                pil_image.save(f"{savedir_name}/{Ring_or_NonRing}/cut_region_{cut_count}.png")
+                pil_image.save(f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}.png")
                 cut_count += 1
 
         if len(ring_data) > 3000:
@@ -163,12 +168,6 @@ def main(args):
         processing.data_view_rectangl(25, np.array(ring_data)[::slice], pd.DataFrame(ring_row)[::slice]).save(
             f"{savedir_name}/Ring_data.png"
         )
-
-        if len(non_ring_data) > 3000:
-            slice = int(len(non_ring_data) / 1000)
-        else:
-            slice = 1
-        processing.data_view_rectangl(25, np.array(non_ring_data)[::slice]).save(f"{savedir_name}/Non_Ring_data.png")
 
 
 if __name__ == "__main__":

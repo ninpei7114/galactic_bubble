@@ -183,7 +183,7 @@ class make_training_val_data:
 
             ## Ringデータをコピーする。
             Val_origin = []
-            a = [glob.glob(f"/workspace/val_png/region_val_png/{i}/*.png") for i in self.val_l]
+            a = [glob.glob(f"/workspace/cut_val_png/region_val_png/{i}/Ring/*.png") for i in self.val_l]
             [Val_origin.extend(i) for i in a]
             for i, k in enumerate(Val_origin):
                 shutil.copyfile(k, f"{self.save_data_path}/val/Ring_{i}.png")
@@ -191,7 +191,7 @@ class make_training_val_data:
 
             ## Non-Ringをコピーする
             NonRing_origin = []
-            a = [glob.glob(f"/workspace/NonRing_png/region_NonRing_png/{i}/*.png") for i in self.val_l]
+            a = [glob.glob(f"/workspace/cut_val_png/region_val_png/NonRing/{i}/*.png") for i in self.val_l]
             [NonRing_origin.extend(i) for i in a]
             Choice_NonRing = self.Data_rg.choice(
                 NonRing_origin, int(len(Val_origin)) * self.args.NonRing_ratio, replace=False
