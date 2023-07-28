@@ -38,7 +38,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     Validation_data_path = Make_data.make_validation_data()
     Dataset_val = webdataset.WebDataset(Validation_data_path).decode("pil").to_tuple("png", "json").map(preprocess)
     dl_val = torch.utils.data.DataLoader(
-        Dataset_val, collate_fn=od_collate_fn, batch_size=32, num_workers=2, pin_memory=True
+        Dataset_val, collate_fn=od_collate_fn, batch_size=128, num_workers=2, pin_memory=True
     )
 
     #############
