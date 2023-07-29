@@ -133,15 +133,15 @@ def main(args):
 
             for cut_region, row in zip(cut_region_array, label.iterrows()):
                 ll = []
-                if len(row["xmin"]) >= 1:
-                    for la in range(len(row["xmin"])):
+                if len(row[1]["xmin"]) >= 1:
+                    for la in range(len(row[1]["xmin"])):
                         ll.append(
                             {
                                 "Confidence": str(0),
-                                "XMin": str(row["xmin"][la]),
-                                "XMax": str(row["xmax"][la]),
-                                "YMin": str(row["ymin"][la]),
-                                "YMax": str(row["ymax"][la]),
+                                "XMin": str(row[1]["xmin"][la]),
+                                "XMax": str(row[1]["xmax"][la]),
+                                "YMin": str(row[1]["ymin"][la]),
+                                "YMax": str(row[1]["ymax"][la]),
                             }
                         )
                     Ring_or_NonRing = "Ring"
