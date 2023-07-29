@@ -147,7 +147,7 @@ def main(args):
                     Ring_or_NonRing = "Ring"
                     ring_count += 1
                     ring_data.append(cut_region)
-                    ring_row.append(row)
+                    ring_row.append(row[1])
                     cut_count = ring_count
                 else:
                     Ring_or_NonRing = "NonRing"
