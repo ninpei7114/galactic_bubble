@@ -117,6 +117,7 @@ def remove_nan(data1):
 def cut_data(data_, many_ind, cut_shape, obj_sig, label_cal, fits_path):
     data_list = []
     frame_list = []
+    offset_info = []
     for i in many_ind:
         x_min = i[1]
         y_min = i[0]
@@ -144,11 +145,12 @@ def cut_data(data_, many_ind, cut_shape, obj_sig, label_cal, fits_path):
                 "ymax": ymax_list,
             }
             frame_list.append(info)
+            offset_info.append([y_min, x_min, cut_shape])
 
         else:
             pass
 
-    return np.array(data_list).astype(np.float32), pd.DataFrame(frame_list)
+    return np.array(data_list).astype(np.float32), pd.DataFrame(frame_list), np.array(offset_info)
 
 
 def data_view_rectangl(col, imgs, infos=None, moji_size=100):

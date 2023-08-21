@@ -10,15 +10,13 @@ class NonRing_sub(object):
         self.hist_ = self.hist / 591
         self.hisy = self.hist_.tolist()
         # fmt: off
-        self.range_ = np.array(
-            [
-                0.11, 0.72866666, 1.3473333, 1.966, 2.5846667, 3.2033334, 3.822,
-                4.4406667, 5.0593333, 5.678, 6.2966666, 7.534, 8.152667, 8.771334,
-                9.39, 10.008667, 10.627334, 11.246, 11.864667, 12.483334, 13.102,
-                13.720667, 14.339334, 14.958, 15.576667, 16.195333, 16.814,
-                17.432667, 18.051332, 18.67,
-            ]
-        )
+        self.range_ = np.array([ 0.11     ,  0.72866666,  1.3473333 ,  1.966     ,  2.5846667 ,
+                                3.2033334 ,  3.822     ,  4.4406667 ,  5.0593333 ,  5.678     ,
+                                6.2966666 ,  6.9153333 ,  7.534     ,  8.152667  ,  8.771334  ,
+                                9.39      , 10.008667  , 10.627334  , 11.246     , 11.864667  ,
+                                12.483334 , 13.102     , 13.720667  , 14.339334  , 14.958     ,
+                                15.576667 , 16.195333  , 16.814     , 17.432667  , 18.051332  ,
+                                18.67      ])
         # fmt: on
 
         self.w = world
@@ -27,9 +25,9 @@ class NonRing_sub(object):
         self.fits_data_shape_y = fits_data.shape[0]
         self.random_uni = random_uni
 
-    def GLON_LAT(self, data, header):
-        a = data.shape[0]
-        b = data.shape[1]
+    def GLON_LAT(self, header):
+        a = self.fits_data.shape[0]
+        b = self.fits_data.shape[1]
         GLON_min, GLAT_min = self.w.all_pix2world(b, 0, 0)
         GLON_max, GLAT_max = self.w.all_pix2world(0, a, 0)
 
@@ -62,7 +60,7 @@ class NonRing_sub(object):
         random_GLAT = self.random_uni.uniform(self.GLAT_new_min1, self.GLAT_new_max1)
 
         ## Churchwellのリングのサイズ分布に従って、切り出す大きさを決める。
-        q = self.random_uni.choice(np.arange(0, len(self.hist_)), p=self.hisy)
+        q = self.random_uni.choice(np.arange(0, len(self.hisy)), p=self.hisy)
         random_Rout = self.random_uni.uniform(self.range_[q], self.range_[q + 1])
 
         lmax_random = random_GLON + 3 * random_Rout / 60
@@ -85,10 +83,10 @@ class NonRing_sub(object):
         width = x_random_max - x_random_min
         hight = y_random_max - y_random_min
         #     print(width, hight)
-        x_random_min = x_random_min - width / 2
-        x_random_max = x_random_max + width / 2
-        y_random_min = y_random_min - hight / 2
-        y_random_max = y_random_max + hight / 2
+        x_random_min = x_random_min - width / 50
+        x_random_max = x_random_max + width / 50
+        y_random_min = y_random_min - hight / 50
+        y_random_max = y_random_max + hight / 50
         #     print(x_random_min, x_random_max, y_random_min, y_random_max)
 
         return x_random_min, x_random_max, y_random_min, y_random_max
@@ -123,9 +121,6 @@ class NonRing_sub(object):
             cut_data_random = self.cut_no_ring()
             if not np.isnan(np.sum(cut_data_random)):
                 break
-
-        # else:
-        #     pass
 
         return cut_data_random
 

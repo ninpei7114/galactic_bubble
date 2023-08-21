@@ -28,9 +28,45 @@ def od_collate_fn(batch):
 
 
 ## webdatasetのために作成
+def val_od_collate_fn(batch):
+    targets = []
+    imgs = []
+    offset = []
+    for sample in batch:
+        imgs.append(sample[0])
+        targets.append(torch.FloatTensor(sample[1]))
+        offset.append(
+            [
+                sample[2].split("/")[-1].split("_")[2],
+                sample[2].split("/")[-1].split("_")[3],
+                sample[2].split("/")[-1].split("_")[4],
+            ]
+        )
+    imgs = np.array(imgs)
+    offset = np.array(offset)
+
+    return imgs, targets, offset
+
+
+## webdatasetのために作成
 def preprocess(sample):
     img, json = sample
-    return np.array(img) / 255, [(float(x["XMin"]), float(x["YMin"]), float(x["XMax"]), float(x["YMax"]), float(x["Confidence"])) for x in json]
+    return np.array(img) / 255, [
+        (float(x["XMin"]), float(x["YMin"]), float(x["XMax"]), float(x["YMax"]), float(x["Confidence"])) for x in json
+    ]
+
+
+## webdatasetのためのval_preprocess
+def val_preprocess(sample):
+    img, json, key = sample
+    return (
+        np.array(img) / 255,
+        [
+            (float(x["XMin"]), float(x["YMin"]), float(x["XMax"]), float(x["YMax"]), float(x["Confidence"]))
+            for x in json
+        ],
+        key,
+    )
 
 
 class DataSet:

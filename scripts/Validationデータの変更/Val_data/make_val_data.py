@@ -128,10 +128,12 @@ def main(args):
             ind_array = np.array(ind_array)
             ################### indexの計算 ###################
 
-            cut_region_array, label = processing.cut_data(data, ind_array, cut_shape[0], obj_sig, label_cal, fits_path)
+            cut_region_array, label, offset_info = processing.cut_data(
+                data, ind_array, cut_shape[0], obj_sig, label_cal, fits_path
+            )
             label["id"] = [i for i in range(len(label))]
 
-            for cut_region, row in zip(cut_region_array, label.iterrows()):
+            for cut_region, row, offset in zip(cut_region_array, label.iterrows(), offset_info):
                 ll = []
                 if len(row[1]["xmin"]) >= 1:
                     for la in range(len(row[1]["xmin"])):
@@ -154,20 +156,28 @@ def main(args):
                     non_ring_count += 1
                     cut_count = ring_count
 
-                with open(f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}.json", "w") as f:
-                    json.dump(ll, f, indent=4)
+                offset_ymin = offset[0]
+                offset_xmin = offset[1]
+                offset_cut_shape = offset[2]
 
+                with open(
+                    f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}_{offset_ymin}_{offset_xmin}_{offset_cut_shape}.json",
+                    "w",
+                ) as f:
+                    json.dump(ll, f, indent=4)
                 pil_image = Image.fromarray(np.uint8(cut_region * 255))
-                pil_image.save(f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}.png")
+                pil_image.save(
+                    f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}_{offset_ymin}_{offset_xmin}_{offset_cut_shape}.png"
+                )
                 cut_count += 1
 
         if len(ring_data) > 3000:
             slice = int(len(ring_data) / 1000)
         else:
             slice = 1
-        processing.data_view_rectangl(25, np.array(ring_data)[::slice], pd.DataFrame(ring_row)[::slice]).save(
-            f"{savedir_name}/Ring_data.png"
-        )
+        processing.data_view_rectangl(
+            25, np.uint8(np.array(ring_data)[::slice] * 255), pd.DataFrame(ring_row)[::slice]
+        ).save(f"{savedir_name}/Ring_data.png")
 
 
 if __name__ == "__main__":

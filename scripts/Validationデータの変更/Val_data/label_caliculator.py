@@ -78,6 +78,8 @@ class label_caliculator(object):
                 clip_area >= star_area * 1 / 3
                 and clip_height / (clip_width + 1e-9) > 1 / 3
                 and clip_width / (clip_height + 1e-9) > 1 / 3
+                and cut_shape / clip_width <= 8
+                and cut_shape / clip_height <= 8
             ):
                 xmin_c = star_xmin - x_min
                 ymin_c = star_ymin - y_min

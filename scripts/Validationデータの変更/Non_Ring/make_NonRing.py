@@ -19,7 +19,7 @@ webdatasetを使用するための、Non-Ringのpng画像を作成する
 さらに、json形式のlabelも作成する
 
 example command:
-python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r True
+python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r
 """
 
 
@@ -54,7 +54,6 @@ def main(args):
             "spitzer_34800+0000_rgb", "spitzer_35100+0000_rgb", "spitzer_35400+0000_rgb", "spitzer_35700+0000_rgb",
         ]
         # fmt: on
-
         mode_l = ["all"]
         if os.path.exists("/workspace/NonRing_png/region_NonRing_png"):
             pass
@@ -86,38 +85,31 @@ def main(args):
         ]
         # fmt: on
         train_l = sorted(train_l)
-
         mode_l = ["train", "val"]
 
     random_uni = default_rng(123)
-
+    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     #####################
     ## Non-Ring作成開始 ##
     #####################
-
     for mode in mode_l:
         if mode == "train":
-            epoch = 100
-            ref_path_list = train_l
-            choice_num = len(train_l) - 1
+            ref_path_list, choice_num = train_l, len(train_l) - 1
+            epoch, iter = 100, 60
             choice_list = random_uni.integers(0, choice_num, epoch)
-            iter = 60
         elif mode == "val":
-            epoch = 30
-            ref_path_list = val_l
-            choice_num = len(val_l) - 1
+            ref_path_list, choice_num = val_l, len(val_l) - 1
+            epoch, iter = 30, 30
             choice_list = random_uni.integers(0, choice_num, epoch)
-            iter = 30
         elif mode == "all":
             epoch = len(all_l)
             ref_path_list = all_l
             iter = 2000
 
         start = time.time()
-        sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
         fits_path = pathlib.Path(args.fits_path)
-
         pbar = tqdm(range(epoch))
+
         for k in pbar:
             if args.each_region:
                 path = ref_path_list[k]
@@ -127,6 +119,7 @@ def main(args):
                     os.mkdir("/workspace/NonRing_png/region_NonRing_png/%s" % path)
             else:
                 path = ref_path_list[choice_list[k]]
+            pbar.set_description(path)
 
             spitzer_rfits = astropy.io.fits.open(fits_path / path / "r.fits")[0]
             spitzer_gfits = astropy.io.fits.open(fits_path / path / "g.fits")[0]
@@ -142,12 +135,9 @@ def main(args):
                 axis=2,
             )
 
-            pbar.set_description(path)
-
             NonRing_sub_c = NonRing_sub.NonRing_sub(w, data, random_uni)
-
             # GLON_LAT関数でGLON_new_min1, GLON_new_max1, GLAT_new_min1, GLAT_new_max1を出す
-            NonRing_sub_c.GLON_LAT(data, header)
+            NonRing_sub_c.GLON_LAT(header)
 
             for i in range(iter):
                 cut_data = NonRing_sub_c.no_nan_ring()
@@ -155,8 +145,8 @@ def main(args):
                 r_shape_y = pi.shape[0]
                 r_shape_x = pi.shape[1]
                 res_data = pi[
-                    int(r_shape_y / 4) : int(r_shape_y * 3 / 4),
-                    int(r_shape_x / 4) : int(r_shape_x * 3 / 4),
+                    int(r_shape_y / 52) : int(r_shape_y * 51 / 52),
+                    int(r_shape_x / 52) : int(r_shape_x * 51 / 52),
                 ]
                 res_data = processing.norm_res(res_data)
                 pil_image = Image.fromarray(np.uint8(res_data * 255))
