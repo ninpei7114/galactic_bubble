@@ -1,18 +1,10 @@
+import glob
 from itertools import product as product
 from math import sqrt as sqrt
 
 import numpy as np
 import torch
-
-# def od_collate_fn(batch):
-#     targets = []
-#     imgs = []
-#     for sample in batch:
-#         imgs.append(sample[0])
-#         targets.append(torch.FloatTensor(sample[1]))
-#     imgs = torch.stack(imgs, dim=0)
-
-#     return imgs, targets
+import webdataset
 
 
 ## webdatasetのために作成
@@ -28,10 +20,11 @@ def od_collate_fn(batch):
 
 
 ## webdatasetのために作成
-def val_od_collate_fn(batch):
+def od_collate_fn_validation(batch):
     targets = []
     imgs = []
     offset = []
+    region_info = []
     for sample in batch:
         imgs.append(sample[0])
         targets.append(torch.FloatTensor(sample[1]))
@@ -42,10 +35,11 @@ def val_od_collate_fn(batch):
                 sample[2].split("/")[-1].split("_")[4],
             ]
         )
+        region_info.append(sample[2].split("/")[-1].split("_")[5])
     imgs = np.array(imgs)
     offset = np.array(offset)
 
-    return imgs, targets, offset
+    return imgs, targets, offset, region_info
 
 
 ## webdatasetのために作成
@@ -57,7 +51,7 @@ def preprocess(sample):
 
 
 ## webdatasetのためのval_preprocess
-def val_preprocess(sample):
+def preprocess_validation(sample):
     img, json, key = sample
     return (
         np.array(img) / 255,
@@ -67,6 +61,18 @@ def val_preprocess(sample):
         ],
         key,
     )
+
+
+# 無限イテレータ
+def InfiniteIterator(loader):
+    iter = loader.__iter__()
+    while True:
+        try:
+            x = next(iter)
+        except StopIteration:
+            iter = loader.__iter__()  # 終わっていたら最初に戻る
+            x = next(iter)
+        yield x
 
 
 class DataSet:
@@ -98,58 +104,54 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
         return self.true_size + self.sample_negative_size
 
 
-def make_data(train_data, val_data, train_label, val_label):
-    train_data = train_data[:, :, :, :2]
-    train_data = np.swapaxes(train_data, 2, 3)
-    train_data = np.swapaxes(train_data, 1, 2)
+def make_training_dataloader(Training_data_path, args, NonRing_mini_batch):
+    ## Training Ring の Dataloader を作成
+    Training_Ring_web = (
+        webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
+        .shuffle(10000000)
+        .decode("pil")
+        .to_tuple("png", "json")
+        .map(preprocess)
+    )
+    dl_ring_train = torch.utils.data.DataLoader(
+        Training_Ring_web,
+        collate_fn=od_collate_fn,
+        batch_size=args.Ring_mini_batch,
+        num_workers=2,
+        pin_memory=True,
+    )
 
-    val_data = val_data[:, :, :, :2]
-    val_data = np.swapaxes(val_data, 2, 3)
-    val_data = np.swapaxes(val_data, 1, 2)
+    ## Training NonRing の Dataloader を作成
+    NonRing_tar_path = sorted(glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"))
+    NonRing_rsample = [0.5, 0.2, 0.4, 0.26, 0.14, 0.3]
+    NonRing_web_list = [
+        webdataset.WebDataset(Nonring_tar_path)
+        .rsample(rsample)
+        .shuffle(100000000000)
+        .decode("pil")
+        .to_tuple("png", "json")
+        .map(preprocess)
+        for rsample, Nonring_tar_path in zip(NonRing_rsample, NonRing_tar_path)
+    ]
+    NonRing_dl_l = [
+        torch.utils.data.DataLoader(
+            nr_w_l, collate_fn=od_collate_fn, batch_size=NonRing_mini_batch, num_workers=2, pin_memory=True
+        )
+        for nr_w_l in NonRing_web_list
+    ]
 
-    print("train label : ", len(train_label), ",  train data : ", train_data.shape)
-    print("val label : ", len(val_label), ",  val data : ", val_data.shape)
+    return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
 
-    # train_label = train_label.drop('Unnamed: 0', axis=1)
-    # val_label = val_label.drop('Unnamed: 0', axis=1)
 
-    # train_label['xmin'] = [ast.literal_eval(d) for d in train_label['xmin']]
-    # train_label['xmax'] = [ast.literal_eval(d) for d in train_label['xmax']]
-    # train_label['ymin'] = [ast.literal_eval(d) for d in train_label['ymin']]
-    # train_label['ymax'] = [ast.literal_eval(d) for d in train_label['ymax']]
+def make_validatoin_dataloader(Validation_data_path):
+    Dataset_val = (
+        webdataset.WebDataset(Validation_data_path)
+        .decode("pil")
+        .to_tuple("png", "json", "__key__")
+        .map(preprocess_validation)
+    )
+    dl_val = torch.utils.data.DataLoader(
+        Dataset_val, collate_fn=od_collate_fn_validation, batch_size=16, num_workers=2, pin_memory=True
+    )
 
-    # val_label['xmin'] = [ast.literal_eval(d) for d in val_label['xmin']]
-    # val_label['xmax'] = [ast.literal_eval(d) for d in val_label['xmax']]
-    # val_label['ymin'] = [ast.literal_eval(d) for d in val_label['ymin']]
-    # val_label['ymax'] = [ast.literal_eval(d) for d in val_label['ymax']]
-
-    train_label = train_label.reset_index()
-    val_label = val_label.reset_index()
-
-    train_label_list = []
-    for i in range(len(train_label)):
-        lab = []
-        for k in range(len(train_label["xmin"][i])):
-            labe = []
-            labe.append(train_label["xmin"][i][k])
-            labe.append(train_label["ymin"][i][k])
-            labe.append(train_label["xmax"][i][k])
-            labe.append(train_label["ymax"][i][k])
-            labe.append(0)
-            lab.append(labe)
-        train_label_list.append(np.array(lab))
-
-    val_label_list = []
-    for i in range(len(val_label)):
-        lab = []
-        for k in range(len(val_label["xmin"][i])):
-            labe = []
-            labe.append(val_label["xmin"][i][k])
-            labe.append(val_label["ymin"][i][k])
-            labe.append(val_label["xmax"][i][k])
-            labe.append(val_label["ymax"][i][k])
-            labe.append(0)
-            lab.append(labe)
-        val_label_list.append(np.array(lab))
-
-    return train_data, val_data, train_label_list, val_label_list
+    return dl_val
