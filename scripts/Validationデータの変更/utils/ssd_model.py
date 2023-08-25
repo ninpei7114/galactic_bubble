@@ -5,34 +5,28 @@
 第2章SSDで実装した内容をまとめたファイル
 """
 
-# パッケージのimport
-import torch.nn as nn
-import torch.nn.init as init
-import torch.nn.functional as F
-from torch.autograd import Function
-import torch.utils.data as data
-import torch
-import numpy as np
 import os.path as osp
-from itertools import product as product
-from math import sqrt as sqrt
 
 # XMLをファイルやテキストから読み込んだり、加工したり、保存したりするためのライブラリ
 import xml.etree.ElementTree as ET
+from itertools import product as product
+from math import sqrt as sqrt
+
+import numpy as np
+import torch
+
+# パッケージのimport
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.nn.init as init
+import torch.utils.data as data
+from torch.autograd import Function
 
 # フォルダ「utils」のdata_augumentation.pyからimport。入力画像の前処理をするクラス
-from utils.data_augumentation import (
-    Compose,
-    ConvertFromInts,
-    ToAbsoluteCoords,
-    ToPercentCoords,
-    Resize,
-    SubtractMeans,
-)
+from utils.data_augumentation import Compose, ConvertFromInts, Resize, SubtractMeans, ToAbsoluteCoords, ToPercentCoords
 
 # フォルダ「utils」にある関数matchを記述したmatch.pyからimport
 from utils.match import match
-
 
 # 学習、検証の画像データとアノテーションデータへのファイルパスリストを作成する
 
@@ -733,7 +727,7 @@ class Detect(Function):
             if decoded:
                 decoded_boxes = loc_data[i]
             else:
-                decoded_boxes = decode(loc_data[i], dbox_list)
+                decoded_boxes = decode(loc_data[i].to("cpu"), dbox_list.to("cpu"))
 
             # confのコピーを作成
             conf_scores = conf_preds[i].clone()
@@ -1033,4 +1027,9 @@ class MultiBoxLoss(nn.Module):
         #### loss_c /= N
         ##################
         #         loss_c = 2*loss_c_pos/N + loss_c_neg/N
-        return loss_l, loss_c, loss_c_pos, loss_c_neg
+        return {
+            "loc_loss": loss_l,
+            "conf_loss": loss_c,
+            "conf_loss_positive": loss_c_pos,
+            "conf_loss_negative": loss_c_neg,
+        }
