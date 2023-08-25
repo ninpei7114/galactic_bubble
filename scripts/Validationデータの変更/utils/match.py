@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-何やっているか、さっぱりわからない
 https://github.com/amdegroot/ssd.pytorch
 のbox_utils.pyより使用
 関数matchを行うファイル
 
-本章の実装はGitHub：amdegroot/ssd.pytorch [4] を参考にしています。
+本章の実装はGitHub: amdegroot/ssd.pytorch [4] を参考にしています。
 MIT License
 Copyright (c) 2017 Max deGroot, Ellis Brown
 
@@ -43,10 +42,10 @@ def intersect(box_a, box_b):
     [B,2] -> [1,B,2] -> [A,B,2]
     Then we compute the area of intersect between box_a and box_b.
     Args:
-      box_a: (tensor) bounding boxes, Shape: [A,4].
-      box_b: (tensor) bounding boxes, Shape: [B,4].
+        box_a: (tensor) bounding boxes, Shape: [A,4].
+        box_b: (tensor) bounding boxes, Shape: [B,4].
     Return:
-      (tensor) intersection area, Shape: [A,B].
+        (tensor) intersection area, Shape: [A,B].
     重なり部分の計算
     """
     A = box_a.size(0)
@@ -63,7 +62,7 @@ def jaccard(box_a, box_b):
         box_a : 正解BBox(正解座標)
         box_b : (xmin, ymin, xmax, ymax)の並びになったDBox
 
-    正解BBoxとDBoxのjaccard係数の計算方法例：
+    正解BBoxとDBoxのjaccard係数の計算方法例:
         A ∩ B / A ∪ B = A ∩ B / (area(A) + area(B) - A ∩ B)
 
     jaccard係数を計算する。
