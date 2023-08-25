@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 import time
@@ -118,7 +119,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ##############################
         ## Validation F1 scoreの計算 ##
         ##############################
-        val_f1_score, val_conf_threshold = calc_f1score_val(np.concatenate(result), np.array(position), regions)
+        val_f1_score, val_conf_threshold = calc_f1score_val(np.concatenate(result), np.array(position), regions, args)
         val_f1_score_l.append(val_f1_score)
 
         log_epoch = write_train_log(
@@ -136,7 +137,8 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
 
         # データの削除
         os.remove(f"{Training_data_path}/bubble_dataset_train_ring.tar")
-        os.remove(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar")
+        for nonring_tar_path in glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"):
+            os.remove(nonring_tar_path)
         shutil.rmtree(args.savedir_path + "".join("dataset") + "/" + augmentation_name.split("/")[-1] + "/train")
 
     ## lossの推移を描画する
