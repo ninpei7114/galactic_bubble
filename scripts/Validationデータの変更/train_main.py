@@ -7,9 +7,8 @@ from math import sqrt as sqrt
 import torch
 import torch.optim as optim
 
-from make_figure import make_figure
-from sub import print_and_log
 from train_model import train_model
+from training_sub import print_and_log, weights_init
 from utils.ssd_model import SSD, MultiBoxLoss
 
 
@@ -24,18 +23,19 @@ def parse_args():
         help="savedire path  (default: /workspace/weights/)",
     )
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
-    parser.add_argument("--batch_size", default=16, type=int, help="mini-batch size (default: 16)")
-    parser.add_argument("--NonRing_ratio", default=3, type=int, help="Ring / NonRing ratio (default: 3)")
+    parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
+    parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
+    parser.add_argument("--NonRing_ratio", default=1, type=int, help="Ring / NonRing ratio (default: 3)")
     parser.add_argument("--augmentation_ratio", default=4, type=int, help="1 Ring augmentation ratio (default: 4)")
     parser.add_argument(
         "--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss &  calc F1 score (default: 0.5)"
     )
-
     parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
-    parser.add_argument("--NonRing_mini_batch", type=int, default=16)
+    parser.add_argument("--NonRing_class_num", type=int, default=8)
+    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 4])
 
     return parser.parse_args()
 
@@ -51,6 +51,7 @@ def main(args):
 
     """
     torch.manual_seed(123)
+    torch.backends.cudnn.benchmark = False
 
     os.makedirs(args.savedir_path, exist_ok=True)
     ssd_cfg = {
@@ -96,12 +97,18 @@ def main(args):
         ]
         print_and_log(f_log, log_list)
 
-        ##############
-        ## Training ##
-        ##############
-        net = SSD(cfg=ssd_cfg)
+        ####################
+        ## Training Model ##
+        ####################
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print_and_log(f_log, f"使用デバイス： {device}")
+
+        net = SSD(cfg=ssd_cfg)
+        ## パラメータを初期化
+        for net_sub in [net.vgg, net.extras, net.loc, net.conf]:
+            net_sub.apply(weights_init)
         net.to(device)
+
         train_model_params = {
             "net": net,
             "criterion": MultiBoxLoss(jaccard_thresh=args.True_iou, neg_pos=3, device=device),
@@ -113,22 +120,11 @@ def main(args):
             "augmentation_name": name,
             "args": args,
             "train_cfg": train_cfg,
+            "device": device,
         }
 
-        (
-            loss_l_list_val,
-            loss_c_list_val,
-            loss_l_list_train,
-            loss_c_list_train,
-            train_f1_score,
-            val_f1_score,
-        ) = train_model(**train_model_params)
+        train_model(**train_model_params)
         f_log.close()
-
-        ## lossの推移を描画する
-        make_figure(
-            name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val, train_f1_score, val_f1_score
-        )
 
 
 if __name__ == "__main__":
