@@ -13,12 +13,12 @@ from tqdm import tqdm
 sys.path.append("../")
 import label_caliculator
 import processing
-import ring_augmentation
+import select_catalogue
 
 """
 example command:
 
-python make_val_data.py /dataset/spitzer_data/ -r True
+python make_val_data.py /dataset/spitzer_data/
 """
 
 
@@ -38,9 +38,6 @@ def append_data(data, info, data_list, frame):
 
 
 def main(args):
-    ################################################
-    ## 領域ごとに作るのか、デフォルトの領域で作るのか選択 ##
-    ################################################
     ## 各領域ごとにVal-Ringを作成する
     ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
     # fmt: off
@@ -63,7 +60,7 @@ def main(args):
 
     ## choice catalogue from 'CH' or 'MWP'
     choice = "MWP"
-    Ring_CATALOGUE = ring_augmentation.catalogue(choice)
+    Ring_CATALOGUE = select_catalogue.catalogue(choice)
     obj_sig = 1 / (2 * (np.log(2)) ** (1 / 2))
 
     #####################
@@ -71,11 +68,15 @@ def main(args):
     #####################
     pbar = tqdm(range(len(val_l)))
     for i in pbar:
-        ring_count = 0
-        non_ring_count = 0
-
         fits_path = val_l[i]
         pbar.set_description(fits_path)
+        ring_count, non_ring_count = 0, 0
+
+        savedir_name = "/workspace/cut_val_png/region_val_png/%s" % fits_path
+        os.makedirs(savedir_name, exist_ok=True)
+        os.makedirs(savedir_name + "/Ring", exist_ok=True)
+        os.makedirs(savedir_name + "/NonRing", exist_ok=True)
+
         spitzer_rfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "r.fits")[0]
         spitzer_gfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "g.fits")[0]
         spitzer_bfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "b.fits")[0]
@@ -91,28 +92,25 @@ def main(args):
         w = astropy.wcs.WCS(spitzer_rfits.header)
         GLON_min, GLAT_min = w.all_pix2world(data.shape[1], 0, 0)
         GLON_max, GLAT_max = w.all_pix2world(0, data.shape[0], 0)
-        GLON_center = (GLON_min + GLON_max) / 2
-        GLON_new_min = GLON_center - 1.5
-        GLON_new_max = GLON_center + 1.5
-
-        Ring_catalogue = Ring_CATALOGUE.query("@GLON_new_min < GLON <= @GLON_new_max")
+        Ring_catalogue = Ring_CATALOGUE.query("@GLON_min < GLON <= @GLON_max")
         label_cal = label_caliculator.label_caliculator(choice, w)
         label_cal.all_star(Ring_catalogue)
 
+        imaging_validation = processing.imaging_validation(
+            data, ring_count, non_ring_count, obj_sig, fits_path, savedir_name, label_cal
+        )
+
         size_list = [150, 300, 600, 900, 1200, 1800, 2500, 3000]
         fragment = 3
-        savedir_name = "/workspace/cut_val_png/region_val_png/%s" % fits_path
-        os.makedirs(savedir_name, exist_ok=True)
-        os.makedirs(savedir_name + "/Ring", exist_ok=True)
-        os.makedirs(savedir_name + "/NonRing", exist_ok=True)
+        all_size_ring = []
+        all_size_ring_info = pd.DataFrame(columns=["fits", "name", "xmin", "xmax", "ymin", "ymax"])
 
-        ring_data = []
-        ring_row = []
-        # non_ring_data = []
         for kk in range(len(size_list)):
             size = size_list[kk]
 
-            ################### indexの計算 ###################
+            ################
+            ## indexの計算 ##
+            ################
             cut_shape = (size, size)
             slide_pix = (int(round(cut_shape[0] / fragment)), int(round(cut_shape[1] / fragment)))
             shape = data.shape
@@ -126,57 +124,21 @@ def main(args):
             for x, y in zip(x_ind.ravel(), y_ind.ravel()):
                 ind_array.append([y, x])
             ind_array = np.array(ind_array)
-            ################### indexの計算 ###################
 
-            cut_region_array, label, offset_info = processing.cut_data(
-                data, ind_array, cut_shape[0], obj_sig, label_cal, fits_path
-            )
-            label["id"] = [i for i in range(len(label))]
-
-            for cut_region, row, offset in zip(cut_region_array, label.iterrows(), offset_info):
-                ll = []
-                if len(row[1]["xmin"]) >= 1:
-                    for la in range(len(row[1]["xmin"])):
-                        ll.append(
-                            {
-                                "Confidence": str(0),
-                                "XMin": str(row[1]["xmin"][la]),
-                                "XMax": str(row[1]["xmax"][la]),
-                                "YMin": str(row[1]["ymin"][la]),
-                                "YMax": str(row[1]["ymax"][la]),
-                            }
-                        )
-                    Ring_or_NonRing = "Ring"
-                    ring_count += 1
-                    ring_data.append(cut_region)
-                    ring_row.append(row[1])
-                    cut_count = ring_count
-                else:
-                    Ring_or_NonRing = "NonRing"
-                    non_ring_count += 1
-                    cut_count = ring_count
-
-                offset_ymin = offset[0]
-                offset_xmin = offset[1]
-                offset_cut_shape = offset[2]
-
-                with open(
-                    f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}_{offset_ymin}_{offset_xmin}_{offset_cut_shape}.json",
-                    "w",
-                ) as f:
-                    json.dump(ll, f, indent=4)
-                pil_image = Image.fromarray(np.uint8(cut_region * 255))
-                pil_image.save(
-                    f"{savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}_{offset_ymin}_{offset_xmin}_{offset_cut_shape}.png"
-                )
-                cut_count += 1
+            ##########################
+            ## Validationデータの作成 ##
+            ##########################
+            ring_data, ring_info = imaging_validation.cut_data(ind_array, cut_shape[0])
+            if len(ring_info) > 0:
+                all_size_ring.append(ring_data)
+                all_size_ring_info = pd.concat([all_size_ring_info, ring_info])
 
         if len(ring_data) > 3000:
             slice = int(len(ring_data) / 1000)
         else:
             slice = 1
         processing.data_view_rectangl(
-            25, np.uint8(np.array(ring_data)[::slice] * 255), pd.DataFrame(ring_row)[::slice]
+            25, np.uint8(np.concatenate(all_size_ring)[::slice] * 255), pd.DataFrame(all_size_ring_info)[::slice]
         ).save(f"{savedir_name}/Ring_data.png")
 
 
