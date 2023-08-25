@@ -1,10 +1,12 @@
 import copy
+import json
 import os
 
 import astropy.io.fits
 import astropy.wcs
 import numpy as np
 import pandas as pd
+from PIL import Image
 import tqdm
 
 import label_caliculator
@@ -12,7 +14,7 @@ import processing
 import ring_augmentation
 
 
-def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
+def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_data_path):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
 
     ## choice catalogue from 'CH' or 'MWP'
@@ -212,6 +214,31 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch):
         savedir_name + "/train_ring_pdf" + f"/train_ring_{epoch}.pdf"
     )
     frame_mwp_train.to_csv(savedir_name + "/train_label.csv")
+
+    ## Trainingデータをpngファイルに変換＋保存
+    for i, ring_data in enumerate(mwp_ring_list_train):
+        pil_image = Image.fromarray(np.uint8(ring_data * 255))
+        pil_image.save(f"{save_data_path}/train/ring/Ring_{i}.png")
+
+    ## Training labelをjsonに変換＋保存
+    for i, row in frame_mwp_train.iterrows():
+        ll = []
+        if len(row["xmin"]) >= 1:
+            for la in range(len(row["xmin"])):
+                ll.append(
+                    {
+                        "Confidence": str(0),
+                        "XMin": str(row["xmin"][la]),
+                        "XMax": str(row["xmax"][la]),
+                        "YMin": str(row["ymin"][la]),
+                        "YMax": str(row["ymax"][la]),
+                    }
+                )
+        else:
+            pass
+
+        with open(f"{save_data_path}/train/ring/Ring_{i}.json", "w") as f:
+            json.dump(ll, f, indent=4)
 
     return mwp_ring_list_train, frame_mwp_train
 
