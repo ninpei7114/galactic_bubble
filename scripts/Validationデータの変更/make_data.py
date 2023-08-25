@@ -4,13 +4,11 @@ import os
 import shutil
 import tarfile
 
-import numpy as np
 from numpy.random import default_rng
-from PIL import Image
 from sklearn.model_selection import ShuffleSplit
+from training_sub import print_and_log
 
 from make_Ring_data import make_ring
-from sub import print_and_log
 
 
 class make_training_val_data:
@@ -90,9 +88,6 @@ class make_training_val_data:
         self.save_data_path = args.savedir_path + "".join("dataset") + "/" + augmentation_name.split("/")[-1]
         os.makedirs(self.save_data_path, exist_ok=True)
         os.makedirs(self.args.savedir_path + "".join("dataset"), exist_ok=True)
-        os.makedirs(self.save_data_path + "/train", exist_ok=True)
-        os.makedirs(self.save_data_path + "/train/ring", exist_ok=True)
-        os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
 
     def make_training_data(self, train_cfg, epoch):
         """Trainingデータを作成する関数。
@@ -104,49 +99,37 @@ class make_training_val_data:
         os.makedirs(self.save_data_path + "/train", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/ring", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
-        self.train_data, train_label = make_ring(
-            self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch
-        )
-
-        ## Trainingデータをpngファイルに変換＋保存
-        for i in range(self.train_data.shape[0]):
-            pil_image = Image.fromarray(np.uint8(self.train_data[i] * 255))
-            pil_image.save(f"{self.save_data_path}/train/ring/Ring_{i}.png")
-
-        ## Training labelをjsonに変換＋保存
-        for i, row in train_label.iterrows():
-            ll = []
-            if len(row["xmin"]) >= 1:
-                for la in range(len(row["xmin"])):
-                    ll.append(
-                        {
-                            "Confidence": str(0),
-                            "XMin": str(row["xmin"][la]),
-                            "XMax": str(row["xmax"][la]),
-                            "YMin": str(row["ymin"][la]),
-                            "YMax": str(row["ymax"][la]),
-                        }
-                    )
-            else:
+        for cl in range(self.args.NonRing_class_num):
+            if cl in self.args.NonRing_remove_class_list:
                 pass
+            else:
+                os.makedirs(f"{self.save_data_path}/train/nonring/class{cl}", exist_ok=True)
 
-            with open(f"{self.save_data_path}/train/ring/Ring_{i}.json", "w") as f:
-                json.dump(ll, f, indent=4)
+        make_ring(self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch, self.save_data_path)
 
         ########################################
         ## Trainingに用いるNon-Ringデータをコピー ##
         ########################################
         if self.args.region_suffle:
             ## 領域ごとのNonRingをcopyする。
-            NonRing_origin = []
-            _ = [glob.glob(f"/workspace/NonRing_png/region_NonRing_png/{i}/*.png") for i in self.train_l]
-            [NonRing_origin.extend(i) for i in _]
-            Choice_NonRing = self.Data_rg.choice(
-                NonRing_origin, int(self.train_data.shape[0]) * self.args.NonRing_ratio, replace=False
-            )
-            for i, k in enumerate(Choice_NonRing):
-                shutil.copyfile(k, f"{self.save_data_path}/train/nonring/NonRing_{i}.png")
-                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/train/nonring/NonRing_{i}.json")
+            for cl in range(self.args.NonRing_class_num):
+                ## NonRingのクラスの内、使用しないクラスは除外する
+                if cl in self.args.NonRing_remove_class_list:
+                    pass
+                else:
+                    ## Non-RingのクラスごとにNonRingをコピーしていく
+                    NonRing_path = []
+                    _ = [
+                        glob.glob(f"/workspace/NonRing_png/region_NonRing_png/{i}/class{cl}/*.png")
+                        for i in self.train_l
+                    ]
+                    [NonRing_path.extend(i) for i in _]
+                    for i, k in enumerate(NonRing_path):
+                        shutil.copyfile(k, f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.png")
+                        shutil.copyfile(
+                            k[:-3] + "json", f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.json"
+                        )
+
         else:
             ## デフォルトのNonRingをcopyする。
             NonRing_origin = glob.glob("/workspace/NonRing_png/default_NonRing_png/train/*.png")
@@ -162,13 +145,15 @@ class make_training_val_data:
         with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_ring.tar", "w:gz") as tar:
             tar.add(f"{self.save_data_path}/train/ring")
 
-        with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_nonring.tar", "w:gz") as tar:
-            tar.add(f"{self.save_data_path}/train/nonring")
+        for cl in range(self.args.NonRing_class_num):
+            ## NonRingのクラスの内、使用しないクラスは除外する
+            if cl in self.args.NonRing_remove_class_list:
+                pass
+            else:
+                with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_nonring_class{cl}.tar", "w:gz") as tar:
+                    tar.add(f"{self.save_data_path}/train/nonring/class{cl}")
 
-        return (
-            f"{self.save_data_path}/bubble_dataset_train_ring.tar",
-            f"{self.save_data_path}/bubble_dataset_train_nonring.tar",
-        )
+        return self.save_data_path
 
     def make_validation_data(self):
         """Validationに用いるRing / NonRingをコピーする。
@@ -185,20 +170,17 @@ class make_training_val_data:
             Val_origin = []
             a = [glob.glob(f"/workspace/cut_val_png/region_val_png/{i}/Ring/*.png") for i in self.val_l]
             [Val_origin.extend(i) for i in a]
-            for i, k in enumerate(Val_origin):
-                shutil.copyfile(k, f"{self.save_data_path}/val/Ring_{i}.png")
-                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/Ring_{i}.json")
+            for k in Val_origin:
+                shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
+                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.json")
 
             ## Non-Ringをコピーする
             NonRing_origin = []
-            a = [glob.glob(f"/workspace/cut_val_png/region_val_png/NonRing/{i}/*.png") for i in self.val_l]
+            a = [glob.glob(f"/workspace/cut_val_png/region_val_png/{i}/NonRing/*.png") for i in self.val_l]
             [NonRing_origin.extend(i) for i in a]
-            Choice_NonRing = self.Data_rg.choice(
-                NonRing_origin, int(len(Val_origin)) * self.args.NonRing_ratio, replace=False
-            )
-            for i, k in enumerate(Choice_NonRing):
-                shutil.copyfile(k, f"{self.save_data_path}/val/NonRing_{i}.png")
-                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/NonRing_{i}.json")
+            for k in NonRing_origin:
+                shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
+                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.json")
 
         ## ********* デフォルト領域で *********
         else:
@@ -217,6 +199,7 @@ class make_training_val_data:
                 shutil.copyfile(k, f"{self.save_data_path}/val/NonRing_{i}.png")
                 shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/NonRing_{i}.json")
 
+        ## tarファイルに変換
         with tarfile.open(f"{self.save_data_path}/bubble_dataset_val.tar", "w:gz") as tar:
             tar.add(f"{self.save_data_path}/val")
 
@@ -226,14 +209,14 @@ class make_training_val_data:
         ## TrainingとValidationの Ring & NonRing の枚数を取得
         train_Ring_num = len(glob.glob(f"{self.save_data_path}/train/ring/Ring_*.json"))
         val_Ring_num = len(glob.glob(f"{self.save_data_path}/val/Ring_*.json"))
-        Train_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/train/nonring/NonRing_*.json"))
+        Train_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/train/nonring/*/NonRing_*.json"))
         Val_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/val/NonRing_*.json"))
 
-        ## logに記入
-        if np.isnan(np.sum(self.train_data)):
-            mg = "Training data include Nan"
-        else:
-            mg = "Training data dont include Nan"
+        # ## logに記入
+        # if np.isnan(np.sum(self.train_data)):
+        #     mg = "Training data include Nan"
+        # else:
+        #     mg = "Training data dont include Nan"
 
         print_and_log(
             self.f_log,
@@ -242,7 +225,7 @@ class make_training_val_data:
                 f"Ring NonRing ratio = 1 : {self.args.NonRing_ratio}",
                 " ",
                 "confirm nan in Training Data",
-                f">>> Ring_data: {mg}",
+                # f">>> Ring_data: {mg}",
                 " ",
                 "Ring & Non-Ring num",
                 f">>> Train Ring num: {train_Ring_num}",
