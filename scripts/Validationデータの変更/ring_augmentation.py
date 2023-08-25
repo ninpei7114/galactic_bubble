@@ -71,7 +71,6 @@ def translation(
             ##################################################
 
             ## 切り出す範囲にある他のRingを見つける
-            # label_cal.find_cover_for_translation(x_pix_min, x_pix_max, y_pix_min, y_pix_max)
             pix_info = {
                 "x_pix_min": x_pix_min,
                 "x_pix_max": x_pix_max,
@@ -99,8 +98,6 @@ def translation(
                 ## 学習データに用いるlabelを作成する。
                 label_cal.make_label(Ring_catalogue)
                 xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
-                # xmin_list, ymin_list, xmax_list, ymax_list, name_list, label_flag = label_cal.check_list()
-                # if label_flag:
                 info = {
                     "fits": fits_path,
                     "name": name_list,
@@ -110,8 +107,6 @@ def translation(
                     "ymax": ymax_list,
                 }
                 return True, pi_conv, info
-                # else:
-                #     return False, 0, 0
 
     else:
         return False, 0, 0
