@@ -1,4 +1,5 @@
 import copy
+import json
 
 import numpy as np
 import pandas as pd
@@ -114,43 +115,92 @@ def remove_nan(data1):
     return data1
 
 
-def cut_data(data_, many_ind, cut_shape, obj_sig, label_cal, fits_path):
-    data_list = []
-    frame_list = []
-    offset_info = []
-    for i in many_ind:
-        x_min = i[1]
-        y_min = i[0]
-        extra_x_min = x_min - cut_shape / 50
-        extra_x_max = x_min + cut_shape + cut_shape / 50
-        extra_y_min = y_min - cut_shape / 50
-        extra_y_max = y_min + cut_shape + cut_shape / 50
-        data_c = data_[int(extra_y_min) : int(extra_y_max), int(extra_x_min) : int(extra_x_max)].view()
+class imaging_validation:
+    def __init__(self, data, ring_count, non_ring_count, obj_sig, fits_path, savedir_name, label_cal):
+        self.data = data
+        self.ring_count = ring_count
+        self.non_ring_count = non_ring_count
+        self.obj_sig = obj_sig
+        self.fits_path = fits_path
+        self.savedir_name = savedir_name
+        self.label_cal = label_cal
 
-        if np.max(data_c) == np.max(data_c):
-            d = copy.deepcopy(data_c)
-            d = conv(300, obj_sig, d)
-            d = d[int(cut_shape / 50) : int(cut_shape * 51 / 50), int(cut_shape / 50) : int(cut_shape * 51 / 50)]
-            d = norm_res(d)
-            data_list.append(d)
-            # position_list_.append([i[0], i[1]])
-            label_cal.make_label(x_min, y_min, cut_shape)
-            xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
-            info = {
-                "fits": fits_path,
-                "name": name_list,
-                "xmin": xmin_list,
-                "xmax": xmax_list,
-                "ymin": ymin_list,
-                "ymax": ymax_list,
-            }
-            frame_list.append(info)
-            offset_info.append([y_min, x_min, cut_shape])
+    def cut_data(self, many_ind, cut_shape):
+        self.cut_shape = int(cut_shape)
+        Ring_data = []
+        Ring_info = []
 
+        for i in many_ind:
+            self.offset_xmin = int(i[1])
+            self.offset_ymin = int(i[0])
+            extra_x_min = self.offset_xmin - self.cut_shape / 50
+            extra_x_max = self.offset_xmin + self.cut_shape + self.cut_shape / 50
+            extra_y_min = self.offset_ymin - self.cut_shape / 50
+            extra_y_max = self.offset_ymin + self.cut_shape + self.cut_shape / 50
+            data_c = self.data[int(extra_y_min) : int(extra_y_max), int(extra_x_min) : int(extra_x_max)].view()
+
+            if not np.isnan(data_c).any():
+                d = copy.deepcopy(data_c)
+                d = conv(300, self.obj_sig, d)
+                d = d[
+                    int(self.cut_shape / 50) : int(self.cut_shape * 51 / 50),
+                    int(self.cut_shape / 50) : int(self.cut_shape * 51 / 50),
+                ]
+                self.cut_region = norm_res(d).astype(np.float32)
+
+                self.label_cal.make_label(self.offset_xmin, self.offset_ymin, self.cut_shape)
+                xmin_list, ymin_list, xmax_list, ymax_list, name_list = self.label_cal.check_list()
+                self.info = {
+                    "fits": self.fits_path,
+                    "name": name_list,
+                    "xmin": xmin_list,
+                    "xmax": xmax_list,
+                    "ymin": ymin_list,
+                    "ymax": ymax_list,
+                }
+                Ring_or_NonRing = self.make_Validation_png()
+                if Ring_or_NonRing == "Ring":
+                    Ring_data.append(self.cut_region)
+                    Ring_info.append(self.info)
+            else:
+                pass
+
+        Ring_info = pd.DataFrame(Ring_info)
+        return np.array(Ring_data), Ring_info
+
+    def make_Validation_png(self):
+        ll = []
+        if len(self.info["xmin"]) >= 1:
+            for la in range(len(self.info["xmin"])):
+                ll.append(
+                    {
+                        "Confidence": str(0),
+                        "XMin": str(self.info["xmin"][la]),
+                        "XMax": str(self.info["xmax"][la]),
+                        "YMin": str(self.info["ymin"][la]),
+                        "YMax": str(self.info["ymax"][la]),
+                    }
+                )
+            Ring_or_NonRing = "Ring"
+            self.ring_count += 1
+            cut_count = self.ring_count
         else:
-            pass
+            Ring_or_NonRing = "NonRing"
+            self.non_ring_count += 1
+            cut_count = self.non_ring_count
 
-    return np.array(data_list).astype(np.float32), pd.DataFrame(frame_list), np.array(offset_info)
+        with open(
+            f"{self.savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}_{self.offset_ymin}_{self.offset_xmin}_{self.cut_shape}_{self.fits_path.split('_')[1]}_.json",
+            "w",
+        ) as f:
+            json.dump(ll, f, indent=4)
+        pil_image = Image.fromarray(np.uint8(self.cut_region * 255))
+        pil_image.save(
+            f"{self.savedir_name}/{Ring_or_NonRing}/{Ring_or_NonRing}_{cut_count}_{self.offset_ymin}_{self.offset_xmin}_{self.cut_shape}_{self.fits_path.split('_')[1]}_.png"
+        )
+        cut_count += 1
+
+        return Ring_or_NonRing
 
 
 def data_view_rectangl(col, imgs, infos=None, moji_size=100):
