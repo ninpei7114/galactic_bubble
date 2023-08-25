@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def make_figure(name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val, train_f1_score, val_f1_score):
+def make_figure(name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val, val_f1_score):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(loss_l_list_train, label="loss_l_train")
@@ -43,12 +43,11 @@ def make_figure(name, loss_l_list_train, loss_c_list_train, loss_l_list_val, los
     ## f1 scoreの推移
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(train_f1_score, label="train_f1_score")
     ax.plot(val_f1_score, label="val_f1_score")
     ax.set_xlabel("epoch", fontsize=18)
     ax.set_ylabel("score value", fontsize=18)
     ax.grid(linestyle="--")
     plt.minorticks_on()
     plt.legend()
-    ax.set_title("train & val F1 score", size=20)
+    ax.set_title("Validation F1 score", size=20)
     fig.savefig(name + "/f1_score.png")
