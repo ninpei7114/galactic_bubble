@@ -308,8 +308,8 @@ def calc_location_each_region(detections, position, regions, conf_thre):
         conf_mask = d[1, :, 0] >= conf_thre
         detection_mask = d[1, :][conf_mask]
         if np.sum(conf_mask) >= 1:
-            bbox = detection_mask[:, 1:] * np.array(p[2])
-            bbox = bbox + np.array([p[1], p[0], p[1], p[0]])
+            bbox = detection_mask[:, 1:] * np.array(int(p[2]))
+            bbox = bbox + np.array([int(p[1]), int(p[0]), int(p[1]), int(p[0])])
 
             predict_bbox.append(bbox)
             scores.append(detection_mask[:, 0])
@@ -318,7 +318,7 @@ def calc_location_each_region(detections, position, regions, conf_thre):
     return predict_bbox, scores, wcs_regions
 
 
-def make_catalogue(region_dict, Ring_CATALOGUE, catalogue):
+def make_catalogue(region_dict, Ring_CATALOGUE, args):
     target_MWP_catalogue = []
     catalogue = pd.DataFrame(columns=["dec_min", "ra_min", "dec_max", "ra_max"])
 
@@ -330,7 +330,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, catalogue):
         bbox = bbox[keep]
         scores = scores[keep]
 
-        spitzer_g = astropy.io.fits.open(f"/workspace/fits_data/spitzer_data/spitzer_{key}_rgb/g.fits")[0]
+        spitzer_g = astropy.io.fits.open(f"{args.spitzer_path}/spitzer_{key}_rgb/g.fits")[0]
         w = astropy.wcs.WCS(spitzer_g.header)
         a = spitzer_g.data.shape[0]
         b = spitzer_g.data.shape[1]
@@ -369,7 +369,7 @@ def judge_in(infer, ra_, dec_, mask):
 
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
-def calc_f1score_val(detections, position, regions):
+def calc_f1score_val(detections, position, regions, args):
     thresholds = [i / 20 for i in range(6, 16, 1)]
     Ring_CATALOGUE = ring_augmentation.catalogue("MWP")
     F1_score = -10000
@@ -387,7 +387,7 @@ def calc_f1score_val(detections, position, regions):
             region_dict[w][0].append(p)
             region_dict[w][1].append(s)
 
-        mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE)
+        mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
 
         not_itti, itti, kensyutu_box_, non_ok_list = [], [], [], []
         count = 0
