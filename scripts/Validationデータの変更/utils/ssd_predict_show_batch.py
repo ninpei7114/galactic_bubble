@@ -14,13 +14,13 @@ rgb_imageも変更した
 
 
 """
-import numpy as np
-import matplotlib.pyplot as plt 
-import torch
 import copy
 
-from utils.ssd_model import DataTransform
-from utils.ssd_model import Detect
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
+from utils.ssd_model import DataTransform, Detect
 
 
 class SSDPredictShow():
