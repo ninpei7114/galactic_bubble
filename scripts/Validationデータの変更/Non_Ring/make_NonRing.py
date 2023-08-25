@@ -6,12 +6,12 @@ import time
 
 import astropy.io.fits
 import astropy.wcs
+import NonRing_sub
 import numpy as np
 from numpy.random import default_rng
 from PIL import Image
 from tqdm import tqdm
 
-import NonRing_sub
 import processing
 
 """
