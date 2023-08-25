@@ -1,0 +1,58 @@
+import numpy as np
+import torch
+from numpy.random import default_rng
+from skimage import transform
+
+
+def augmentation_func(data, augmentation_type):
+    data_l = []
+
+    for i in data:
+        if augmentation_type == 0:
+            data_l.append(np.flipud(i))
+
+        elif augmentation_type == 1:
+            data_l.append(np.fliplr(i))
+
+        elif augmentation_type == 2:
+            data_l.append(transform.rotate(i, 90))
+
+        elif augmentation_type == 3:
+            data_l.append(transform.rotate(i, 180))
+
+        elif augmentation_type == 4:
+            data_l.append(transform.rotate(i, 270))
+
+    return np.array(data_l)
+
+
+def nonring_augmentation(iter_noring_list):
+    non_ring_image = []
+    non_ring_label = []
+    NonRing_rg = default_rng(123)
+
+    for class_num, noring in zip([0, 1, 2, 5, 6, 7], iter_noring_list):
+        data, label = next(noring)
+        non_ring_image.append(data)
+        non_ring_label.extend(label)
+
+        if class_num == 0:
+            pass
+        elif class_num == 1:
+            pass
+        elif class_num == 2:
+            pass
+        elif class_num == 5:
+            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
+                non_ring_image.append(augmentation_func(data, flag))
+                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
+        elif class_num == 6:
+            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
+                non_ring_image.append(augmentation_func(data, flag))
+                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
+        elif class_num == 7:
+            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
+                non_ring_image.append(augmentation_func(data, flag))
+                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
+
+    return np.concatenate(non_ring_image), non_ring_label
