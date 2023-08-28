@@ -4,6 +4,7 @@ import os
 from itertools import product as product
 from math import sqrt as sqrt
 
+from PIL import ImageFile
 import torch
 import torch.optim as optim
 
@@ -50,8 +51,9 @@ def main(args):
         --NonRing_ratio 1 --augmentation_ratio 1 -s -i 123 -n 3 -r 123
 
     """
-    torch.manual_seed(123)
+    torch.manual_seed(args.fits_random_state)
     torch.backends.cudnn.benchmark = False
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
 
     os.makedirs(args.savedir_path, exist_ok=True)
     ssd_cfg = {
