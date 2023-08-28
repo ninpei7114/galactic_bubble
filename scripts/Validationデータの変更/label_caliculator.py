@@ -111,7 +111,7 @@ class label_caliculator(object):
             clip_yy = np.clip(yy, self.y_pix_min + extra_height, self.y_pix_max - extra_height)
             clip_width = clip_xx[1] - clip_xx[0] + 1e-9
             clip_height = clip_yy[1] - clip_yy[0] + 1e-9
-            clip_area = (clip_xx[1] - clip_xx[0]) * (clip_yy[1] - clip_yy[0])
+            clip_area = clip_width * clip_height
 
             ## 場合分け、全体に対してringが1/3以上入っていないといけない
             ## width/height比が1/3以上でないとlabel付けしない
