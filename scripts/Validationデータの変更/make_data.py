@@ -115,7 +115,7 @@ class make_training_val_data:
             for cl in NonRing_class_num:
                 ## Non-RingのクラスごとにNonRingをコピーしていく
                 NonRing_path = []
-                _ = [glob.glob(f"/workspace/NonRing_png/region_NonRing_png/{i}/class{cl}/*.png") for i in self.train_l]
+                _ = [glob.glob(f"{self.args.NonRing_data_path}/{i}/class{cl}/*.png") for i in self.train_l]
                 [NonRing_path.extend(i) for i in _]
                 for i, k in enumerate(NonRing_path):
                     shutil.copyfile(k, f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.png")
@@ -155,7 +155,7 @@ class make_training_val_data:
 
             ## Ringデータをコピーする。
             Val_origin = []
-            a = [glob.glob(f"/workspace/cut_val_png/region_val_png/{i}/Ring/*.png") for i in self.val_l]
+            a = [glob.glob(f"{self.args.validation_data_path}/{i}/Ring/*.png") for i in self.val_l]
             [Val_origin.extend(i) for i in a]
             for k in Val_origin:
                 shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
@@ -163,7 +163,7 @@ class make_training_val_data:
 
             ## Non-Ringをコピーする
             NonRing_origin = []
-            a = [glob.glob(f"/workspace/cut_val_png/region_val_png/{i}/NonRing/*.png") for i in self.val_l]
+            a = [glob.glob(f"{self.args.validation_data_path}/{i}/NonRing/*.png") for i in self.val_l]
             [NonRing_origin.extend(i) for i in a]
             for k in NonRing_origin:
                 shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
@@ -190,7 +190,7 @@ class make_training_val_data:
         with tarfile.open(f"{self.save_data_path}/bubble_dataset_val.tar", "w:gz") as tar:
             tar.add(f"{self.save_data_path}/val")
 
-        return f"{self.save_data_path}/bubble_dataset_val.tar"
+        return f"{self.save_data_path}/bubble_dataset_val.tar", len(glob.glob(f"{self.save_data_path}/val/*.png"))
 
     def data_logger(self):
         ## TrainingとValidationの Ring & NonRing の枚数を取得
