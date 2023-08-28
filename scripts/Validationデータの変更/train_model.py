@@ -19,6 +19,7 @@ from utils.ssd_model import Detect
 
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device):
     NonRing_mini_batch = args.NonRing_mini_batch * args.NonRing_ratio
+    NonRing_class_num = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
@@ -73,7 +74,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             for _ in dataloaders_dict[phase]:
                 if phase == "train":
                     images, targets = _[0], _[1]
-                    no_ring_image, no_ring_target = nonring_augmentation(NonRing_dl_l)
+                    no_ring_image, no_ring_target = nonring_augmentation(NonRing_dl_l, NonRing_class_num, args)
                     images = np.concatenate((images, no_ring_image))
                     targets = targets + no_ring_target
                 else:
