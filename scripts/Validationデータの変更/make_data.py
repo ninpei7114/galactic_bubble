@@ -5,6 +5,7 @@ import shutil
 import tarfile
 
 from numpy.random import default_rng
+import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from training_sub import print_and_log
 
@@ -99,11 +100,10 @@ class make_training_val_data:
         os.makedirs(self.save_data_path + "/train", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/ring", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
-        for cl in range(self.args.NonRing_class_num):
-            if cl in self.args.NonRing_remove_class_list:
-                pass
-            else:
-                os.makedirs(f"{self.save_data_path}/train/nonring/class{cl}", exist_ok=True)
+        ## NonRingのクラスの内、使用しないクラスは除外する
+        NonRing_class_num = np.delete(np.arange(self.args.NonRing_class_num), self.args.NonRing_remove_class_list)
+        for cl in NonRing_class_num:
+            os.makedirs(f"{self.save_data_path}/train/nonring/class{cl}", exist_ok=True)
 
         make_ring(self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch, self.save_data_path)
 
@@ -112,23 +112,14 @@ class make_training_val_data:
         ########################################
         if self.args.region_suffle:
             ## 領域ごとのNonRingをcopyする。
-            for cl in range(self.args.NonRing_class_num):
-                ## NonRingのクラスの内、使用しないクラスは除外する
-                if cl in self.args.NonRing_remove_class_list:
-                    pass
-                else:
-                    ## Non-RingのクラスごとにNonRingをコピーしていく
-                    NonRing_path = []
-                    _ = [
-                        glob.glob(f"/workspace/NonRing_png/region_NonRing_png/{i}/class{cl}/*.png")
-                        for i in self.train_l
-                    ]
-                    [NonRing_path.extend(i) for i in _]
-                    for i, k in enumerate(NonRing_path):
-                        shutil.copyfile(k, f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.png")
-                        shutil.copyfile(
-                            k[:-3] + "json", f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.json"
-                        )
+            for cl in NonRing_class_num:
+                ## Non-RingのクラスごとにNonRingをコピーしていく
+                NonRing_path = []
+                _ = [glob.glob(f"/workspace/NonRing_png/region_NonRing_png/{i}/class{cl}/*.png") for i in self.train_l]
+                [NonRing_path.extend(i) for i in _]
+                for i, k in enumerate(NonRing_path):
+                    shutil.copyfile(k, f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.png")
+                    shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.json")
 
         else:
             ## デフォルトのNonRingをcopyする。
@@ -145,13 +136,9 @@ class make_training_val_data:
         with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_ring.tar", "w:gz") as tar:
             tar.add(f"{self.save_data_path}/train/ring")
 
-        for cl in range(self.args.NonRing_class_num):
-            ## NonRingのクラスの内、使用しないクラスは除外する
-            if cl in self.args.NonRing_remove_class_list:
-                pass
-            else:
-                with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_nonring_class{cl}.tar", "w:gz") as tar:
-                    tar.add(f"{self.save_data_path}/train/nonring/class{cl}")
+        for cl in NonRing_class_num:
+            with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_nonring_class{cl}.tar", "w:gz") as tar:
+                tar.add(f"{self.save_data_path}/train/nonring/class{cl}")
 
         return self.save_data_path
 
