@@ -16,7 +16,18 @@ from utils.ssd_model import SSD, MultiBoxLoss
 def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("spitzer_path", metavar="DIR", help="spitzer_path", default="/dataset/spitzer_data/")
-    parser.add_argument("--validation_data_path", metavar="DIR", help="validation data path", default="/workspace/val")
+    parser.add_argument(
+        "--validation_data_path",
+        metavar="DIR",
+        help="validation data path",
+        default="/workspace/cut_val_png/region_val_png",
+    )
+    parser.add_argument(
+        "--NonRing_data_path",
+        metavar="DIR",
+        help="NonRing data path",
+        default="/workspace/NonRing_png/region_NonRing_png",
+    )
     parser.add_argument(
         "--savedir_path",
         metavar="DIR",
@@ -85,7 +96,11 @@ def main(args):
         ############
         f_log = open(name + "/log.txt", "w")
         log_list = [
+            "###########################",
+            "  augmentation parameter",
+            "###########################",
             f"flip: {flip}, rotate: {rotate}, scale: {scale}, translation: {translation}",
+            " ",
             "###################",
             "  args parameters",
             "###################",
