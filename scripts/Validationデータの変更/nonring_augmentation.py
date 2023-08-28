@@ -26,12 +26,12 @@ def augmentation_func(data, augmentation_type):
     return np.array(data_l)
 
 
-def nonring_augmentation(iter_noring_list):
+def nonring_augmentation(iter_noring_list, NonRing_class_num, args):
     non_ring_image = []
     non_ring_label = []
-    NonRing_rg = default_rng(123)
+    NonRing_rg = default_rng(args.fits_random_state)
 
-    for class_num, noring in zip([0, 1, 2, 5, 6, 7], iter_noring_list):
+    for class_num, noring in zip(NonRing_class_num, iter_noring_list):
         data, label = next(noring)
         non_ring_image.append(data)
         non_ring_label.extend(label)
