@@ -18,7 +18,6 @@ from utils.ssd_model import Detect
 
 
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device):
-    NonRing_mini_batch = args.NonRing_mini_batch * args.NonRing_ratio
     NonRing_class_num = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
@@ -31,9 +30,9 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     ## Validation dataの作成 ##
     ##########################
     Make_data = make_training_val_data(augmentation_name, f_log, args)
-    print("MAKING VALIDATION DATA")
-    Validation_data_path = Make_data.make_validation_data()
+    Validation_data_path, Val_num = Make_data.make_validation_data()
     dl_val = make_validatoin_dataloader(Validation_data_path)
+    all_iter_val = int(int(Val_num) / 32)
 
     for epoch in range(num_epochs):
         epoch_start_time = time.time()
@@ -46,15 +45,12 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ########################
         ## png形式のRing画像とjson形式のlabelを作成
         Training_data_path = Make_data.make_training_data(train_cfg, epoch)
-        train_Ring_num = Make_data.data_logger()
         ## Training Ring の Dataloader を作成
-        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args, NonRing_mini_batch)
+        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args, args.NonRing_mini_batch)
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
 
-        all_iter = int(
-            (int(train_Ring_num) + int(train_Ring_num * args.NonRing_ratio))
-            / (args.Ring_mini_batch + NonRing_mini_batch)
-        )
+        train_Ring_num = Make_data.data_logger()
+        all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
 
         #############
         ## 学習開始 ##
@@ -64,7 +60,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                 print_and_log(f_log, f" ({phase}) ")
                 net.train()
             else:
-                print_and_log(f_log, f" ({phase}) ")
+                print_and_log(f_log, f" \n({phase}) ")
                 net.eval()
                 result, position, regions = [], [], []
 
@@ -104,6 +100,10 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                         iteration_train += 1
                         save_training_val_loss.sum_iter_loss(loss_dic, "train")
                     else:
+                        print(
+                            "\r" + str(iteration_val) + "/" + str(all_iter_val) + " ",
+                            end="",
+                        )
                         iteration_val += 1
                         result.append(detect(*outputs).to("cpu").detach().numpy().copy())
                         position.extend(offset)
