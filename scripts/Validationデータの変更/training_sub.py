@@ -350,7 +350,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
             )
             catalogue = pd.concat([catalogue, temp])
 
-    mwp = pd.concat(target_MWP_catalogue)
+    mwp = pd.concat(target_MWP_catalogue).reset_index()
 
     return mwp, catalogue
 
@@ -366,6 +366,37 @@ def judge_in(infer, ra_, dec_, mask):
         else:
             pass
     return ok, kensyutu_box, mask
+
+
+def calc_TP_FP_FN(mwp, infer):
+    TP = []
+    FP = []
+    mwp_mask = [False] * len(mwp)
+    for _, infer_row in infer.iterrows():
+        judge = []
+        for mwp_i, mwp_row in mwp.iterrows():
+            mwp_GLON_min = mwp_row["GLON"] - mwp_row["Reff"] / 60
+            mwp_GLON_max = mwp_row["GLON"] + mwp_row["Reff"] / 60
+            mwp_GLAT_min = mwp_row["GLAT"] - mwp_row["Reff"] / 60
+            mwp_GLAT_max = mwp_row["GLAT"] + mwp_row["Reff"] / 60
+            star_area = (mwp_GLON_max - mwp_GLON_min) * (mwp_GLAT_max - mwp_GLAT_min)
+
+            clip_GLON = np.clip([infer_row["ra_min"], infer_row["ra_max"]], mwp_GLON_min, mwp_GLON_max)
+            clip_GLAT = np.clip([infer_row["dec_min"], infer_row["dec_max"]], mwp_GLAT_min, mwp_GLAT_max)
+            clip_width = clip_GLON[1] - clip_GLON[0] + 1e-9
+            clip_height = clip_GLAT[1] - clip_GLAT[0] + 1e-9
+            clip_area = clip_width * clip_height
+
+            if clip_area >= star_area * 1 / 3:
+                mwp_mask[mwp_i] = True
+                judge.append(True)
+            else:
+                judge.append(False)
+        if np.sum(judge) >= 1:
+            TP.append(infer_row)
+        else:
+            FP.append(infer_row)
+    return TP, FP, mwp_mask
 
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
@@ -388,31 +419,22 @@ def calc_f1score_val(detections, position, regions, args):
             region_dict[w][1].append(s)
 
         mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
+        _, FP, mwp_mask = calc_TP_FP_FN(mwp, catalogue)
 
-        not_itti, itti, kensyutu_box_, non_ok_list = [], [], [], []
-        count = 0
-        mask = [True] * len(catalogue)
-
-        for i, row in mwp.iterrows():
-            glon = row["GLON"]
-            glat = row["GLAT"]
-            ok, kensyutu_box, mask = judge_in(catalogue[mask], glon, glat, mask)
-            kensyutu_box_.extend(kensyutu_box)
-            if ok:
-                itti.append(i)
-                count += 1
-            else:
-                not_itti.append(i)
-                non_ok_list.append(i)
-
-        Precision = len(itti) / (len(catalogue))
-        Recall = len(itti) / (len(mwp))
-        F1_score_ = 2 * Precision * Recall / (Precision + Recall)
+        TP = mwp_mask.count(True)
+        FN = mwp_mask.count(False)
+        FP = len(FP)
+        Precision_ = TP / (TP + FP)
+        Recall_ = TP / (TP + FN)
+        F1_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_)
 
         if F1_score_ > F1_score:
             F1_score = F1_score_
             threthre = conf_thre
+            Precision = Precision_
+            Recall = Recall_
 
+    print(f"Precision : {Precision}, Recall : {Recall}")
     return F1_score, threthre
 
 
