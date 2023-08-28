@@ -215,6 +215,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
     )
     frame_mwp_train.to_csv(savedir_name + "/train_label.csv")
 
+    print("convert photo....")
     ## Trainingデータをpngファイルに変換＋保存
     for i, ring_data in enumerate(mwp_ring_list_train):
         pil_image = Image.fromarray(np.uint8(ring_data * 255))
