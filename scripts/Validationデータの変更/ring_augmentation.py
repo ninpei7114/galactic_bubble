@@ -12,9 +12,7 @@ import processing
 """
 
 
-def translation(
-    row, fits_path, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, Ring_catalogue, data, label_cal, trans_rg
-):
+def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_catalogue, data, label_cal, trans_rg):
     """
     並行移動augmentationに用いる関数
     画像内でランダムな位置（シード値固定）にRingが入るように切り出す。
@@ -37,7 +35,7 @@ def translation(
 
     random_num = 1 / trans_rg.uniform(0.125, 1)
     x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
-        row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, random_num
+        row, GLON_min, GLON_max, GLAT_min, GLAT_max, random_num
     )
 
     ################################################
@@ -97,15 +95,8 @@ def translation(
             else:
                 ## 学習データに用いるlabelを作成する。
                 label_cal.make_label(Ring_catalogue)
-                xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
-                info = {
-                    "fits": fits_path,
-                    "name": name_list,
-                    "xmin": xmin_list,
-                    "xmax": xmax_list,
-                    "ymin": ymin_list,
-                    "ymax": ymax_list,
-                }
+                info = label_cal.check_list()
+                info["fits"] = fits_path
                 return True, pi_conv, info
 
     else:
@@ -239,82 +230,3 @@ def catalogue(choice):
 
     else:
         print("this choice catalogue does not exist")
-
-
-# class data_proccessing(object):
-#     def __init__(self, fits_path, choice):
-#         self.fits_path = fits_path
-#         self.choice = choice
-
-#         if choice == "MWP":
-#             self.Rout = "Reff"
-#         else:
-#             self.Rout = "Rout"
-
-#     def scale(self, row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, scale, MWP, data, label_cal):
-#         """
-#         サイズを縮小したパターンのRingを作り出す
-#         """
-#         x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
-#             row, GLON_new_min, GLON_new_max, GLAT_min, GLAT_max, scale
-#         )
-#         # calc_pix時に100回試行してもできなかった場合の場合分け
-#         if flag:
-#             label_cal.find_cover()
-
-#             sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
-#             if x_pix_min < 0 or y_pix_min < 0:
-#                 return False, 0, 0
-#             else:
-#                 c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
-#                 cut_data = copy.deepcopy(c_data)
-#                 pi = processing.conv(300, sig1, cut_data)
-#                 # res_data = self.norm_res(pi)
-
-#                 if np.isnan(pi.sum()):
-#                     return False, 0, 0
-#                 else:
-#                     label_cal.make_label(MWP)
-#                     xmin_list, ymin_list, xmax_list, ymax_list, name_list = label_cal.check_list()
-
-#                     info = {
-#                         "fits": self.fits_path,
-#                         "name": name_list,
-#                         "xmin": xmin_list,
-#                         "xmax": xmax_list,
-#                         "ymin": ymin_list,
-#                         "ymax": ymax_list,
-#                     }
-
-#                     return True, pi, info
-
-#         else:
-#             return False, 0, 0
-
-
-# def rotate_data(self, deg):
-#     """
-#     リングを回転させる。
-#     """
-#     tempo = copy.deepcopy(self.source_data)
-#     rotate_cut_data = transform.rotate(tempo, deg)
-#     xmin_list_, ymin_list_, xmax_list_, ymax_list_ = [], [], [], []
-
-#     for xy_num in range(len(self.xmin_list)):
-#         width = self.xmax_list[xy_num] - self.xmin_list[xy_num]
-#         center_x = ((self.xmin_list[xy_num] - 0.5) + (self.xmax_list[xy_num] - 0.5))/2
-#         center_y = ((self.ymin_list[xy_num] - 0.5) + (self.ymax_list[xy_num] - 0.5))/2
-
-#         new_center_x = center_x*np.cos(np.deg2rad(-deg)) - center_y*np.sin(np.deg2rad(-deg)) + 0.5
-#         new_center_y = center_x*np.sin(np.deg2rad(-deg)) + center_y*np.cos(np.deg2rad(-deg)) + 0.5
-
-#         xmin_list_.append(np.clip(new_center_x - width/2, 0, 1))
-#         ymin_list_.append(np.clip(new_center_y - width/2, 0, 1))
-#         xmax_list_.append(np.clip(new_center_x + width/2, 0, 1))
-#         ymax_list_.append(np.clip(new_center_y + width/2, 0, 1))
-
-#     res_data = self.norm_res(rotate_cut_data)
-#     info = {'fits':self.fits_path, 'name':self.name_list, 'xmin':xmin_list_, 'xmax':xmax_list_,
-#                         'ymin':ymin_list_, 'ymax':ymax_list_}
-
-#     return res_data, info
