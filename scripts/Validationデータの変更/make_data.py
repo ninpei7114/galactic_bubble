@@ -95,6 +95,7 @@ class make_training_val_data:
 
         Params:
             train_cfg (list):どのaugmentationを使用するか
+            epoch (int):何epoch目か
         """
         ## train_dataのshapeは、(Num, 300, 300, 3)/ typeはfloat32型
         os.makedirs(self.save_data_path + "/train", exist_ok=True)
@@ -193,26 +194,20 @@ class make_training_val_data:
         return f"{self.save_data_path}/bubble_dataset_val.tar", len(glob.glob(f"{self.save_data_path}/val/*.png"))
 
     def data_logger(self):
+        """TrainingとValidationに使用する Ring & NonRing の枚数を取得
+
+        Returns(int): Trainingに使用するRingの枚数
+        """
         ## TrainingとValidationの Ring & NonRing の枚数を取得
         train_Ring_num = len(glob.glob(f"{self.save_data_path}/train/ring/Ring_*.json"))
         val_Ring_num = len(glob.glob(f"{self.save_data_path}/val/Ring_*.json"))
         Train_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/train/nonring/*/NonRing_*.json"))
         Val_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/val/NonRing_*.json"))
 
-        # ## logに記入
-        # if np.isnan(np.sum(self.train_data)):
-        #     mg = "Training data include Nan"
-        # else:
-        #     mg = "Training data dont include Nan"
-
         print_and_log(
             self.f_log,
             [
-                "====================================",
                 f"Ring NonRing ratio = 1 : {self.args.NonRing_ratio}",
-                " ",
-                "confirm nan in Training Data",
-                # f">>> Ring_data: {mg}",
                 " ",
                 "Ring & Non-Ring num",
                 f">>> Train Ring num: {train_Ring_num}",
