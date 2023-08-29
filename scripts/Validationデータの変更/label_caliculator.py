@@ -203,4 +203,4 @@ class label_caliculator(object):
             ymax_list_.append(self.ymax_list[xy_num])
             name_list_.append(self.named_list[xy_num])
 
-        return xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_  # , self.flag
+        return {"xmin": xmin_list_, "ymin": ymin_list_, "xmax": xmax_list_, "ymax": ymax_list_, "name": name_list_}
