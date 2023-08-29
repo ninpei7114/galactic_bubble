@@ -18,13 +18,26 @@ from utils.ssd_model import Detect
 
 
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device):
+    """モデルの学習を実行する関数
+
+    Args:
+        net (pytorch Modulelist): SSDネットワーク
+        criterion (MultiBoxLoss): 損失関数
+        optimizer (AdamW)       : 最適化手法
+        num_epochs (int)        : 最大epoch数
+        f_log (txt file)        : logファイル
+        augmentation_name (int) : どのaugmentationを使用したかの名前
+        args (args)             : argparseの引数
+        train_cfg (dictionary)  : augmentationのパラメータ
+        device (torch.device)   : GPU or CPU
+    """
     NonRing_class_num = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
-    detect = Detect(nms_thresh=0.45, top_k=3000, conf_thresh=0.3)
+    detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.3)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
     save_training_val_loss = management_loss()
-    logs, val_f1_score_l = [], []
+    logs, f1_score_val_l = [], []
 
     ##########################
     ## Validation dataの作成 ##
@@ -35,7 +48,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     all_iter_val = int(int(Val_num) / 32)
 
     for epoch in range(num_epochs):
-        epoch_start_time = time.time()
+        start_time = time.time()
         iteration_train, iteration_val = 0, 0
         save_training_val_loss()  # lossの初期化
         print_and_log(f_log, ["-------------", "Epoch {}/{}".format(epoch + 1, num_epochs), "-------------"])
@@ -43,12 +56,11 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ########################
         ## Training dataの作成 ##
         ########################
-        ## png形式のRing画像とjson形式のlabelを作成
+        # png形式のRing画像とjson形式のlabelを作成
         Training_data_path = Make_data.make_training_data(train_cfg, epoch)
-        ## Training Ring の Dataloader を作成
+        # Training Ring の Dataloader を作成
         dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args, args.NonRing_mini_batch)
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
-
         train_Ring_num = Make_data.data_logger()
         all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
 
@@ -76,8 +88,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                 else:
                     images, targets, offset, region_info = _[0], _[1], _[2], _[3]
 
-                images = torch.from_numpy(images)
-                images = images.permute(0, 3, 1, 2)[:, :2, :, :]
+                images = torch.from_numpy(images).permute(0, 3, 1, 2)[:, :2, :, :]
                 images = images.to(device, dtype=torch.float)
                 targets = [ann.to(device, dtype=torch.float) for ann in targets]  # リストの各要素のテンソルをGPUへ
 
@@ -114,24 +125,26 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ## Lossの管理 ##
         ###############
         # loc, confのlossを出力
-        each_loss_train = save_training_val_loss.output_each_loss("train", iteration_train)
-        each_loss_val = save_training_val_loss.output_each_loss("val", iteration_val)
+        loss_train = save_training_val_loss.output_each_loss("train", iteration_train)
+        loss_val = save_training_val_loss.output_each_loss("val", iteration_val)
 
         ##############################
         ## Validation F1 scoreの計算 ##
         ##############################
-        val_f1_score, val_conf_threshold = calc_f1score_val(np.concatenate(result), np.array(position), regions, args)
-        val_f1_score_l.append(val_f1_score)
+        f1_score_val, precision, recall, conf_threshold_val = calc_f1score_val(
+            np.concatenate(result), np.array(position), regions, args
+        )
+        f1_score_val_l.append(f1_score_val)
 
         log_epoch = write_train_log(
-            f_log, epoch, each_loss_train, each_loss_val, val_f1_score, val_conf_threshold, epoch_start_time
+            f_log, epoch, loss_train, loss_val, f1_score_val, precision, recall, conf_threshold_val, start_time
         )
         logs.append(log_epoch)
         df = pd.DataFrame(logs)
         df.to_csv(augmentation_name + "/log_output.csv")
 
         # early_stopping(epoch_val_loss, net)
-        early_stopping(val_f1_score, net)
+        early_stopping(f1_score_val, net, epoch, optimizer, loss_train, loss_val)
         if early_stopping.early_stop:
             print_and_log(f_log, "Early_Stopping")
             break
@@ -144,4 +157,4 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
 
     ## lossの推移を描画する
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
-    make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, val_f1_score)
+    make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f1_score_val)
