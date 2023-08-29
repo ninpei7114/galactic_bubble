@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.init as init
 
 import ring_augmentation
-from utils.ssd_model import Detect, decode_all, nm_suppression
+from utils.ssd_model import nm_suppression
 
 
 class EarlyStopping_f1_score:
@@ -43,12 +43,12 @@ class EarlyStopping_f1_score:
         self.trace_func = trace_func
         self.flog = flog
 
-    def __call__(self, f1_score, model):
+    def __call__(self, f1_score, model, epoch, optimizer, loss_train, loss_eval):
         score = f1_score
 
         if self.best_score is None:
             self.best_score = score
-            self.save_checkpoint(f1_score, model)
+            self.save_checkpoint(f1_score, model, epoch, optimizer, loss_train, loss_eval)
         elif score < self.best_score + self.delta:
             self.counter += 1
             self.trace_func(f"EarlyStopping counter: {self.counter} out of {self.patience}")
@@ -57,249 +57,55 @@ class EarlyStopping_f1_score:
                 self.early_stop = True
         else:
             self.best_score = score
-            self.save_checkpoint(f1_score, model)
+            self.save_checkpoint(f1_score, model, epoch, optimizer, loss_train, loss_eval)
             self.counter = 0
 
-    def save_checkpoint(self, f1_score, model):
+    def save_checkpoint(self, f1_score, model, epoch, optimizer, loss_train, loss_eval):
         """Saves model when f1_score increase."""
         if self.verbose:
             self.trace_func(f"f1_score increase ({self.f1_score_max:.6f} --> {f1_score:.6f}).  Saving model ...")
             self.flog.write(f"f1_score increase ({self.f1_score_max:.6f} --> {f1_score:.6f}).  Saving model ...\n")
-        torch.save(model.state_dict(), self.path)
+        # torch.save(model.state_dict(), self.path)
+        torch.save(
+            {
+                "epoch": epoch,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "f1_score": f1_score,
+                "loss_train": loss_train,
+                "loss_eval": loss_eval,
+            },
+            self.path,
+        )
         self.f1_score_max = f1_score
 
 
-class EarlyStopping:
-    """Early stops the training if validation loss doesn't improve after a given patience."""
-
-    def __init__(self, path, flog, patience=7, verbose=False, delta=0, trace_func=print):
-        """
-        Args:
-            patience (int): How long to wait after last time validation loss improved.
-                            Default: 7
-            verbose (bool): If True, prints a message for each validation loss improvement.
-                            Default: False
-            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
-                            Default: 0
-            path (str): Path for the checkpoint to be saved to.
-                            Default: 'checkpoint.pt'
-            trace_func (function): trace print function.
-                            Default: print
-        """
-        self.patience = patience
-        self.verbose = verbose
-        self.counter = 0
-        self.best_score = None
-        self.early_stop = False
-        self.val_loss_min = np.Inf
-        self.delta = delta
-        self.path = path
-        self.trace_func = trace_func
-        self.flog = flog
-
-    def __call__(self, val_loss, model):
-        score = -val_loss
-
-        if self.best_score is None:
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-        elif score < self.best_score + self.delta:
-            self.counter += 1
-            self.trace_func(f"EarlyStopping counter: {self.counter} out of {self.patience}")
-            self.flog.write(f"EarlyStopping counter: {self.counter} out of {self.patience}\n")
-            if self.counter >= self.patience:
-                self.early_stop = True
-        else:
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-            self.counter = 0
-
-    def save_checkpoint(self, val_loss, model):
-        """Saves model when validation loss decrease."""
-        if self.verbose:
-            self.trace_func(
-                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
-            )
-            self.flog.write(
-                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...\n"
-            )
-        torch.save(model.state_dict(), self.path)
-        self.val_loss_min = val_loss
-
-
 def weights_init(m):
+    """モデルのパラメーターを初期化する
+
+    Args:
+        m (_type_): _description_
+    """
     if isinstance(m, nn.Conv2d):
         init.kaiming_normal_(m.weight.data)
         if m.bias is not None:
             nn.init.constant_(m.bias, 0.0)
 
 
-# ll , boxは一枚の画像に対する、正解と予想
-def calc_collision(ll, box, iou=0.5):
-    """
-    1. この関数は、SSDが予想したBBoxと正解labelのBBoxの重なり率を計算する。
-        ll: 正解ラベル  [xmin, ymin, xmax, ymax]。
-            複数ラベルの場合は、[[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ----]
-
-        box : モデルの予想結果、[[conf, xmin, ymin, xmax, ymax], [conf, xmin, ymin, xmax, ymax], -----]の配列
-
-    2. またNon-Ring領域を正しく判断できているかの計算も行う。
-        0: 正解でも予測でもない
-        1: 正解だが予測ではない
-        2: 正解ではないが予測されている
-        3: 正解かつ予測
-    """
-    true_positive = []
-
-    # Ringのみの結果を取り出す
-    box = box[1, :, :].detach().numpy()
-
-    # 各boxの面積を求める。
-    area = (box[:, 3] - box[:, 1]) * (box[:, 4] - box[:, 2])
-
-    ### Non-RingのF1 scoreを計算する ###
-    # x = np.zeros((300,300), np.uint8)
-    # for t_box in box:
-    #     x[int(t_box[2]*300):int(t_box[4]*300), int(t_box[1]*300):int(t_box[3]*300)] |= 2
-
-    for l in ll:
-        ## lのxminなどの順番は上記を参照
-        # x[int(l[3]*300):int(l[1]*300), int(l[2]*300):int(l[0]*300)] |= 1
-        # 正解boxの面積
-        l_area = (l[2] - l[0]) * (l[3] - l[1])
-
-        # 重なり部分の面積を求める
-        abx_mn = np.maximum(l[0], box[:, 1])  # xmin
-        aby_mn = np.maximum(l[1], box[:, 2])  # ymin
-        abx_mx = np.minimum(l[2], box[:, 3])  # xmax
-        aby_mx = np.minimum(l[3], box[:, 4])  # ymax
-
-        w = np.maximum(0, abx_mx - abx_mn)
-        h = np.maximum(0, aby_mx - aby_mn)
-
-        intersect = w * h
-        IoU = intersect / (area + l_area - intersect)
-
-        # 重なりが0.45以上のbox
-        true_positive.append(IoU > iou)
-
-    # Non_Ring_TN = (x==0).sum()
-    # Non_Ring_FN = (x==1).sum()
-    # Non_Ring_FP = (x==2).sum()
-    # Non_Ring_TP = (x==3).sum()
-
-    # Non_Ring_precision = Non_Ring_TP / (Non_Ring_TP + Non_Ring_FP)
-    # Non_Ring_recall = Non_Ring_TP / (Non_Ring_TP + Non_Ring_FN)
-
-    # Non_Ring_judge = [Non_Ring_precision, Non_Ring_recall]
-
-    # Non_Ring_judge = [Non_Ring_TP, Non_Ring_FP, Non_Ring_FN, Non_Ring_TN]
-
-    if len(ll) == 0:
-        return 0, box[:, 0], False  # box[:,0]は、probability
-    else:
-        return np.stack(true_positive), box[:, 0], True  # box[:,0]は、probability
-
-
-def calc_f1score(val_seikai, val_bbbb, mode, jaccard=0.45, top_k=50, iou=0.5):
-    """
-    TP1=推定したボックスのうち、正解と一定以上のIoUを持つ個数
-    FP=推定したボックスのうち、正解と一定以上のIoUを持たない個数
-    TP2=正解のうち、一定以上のIoUを推定したボックスと持つ個数
-    FN=正解のうち、一定以上のIoUを推定したボックスと持たない個数
-
-    TP1_FP : モデルのboxの数（conf閾値適応済み）, predict showした時の赤枠
-
-    """
-    if mode == "train":
-        thresholds = [i / 20 for i in range(6, 16, 1)]
-    else:
-        thresholds = [i / 20 for i in range(6, 16, 1)]
-
-    f1_score = -10000
-    f1_score_non_ring = -10000
-    threthre = 0
-    threthre_noring = 0
-    PRE = []
-    RE = []
-    TP1_l = []
-    FP_l = []
-
-    dbox_list = val_bbbb[2].cpu()
-    val_bbbb = [decode_all(val_bbbb[0].cpu(), dbox_list), nn.Softmax(dim=-1)(val_bbbb[1].cpu()), dbox_list]
-
-    for th in thresholds:
-        TP1 = 0
-        TP2 = 0
-        TP1_FP = 0
-        TP1_FP_non_ring = 0
-        TP2_FN = 0
-
-        # TP_NonRing = 0
-        # FP_NonRing = 0
-        # FN_NonRing = 0
-
-        # detectクラスで、nm_suppressionする
-        detect = Detect(conf_thresh=th, nms_thresh=jaccard, top_k=top_k)
-        output = detect(*val_bbbb, decoded=True, softmaxed=True)
-        collisions = [calc_collision(s, b, iou=iou) for s, b in zip(val_seikai, output)]
-        # colは面積のあたり判定
-        for col, prob, flag in collisions:
-            ## このflagは Ring か NonRingの画像かの判断をしている
-            if flag:
-                idx = prob > th
-                ## 正解boxとDBoxで、重なりがiou以上でかつ、probが閾値を超えるもの
-
-                tp1 = col.any(axis=0)
-                tp2 = col.any(axis=1)  # for tp2
-
-                tp1_fp = idx.sum()
-                tp2_fn = col.shape[0]
-
-                TP1 += np.sum(tp1)
-                TP2 += np.sum(tp2)
-
-                TP1_FP += tp1_fp
-                TP1_FP_non_ring += tp1_fp
-                TP2_FN += tp2_fn
-
-                # TP_NonRing += non_ring_judge[0]
-                # FP_NonRing += non_ring_judge[1]
-                # FN_NonRing += non_ring_judge[2]
-
-            else:
-                idx = prob > th
-                TP1_FP_non_ring += idx.sum()
-
-        PRE.append(TP1 / TP1_FP)
-        RE.append(TP2 / TP2_FN)
-        TP1_l.append(TP1)
-        FP_l.append(TP1_FP - TP1)
-
-        f1_score_ = calc_f1_sub(
-            TP1, TP2, TP1_FP, TP2_FN
-        )  # + calc_f1_sub(TP_NonRing, TP_NonRing, TP_NonRing+FP_NonRing, TP_NonRing+FN_NonRing)
-        f1_score_non_ring_ = calc_f1_sub(TP1, TP2, TP1_FP_non_ring, TP2_FN)
-
-        if f1_score_ > f1_score:
-            f1_score = f1_score_
-            threthre = th
-
-        if f1_score_non_ring_ > f1_score_non_ring:
-            f1_score_non_ring = f1_score_non_ring_
-            threthre_noring = th
-
-    return f1_score, threthre, f1_score_non_ring, threthre_noring  # , PRE, RE, TP1_l, FP_l
-
-
-def calc_f1_sub(TP1, TP2, TP1_FP, TP2_FN):
-    r1 = TP1 / (TP1_FP + 1e-9)
-    r2 = TP2 / (TP2_FN + 1e-9)
-    # print(f'precision : {r1}, recall : {r2}')
-    return 2 * r1 * r2 / (r1 + r2 + 1e-9)
-
-
 def calc_location_each_region(detections, position, regions, conf_thre):
+    """bboxを全体マップでの座標に変換する
+
+    Args:
+        detections (numpy array): モデルの出力にDetect関数を適用したもの
+        position (numpy array): 画像を切り出した際のpixel座標
+        regions (list): どのfitsファイルかを示すstrのlist
+        conf_thre (float): 0.3~0.8の数字
+
+    Returns:
+        predict_bbox (list): bboxと切り出し座標から補正したマップ上の検出リング座標
+        scores (list): 検出リングのscore
+        wcs_regions (list): どのfitsファイルかを示すstrのlist
+    """
     predict_bbox = []
     scores = []
     wcs_regions = []
@@ -319,6 +125,17 @@ def calc_location_each_region(detections, position, regions, conf_thre):
 
 
 def make_catalogue(region_dict, Ring_CATALOGUE, args):
+    """_summary_
+
+    Args:
+        region_dict (dictionary): 領域ごとのマップ上のリング位置情報とscoreを格納した辞書
+        Ring_CATALOGUE (pandas dataframe): MWPリングのカタログ
+        args (args): argparseの引数
+
+    Returns:
+        mwp (pandas dataframe): Validation領域内のMWPリングカタログ
+        catalogue (pandas dataframe): wcs座標系に変換した検出リングの位置座標
+    """
     target_MWP_catalogue = []
     catalogue = pd.DataFrame(columns=["dec_min", "ra_min", "dec_max", "ra_max"])
 
@@ -355,20 +172,18 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     return mwp, catalogue
 
 
-def judge_in(infer, ra_, dec_, mask):
-    kensyutu_box = []
-    ok = False
-    for i, irow in infer.iterrows():
-        if irow["ra_min"] <= ra_ and ra_ <= irow["ra_max"] and irow["dec_min"] <= dec_ and dec_ <= irow["dec_max"]:
-            kensyutu_box.append(i)
-            ok = True
-            mask[i] = False
-        else:
-            pass
-    return ok, kensyutu_box, mask
-
-
 def calc_TP_FP_FN(mwp, infer):
+    """TP, FP, FNを計算する
+
+    Args:
+        mwp (pandas dataframe): Validation領域内のMWPリングカタログ
+        infer (pandas dataframe): wcs座標系に変換した検出リングの位置座標
+
+    Returns:
+        TP (list): True Positive
+        FP (list): False Positive
+        mwp_mask (list): MWPリングカタログのうち、検出されたものをTrueとしたリスト
+    """
     TP = []
     FP = []
     mwp_mask = [False] * len(mwp)
@@ -401,6 +216,20 @@ def calc_TP_FP_FN(mwp, infer):
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
 def calc_f1score_val(detections, position, regions, args):
+    """f1scoreを計算する
+
+    Args:
+        detections (numpy array): モデルの出力にDetect関数を適用したもの
+        position (numpy array): 画像を切り出した際のpixel座標
+        regions (list): どのfitsファイルかを示すstrのlist
+        args (args): argparseの引数
+
+    Returns:
+        F1_score (float): f1score
+        Precision (float): Precision
+        Recall (float): Recall
+        threthre (float): 0.3~0.8の数字
+    """
     thresholds = [i / 20 for i in range(6, 16, 1)]
     Ring_CATALOGUE = ring_augmentation.catalogue("MWP")
     F1_score = -10000
@@ -434,11 +263,16 @@ def calc_f1score_val(detections, position, regions, args):
             Precision = Precision_
             Recall = Recall_
 
-    print(f"Precision : {Precision}, Recall : {Recall}")
-    return F1_score, threthre
+    return F1_score, Precision, Recall, threthre
 
 
 def print_and_log(f, moji):
+    """printとlogを同時に行う
+
+    Args:
+        f (txtファイル): logを保存するファイル
+        moji (str): printとlogに出力する文字列
+    """
     if isinstance(moji, list):
         for i in moji:
             print(i)
@@ -449,6 +283,8 @@ def print_and_log(f, moji):
 
 
 class management_loss:
+    """lossの管理を行うクラス"""
+
     def __init__(self):
         self.loc_l_val_s, self.conf_l_val_s = [], []
         self.loc_l_train_s, self.conf_l_train_s = [], []
@@ -497,7 +333,24 @@ class management_loss:
         return self.loc_l_val_s, self.conf_l_val_s, self.loc_l_train_s, self.conf_l_train_s
 
 
-def write_train_log(f_log, epoch, each_loss_train, each_loss_val, val_f1_score, val_conf_threshold, epoch_start_time):
+def write_train_log(
+    f_log, epoch, each_loss_train, each_loss_val, val_f1_score, Precision, Recall, val_conf_threshold, epoch_start_time
+):
+    """epochごとのlogを出力する
+    Args:
+        f_log (txtファイル): logを保存するファイル
+        epoch (int): epoch数
+        each_loss_train (dictionary): trainのloc_lossとconf_loss
+        each_loss_val (dictionary): valのloc_lossとconf_loss
+        val_f1_score (float): valのf1_score
+        Precision (float): valのPrecision
+        Recall (float): valのRecall
+        val_conf_threshold (float): valのconf_threshold
+        epoch_start_time (float): epochの開始時間
+
+    Returns:
+        log_epoch (dictionary): epochごとのlog
+    """
     epoch_finish_time = time.time()
     avg_train_loss = each_loss_train["loc_loss"] + each_loss_train["conf_loss"]
     avg_val_loss = each_loss_val["loc_loss"] + each_loss_val["conf_loss"]
@@ -513,7 +366,9 @@ def write_train_log(f_log, epoch, each_loss_train, each_loss_val, val_f1_score, 
                 each_loss_val["conf_loss_positive"],
                 each_loss_val["conf_loss_negative"],
             ),
-            "val_f1_score : {:.4f}, threshold : {:.4f}".format(val_f1_score, val_conf_threshold),
+            "val_f1_score : {:.4f}, Precision : {:.4f}, Recall : {:.4f}, threshold : {:.4f}".format(
+                val_f1_score, Precision, Recall, val_conf_threshold
+            ),
             "time:  {:.4f} sec.".format(epoch_finish_time - epoch_start_time),
         ],
     )
@@ -528,6 +383,8 @@ def write_train_log(f_log, epoch, each_loss_train, each_loss_val, val_f1_score, 
         "avarage_conf_loss_positive": each_loss_val["conf_loss_positive"],
         "avarage_conf_loss_negative": each_loss_val["conf_loss_negative"],
         "val_f1_score": val_f1_score,
+        "val_precision": Precision,
+        "val_recall": Recall,
         "val_conf_threshold": val_conf_threshold,
         "training_time": epoch_finish_time - epoch_start_time,
     }
