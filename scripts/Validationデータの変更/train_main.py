@@ -37,6 +37,7 @@ def parse_args():
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
     parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
+    parser.add_argument("--Val_mini_batch", default=16, type=int, help="Validation mini-batch size (default: 16)")
     parser.add_argument("--NonRing_ratio", default=1, type=int, help="Ring / NonRing ratio (default: 3)")
     parser.add_argument("--augmentation_ratio", default=4, type=int, help="1 Ring augmentation ratio (default: 4)")
     parser.add_argument(
@@ -47,7 +48,7 @@ def parse_args():
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
     parser.add_argument("--NonRing_class_num", type=int, default=8)
-    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 4])
+    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
 
     return parser.parse_args()
 
@@ -67,16 +68,6 @@ def main(args):
     ImageFile.LOAD_TRUNCATED_IMAGES = True
 
     os.makedirs(args.savedir_path, exist_ok=True)
-    ssd_cfg = {
-        "num_classes": 2,  # 背景クラスを含めた合計クラス数
-        "input_size": 300,  # 画像の入力サイズ
-        "bbox_aspect_num": [4, 6, 6, 6, 4, 4],  # 出力するDBoxのアスペクト比の種類
-        "feature_maps": [38, 19, 10, 5, 3, 1],  # 各sourceの画像サイズ
-        "steps": [8, 16, 32, 64, 100, 300],  # DBOXの大きさを決める
-        "min_sizes": [30, 60, 111, 162, 213, 264],  # DBOXの大きさを決める
-        "max_sizes": [60, 111, 162, 213, 264, 315],  # DBOXの大きさを決める
-        "aspect_ratios": [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
-    }
 
     ## 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentationをする。
     flip_list = [True, False]
@@ -96,14 +87,14 @@ def main(args):
         ############
         f_log = open(name + "/log.txt", "w")
         log_list = [
-            "###########################",
-            "  augmentation parameter",
-            "###########################",
+            "#######################",
+            "augmentation parameter",
+            "#######################",
             f"flip: {flip}, rotate: {rotate}, scale: {scale}, translation: {translation}",
             " ",
-            "###################",
-            "  args parameters",
-            "###################",
+            "#######################",
+            "   args parameters",
+            "#######################",
             f"augmentation_ratio: {args.augmentation_ratio}",
             f"region shuffle: {args.region_suffle}",
             f"fits_index: {args.fits_index}",
@@ -120,7 +111,7 @@ def main(args):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print_and_log(f_log, f"使用デバイス： {device}")
 
-        net = SSD(cfg=ssd_cfg)
+        net = SSD()
         ## パラメータを初期化
         for net_sub in [net.vgg, net.extras, net.loc, net.conf]:
             net_sub.apply(weights_init)
