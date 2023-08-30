@@ -444,7 +444,7 @@ class Detect(Function):
                 decoded_boxes = decode(loc_data[i].to("cpu"), dbox_list.to("cpu"))
 
             # confのコピーを作成
-            conf_scores = conf_preds[i].clone()
+            conf_scores = conf_preds[i].clone().to("cpu")
 
             # 画像クラスごとのループ（背景クラスのindexである0は計算せず、index=1から）
             for cl in range(1, num_classes):
@@ -487,10 +487,19 @@ class Detect(Function):
 
 
 class SSD(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg=None):
         super(SSD, self).__init__()
-        #         self.softmax = nn.Softmax(dim=-1)
-        # self.phase = phase  # train or inferenceを指定
+        if cfg is None:
+            cfg = {
+                "num_classes": 2,  # 背景クラスを含めた合計クラス数
+                "input_size": 300,  # 画像の入力サイズ
+                "bbox_aspect_num": [4, 6, 6, 6, 4, 4],  # 出力するDBoxのアスペクト比の種類
+                "feature_maps": [38, 19, 10, 5, 3, 1],  # 各sourceの画像サイズ
+                "steps": [8, 16, 32, 64, 100, 300],  # DBOXの大きさを決める
+                "min_sizes": [30, 60, 111, 162, 213, 264],  # DBOXの大きさを決める
+                "max_sizes": [60, 111, 162, 213, 264, 315],  # DBOXの大きさを決める
+                "aspect_ratios": [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
+            }
         self.num_classes = cfg["num_classes"]  # クラス数=21
 
         # SSDのネットワークを作る
