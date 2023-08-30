@@ -37,21 +37,29 @@ def nonring_augmentation(iter_noring_list, NonRing_class_num, args):
         non_ring_label.extend(label)
 
         if class_num == 0:
-            pass
+            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
+                non_ring_image.append(augmentation_func(data, flag))
+                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
         elif class_num == 1:
-            pass
+            for flag in NonRing_rg.choice(np.arange(5), 1, replace=False):
+                non_ring_image.append(augmentation_func(data, flag))
+                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
         elif class_num == 2:
+            for flag in NonRing_rg.choice(np.arange(5), 1, replace=False):
+                non_ring_image.append(augmentation_func(data, flag))
+                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
+        elif class_num == 3:
+            pass
+        elif class_num == 4:
             pass
         elif class_num == 5:
-            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
+            for flag in NonRing_rg.choice(np.arange(5), 3, replace=False):
                 non_ring_image.append(augmentation_func(data, flag))
                 non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
         elif class_num == 6:
-            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
-                non_ring_image.append(augmentation_func(data, flag))
-                non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
+            pass
         elif class_num == 7:
-            for flag in NonRing_rg.choice(np.arange(5), 5, replace=False):
+            for flag in NonRing_rg.choice(np.arange(5), 2, replace=False):
                 non_ring_image.append(augmentation_func(data, flag))
                 non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
 
