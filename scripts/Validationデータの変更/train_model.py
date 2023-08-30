@@ -44,8 +44,8 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     ##########################
     Make_data = make_training_val_data(augmentation_name, f_log, args)
     Validation_data_path, Val_num = Make_data.make_validation_data()
-    dl_val = make_validatoin_dataloader(Validation_data_path)
-    all_iter_val = int(int(Val_num) / 32)
+    dl_val = make_validatoin_dataloader(Validation_data_path, args)
+    all_iter_val = int(int(Val_num) / args.Val_mini_batch)
 
     for epoch in range(num_epochs):
         start_time = time.time()
