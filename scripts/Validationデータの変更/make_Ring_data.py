@@ -72,7 +72,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
             x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
                 row, GLON_min, GLON_max, GLAT_min, GLAT_max, 1
             )
-            if flag or x_pix_min < 0 or y_pix_min < 0:  # calc_pix時に100回試行してもできなかった場合の場合分け
+            if flag and x_pix_min >= 0 and y_pix_min >= 0:  # calc_pix時に100回試行してもできなかった場合の場合分け
                 label_cal.find_cover()
 
                 c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
