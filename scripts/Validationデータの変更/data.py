@@ -143,7 +143,7 @@ def make_training_dataloader(Training_data_path, args, NonRing_mini_batch):
     return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
 
 
-def make_validatoin_dataloader(Validation_data_path):
+def make_validatoin_dataloader(Validation_data_path, args):
     Dataset_val = (
         webdataset.WebDataset(Validation_data_path)
         .decode("pil")
@@ -151,7 +151,11 @@ def make_validatoin_dataloader(Validation_data_path):
         .map(preprocess_validation)
     )
     dl_val = torch.utils.data.DataLoader(
-        Dataset_val, collate_fn=od_collate_fn_validation, batch_size=16, num_workers=2, pin_memory=True
+        Dataset_val,
+        collate_fn=od_collate_fn_validation,
+        batch_size=args.Val_mini_batch,
+        num_workers=2,
+        pin_memory=True,
     )
 
     return dl_val
