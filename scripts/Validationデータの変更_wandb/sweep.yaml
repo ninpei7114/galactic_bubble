@@ -1,0 +1,13 @@
+program: ./train_main.py
+method: bayes
+metric:
+  name: val_f1_score
+  goal: maximize
+parameters:
+  lr:
+    min: 1e-10
+    max: 1e-3
+  weight_decay: 
+    min: 1e-10
+    max: 1e-3
+  
