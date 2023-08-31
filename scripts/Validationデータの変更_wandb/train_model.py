@@ -43,13 +43,15 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         project="Validationデータの変更とNonringのaugmentation",
         name=augmentation_name.split("/")[-1],
         config={
-            "learning_rate": 1e-4,
+            "learning_rate": args.lr,
+            "weight_decay": args.weight_decay,
             "augmentation_ratio": args.augmentation_ratio,
             "fits_index": args.fits_index,
             "n_splits": args.n_splits,
             "fits_random_state": args.fits_random_state,
         },
     )
+    wandb.watch(net, log_freq=100)
 
     ##########################
     ## Validation dataの作成 ##
@@ -116,17 +118,11 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                         # 勾配が大きくなりすぎると計算が不安定になるため、clipで最大でも勾配10.0に留める
                         nn.utils.clip_grad_value_(net.parameters(), clip_value=10.0)
                         optimizer.step()  # パラメータ更新
-                        print(
-                            "\r" + str(iteration_train) + "/" + str(all_iter) + " ",
-                            end="",
-                        )
+                        print("\r" + str(iteration_train) + "/" + str(all_iter) + " ", end="")
                         iteration_train += 1
                         save_training_val_loss.sum_iter_loss(loss_dic, "train")
                     else:
-                        print(
-                            "\r" + str(iteration_val) + "/" + str(all_iter_val) + " ",
-                            end="",
-                        )
+                        print("\r" + str(iteration_val) + "/" + str(all_iter_val) + " ", end="")
                         iteration_val += 1
                         result.append(detect(*outputs).to("cpu").detach().numpy().copy())
                         position.extend(offset)
@@ -158,6 +154,11 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
 
         # early_stopping(epoch_val_loss, net)
         early_stopping(f1_score_val, net, epoch, optimizer, loss_train, loss_val)
+
+        if early_stopping.counter == 0:
+            artifact = wandb.Artifact("model", type="model")
+            artifact.add_file(augmentation_name + "/earlystopping.pth")
+            wandb.log_artifact(artifact, aliases=["latest", "best"])
         if early_stopping.early_stop:
             print_and_log(f_log, "Early_Stopping")
             break
