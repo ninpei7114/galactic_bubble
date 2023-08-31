@@ -123,7 +123,7 @@ def make_training_dataloader(Training_data_path, args, NonRing_mini_batch):
 
     ## Training NonRing の Dataloader を作成
     NonRing_tar_path = sorted(glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"))
-    NonRing_rsample = [0.06, 0.07, 0.11, 0.05, 0.12, 0.03, 0.07]
+    NonRing_rsample = [0.02, 0.03, 0.04, 0.02, 0.04, 0.02, 0.03]
     NonRing_web_list = [
         webdataset.WebDataset(Nonring_tar_path)
         .rsample(rsample)
