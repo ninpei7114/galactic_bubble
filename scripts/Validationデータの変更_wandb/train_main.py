@@ -44,7 +44,7 @@ def parse_args():
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
-    parser.add_argument("--data_random_state", "-r", type=int, default=123)
+    parser.add_argument("--data_random_state", "-d", type=int, default=123)
     parser.add_argument("--NonRing_class_num", type=int, default=8)
     parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
     parser.add_argument("--lr", type=float, default=1e-4)
