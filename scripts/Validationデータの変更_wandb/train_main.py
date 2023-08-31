@@ -38,15 +38,13 @@ def parse_args():
     parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--Val_mini_batch", default=16, type=int, help="Validation mini-batch size (default: 16)")
-    # parser.add_argument("--NonRing_ratio", default=1, type=int, help="Ring / NonRing ratio (default: 1)")
     parser.add_argument("--augmentation_ratio", default=1, type=int, help="1 Ring augmentation ratio (default: 1)")
-    parser.add_argument(
-        "--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss &  calc F1 score (default: 0.5)"
-    )
+    parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
     parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
+    parser.add_argument("--data_random_state", "-r", type=int, default=123)
     parser.add_argument("--NonRing_class_num", type=int, default=8)
     parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
     parser.add_argument("--lr", type=float, default=1e-4)
