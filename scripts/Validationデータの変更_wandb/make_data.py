@@ -27,7 +27,7 @@ class make_training_val_data:
     """
 
     def __init__(self, augmentation_name, f_log, args):
-        self.Data_rg = default_rng(args.fits_random_state)
+        self.Data_rg = default_rng(args.data_random_state)
         self.augmentation_name = augmentation_name
         self.f_log = f_log
         self.args = args
