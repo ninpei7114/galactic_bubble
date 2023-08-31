@@ -39,7 +39,7 @@ def parse_args():
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--Val_mini_batch", default=16, type=int, help="Validation mini-batch size (default: 16)")
     parser.add_argument("--NonRing_ratio", default=1, type=int, help="Ring / NonRing ratio (default: 3)")
-    parser.add_argument("--augmentation_ratio", default=4, type=int, help="1 Ring augmentation ratio (default: 4)")
+    parser.add_argument("--augmentation_ratio", default=1, type=int, help="1 Ring augmentation ratio (default: 1)")
     parser.add_argument(
         "--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss &  calc F1 score (default: 0.5)"
     )
@@ -70,8 +70,8 @@ def main(args):
     os.makedirs(args.savedir_path, exist_ok=True)
 
     ## 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentationをする。
-    flip_list = [True, False]
-    rotate_list = [True, False]
+    flip_list = [True]  # , False]
+    rotate_list = [True]  # , False]
     scale_list = [False]
     translation_list = [True]
 
