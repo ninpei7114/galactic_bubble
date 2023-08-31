@@ -207,8 +207,8 @@ class make_training_val_data:
         print_and_log(
             self.f_log,
             [
-                f"Ring NonRing ratio = 1 : {self.args.NonRing_ratio}",
-                " ",
+                # f"Ring NonRing ratio = 1 : {self.args.NonRing_ratio}",
+                # " ",
                 "Ring & Non-Ring num",
                 f">>> Train Ring num: {train_Ring_num}",
                 f">>> Val Ring num: {val_Ring_num}",
