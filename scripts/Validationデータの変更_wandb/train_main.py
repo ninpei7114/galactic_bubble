@@ -11,6 +11,7 @@ import torch.optim as optim
 from train_model import train_model
 from training_sub import print_and_log, weights_init
 from utils.ssd_model import SSD, MultiBoxLoss
+import l18_infer
 
 
 def parse_args():
@@ -49,6 +50,7 @@ def parse_args():
     parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
+    parser.add_argument("--l18_infer", action="store_true")
 
     return parser.parse_args()
 
@@ -137,6 +139,15 @@ def main(args):
         }
 
         train_model(**train_model_params)
+
+        if args.l18_infer:
+            pass
+        else:
+            f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args)
+            print_and_log(
+                f_log,
+                [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
+            )
         f_log.close()
 
 
