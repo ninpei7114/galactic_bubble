@@ -70,16 +70,13 @@ class label_caliculator(object):
             clip_yy = np.clip(yy, y_min, y_min + cut_shape)
             clip_width = clip_xx[1] - clip_xx[0] + 1e-9
             clip_height = clip_yy[1] - clip_yy[0] + 1e-9
-            clip_area = (clip_xx[1] - clip_xx[0]) * (clip_yy[1] - clip_yy[0])
-
+            clip_area = clip_width * clip_height
             ## 場合分け、全体に対してringが1/3以上入っていないといけない
             ## width/height比が1/3以上でないとlabel付けしない
             if (
                 clip_area >= star_area * 1 / 3
                 and clip_height / (clip_width + 1e-9) > 1 / 3
                 and clip_width / (clip_height + 1e-9) > 1 / 3
-                and cut_shape / clip_width <= 8
-                and cut_shape / clip_height <= 8
             ):
                 xmin_c = star_xmin - x_min
                 ymin_c = star_ymin - y_min
