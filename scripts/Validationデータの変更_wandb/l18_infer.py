@@ -14,6 +14,18 @@ from training_sub import calc_f1score_val
 
 
 def infer_l18(model_path, args):
+    """l18の推論を行う関数
+
+    Args:
+        model_path (str): 推論を行うモデルのパス
+        args (args)     : argparseの引数
+
+    Returns:
+        f1_score (float)      : F1 score
+        precision (float)     : precision
+        recall (float)        : recall
+        conf_threshold (float): conf_threshold
+    """
     result, position, regions = [], [], []
     save_data_path = args.savedir_path + "".join("dataset") + "/" + model_path.split("/")[-1]
     os.makedirs(f"{save_data_path}/l18", exist_ok=True)
