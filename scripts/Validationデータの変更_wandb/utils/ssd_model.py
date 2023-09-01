@@ -601,16 +601,9 @@ class MultiBoxLoss(nn.Module):
             if len(targets[idx]) == 0:
                 pass
             else:
-                # print(type(targets))
                 truths = targets[idx][:, :-1].to(self.device)  # BBox
-                # with open("BBox.log", "a") as fff:
-                #     fff.write("----------\n")
-                #     fff.write(f"{truths}\n")
                 # ラベル [物体1のラベル, 物体2のラベル, …]
                 labels = targets[idx][:, -1].to(self.device)
-                # with open("labels.log", "a") as fff:
-                #     fff.write("----------\n")
-                #     fff.write(f"{labels}\n")
 
                 variance = [0.1, 0.2]
                 # このvarianceはDBoxからBBoxに補正計算する際に使用する式の係数です
@@ -618,9 +611,6 @@ class MultiBoxLoss(nn.Module):
 
         pos_mask = conf_t_label > 0  # torch.Size([num_batch, 8732])
 
-        # with open("conf_t_label.log", "a") as fff:
-        #     fff.write("----------\n")
-        #     fff.write(f"conf_t_label1 : {conf_t_label}\n")
         # pos_maskをloc_dataのサイズに変形
         # pos_mask : torch.size([num_batch, 8732]) → torch.size([num_batch, 8732, 1])
         # pos_idx : torch.size([num_batch, 8732, 4])
@@ -660,7 +650,7 @@ class MultiBoxLoss(nn.Module):
         # 各DBoxの損失の大きさloss_cの順位であるidx_rankを求める
         _, loss_idx = loss_c.sort(1, descending=True)
         _, idx_rank = loss_idx.sort(1)
-        num_neg = torch.clamp(num_pos * self.negpos_ratio, max=num_dbox, min=3)
+        num_neg = torch.clamp(num_pos * self.negpos_ratio, max=num_dbox, min=10)
 
         # idx_rankは各DBoxの損失の大きさが上から何番目なのかが入っている
         # 背景のDBoxの数num_negよりも、順位が低い（すなわち損失が大きい）DBoxを取るマスク作成
