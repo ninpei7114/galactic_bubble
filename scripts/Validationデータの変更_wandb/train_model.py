@@ -86,7 +86,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
                 print_and_log(f_log, f" ({phase}) ")
                 net.train()
             else:
-                print_and_log(f_log, f" \n({phase}) ")
+                print_and_log(f_log, f" \n ({phase}) ")
                 net.eval()
                 result, position, regions = [], [], []
 
@@ -154,12 +154,10 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
 
         # early_stopping(epoch_val_loss, net)
         early_stopping(f1_score_val, net, epoch, optimizer, loss_train, loss_val)
-
-        if early_stopping.counter == 0:
+        if early_stopping.early_stop:
             artifact = wandb.Artifact("model", type="model")
             artifact.add_file(augmentation_name + "/earlystopping.pth")
             wandb.log_artifact(artifact, aliases=["latest", "best"])
-        if early_stopping.early_stop:
             print_and_log(f_log, "Early_Stopping")
             break
 
