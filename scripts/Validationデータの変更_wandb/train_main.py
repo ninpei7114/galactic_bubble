@@ -66,7 +66,7 @@ def main(args):
 
     """
     torch.manual_seed(args.fits_random_state)
-    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.benchmark = True
     ImageFile.LOAD_TRUNCATED_IMAGES = True
 
     os.makedirs(args.savedir_path, exist_ok=True)
@@ -141,13 +141,13 @@ def main(args):
         train_model(**train_model_params)
 
         if args.l18_infer:
-            pass
-        else:
             f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args)
             print_and_log(
                 f_log,
                 [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
             )
+        else:
+            pass
         f_log.close()
 
 
