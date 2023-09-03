@@ -104,7 +104,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
         return self.true_size + self.sample_negative_size
 
 
-def make_training_dataloader(Training_data_path, args, NonRing_mini_batch):
+def make_training_dataloader(Training_data_path, args):
     ## Training Ring の Dataloader を作成
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
@@ -127,7 +127,7 @@ def make_training_dataloader(Training_data_path, args, NonRing_mini_batch):
     NonRing_web_list = [
         webdataset.WebDataset(Nonring_tar_path)
         .rsample(rsample)
-        .shuffle(100000000000)
+        .shuffle(10000000000)
         .decode("pil")
         .to_tuple("png", "json")
         .map(preprocess)
@@ -135,7 +135,7 @@ def make_training_dataloader(Training_data_path, args, NonRing_mini_batch):
     ]
     NonRing_dl_l = [
         torch.utils.data.DataLoader(
-            nr_w_l, collate_fn=od_collate_fn, batch_size=NonRing_mini_batch, num_workers=2, pin_memory=True
+            nr_w_l, collate_fn=od_collate_fn, batch_size=args.NonRing_mini_batch, num_workers=2, pin_memory=True
         )
         for nr_w_l in NonRing_web_list
     ]
