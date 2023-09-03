@@ -63,7 +63,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
         w = astropy.wcs.WCS(spitzer_rfits.header)
         GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
         GLON_max, GLAT_max = w.all_pix2world(0, a, 0)
-        Ring_catalogue = Ring_CATALOGUE.query("@GLON_min < GLON <= @GLON_max")
+        Ring_catalogue = Ring_CATALOGUE.query("@GLON_min <= GLON <= @GLON_max")
 
         label_cal = label_caliculator.label_caliculator(choice_catalogue, w)
         label_cal.all_star(Ring_catalogue)
