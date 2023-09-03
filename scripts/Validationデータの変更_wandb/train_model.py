@@ -73,7 +73,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         # png形式のRing画像とjson形式のlabelを作成
         Training_data_path = Make_data.make_training_data(train_cfg, epoch)
         # Training Ring の Dataloader を作成
-        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args, args.NonRing_mini_batch)
+        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args)
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
         train_Ring_num = Make_data.data_logger()
         all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
@@ -82,6 +82,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ## 学習開始 ##
         #############
         for phase in ["train", "val"]:
+            torch.cuda.empty_cache()
             if phase == "train":
                 print_and_log(f_log, f" ({phase}) ")
                 net.train()
