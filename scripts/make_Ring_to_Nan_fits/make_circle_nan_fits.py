@@ -42,11 +42,11 @@ def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_cata
     for i in range(len(pandas_catalog1)):
         series_i = pandas_catalog1.iloc[i]
         # 左端
-        lmax = series_i["GLON"] + series_i["Rout"] / 60
-        bmin = series_i["GLAT"] - series_i["Rout"] / 60
+        lmax = series_i["GLON"] + series_i["Reff"] / 60
+        bmin = series_i["GLAT"] - series_i["Reff"] / 60
         # 右端
-        lmin = series_i["GLON"] - series_i["Rout"] / 60
-        bmax = series_i["GLAT"] + series_i["Rout"] / 60
+        lmin = series_i["GLON"] - series_i["Reff"] / 60
+        bmax = series_i["GLAT"] + series_i["Reff"] / 60
 
         x_pix_min, y_pix_min = w.all_world2pix(lmax, bmin, 0)
         x_pix_max, y_pix_max = w.all_world2pix(lmin, bmax, 0)
@@ -84,12 +84,9 @@ def main(args):
 
     viz = astroquery.vizier.Vizier(columns=["*"])
     viz.ROW_LIMIT = -1
-    bub_2006 = viz.query_constraints(catalog="J/ApJ/649/759/bubbles")[0].to_pandas()
-    bub_2007 = viz.query_constraints(catalog="J/ApJ/670/428/bubble")[0].to_pandas()
-    bub_2006_change = bub_2006.set_index("__CPA2006_")
-    bub_2007_change = bub_2007.set_index("__CWP2007_")
-    CH = pd.concat([bub_2006_change, bub_2007_change])
-    CH["CH"] = CH.index
+    MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
+    MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
+    MWP = MWP.set_index("MWP")
 
     for i in l:
         print(i)
@@ -110,7 +107,7 @@ def main(args):
             else:
                 pass
 
-            cut_MWP = CH.query("@GLON_min < GLON < @GLON_max")
+            cut_MWP = MWP.query("@GLON_min < GLON < @GLON_max")
             c = np.zeros_like(fits)
             data = circle_nan(fits, c, cut_MWP, w)
 
