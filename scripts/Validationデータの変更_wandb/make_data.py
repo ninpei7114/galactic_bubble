@@ -156,17 +156,12 @@ class make_training_val_data:
 
             ## Ringデータをコピーする。
             Val_origin = []
-            a = [glob.glob(f"{self.args.validation_data_path}/{i}/Ring/*.png") for i in self.val_l]
-            [Val_origin.extend(i) for i in a]
-            for k in Val_origin:
-                shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
-                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.json")
+            for i in self.val_l:
+                for size in [150, 300, 600, 900, 1200, 1800, 2500, 3000]:
+                    a = glob.glob(f"{self.args.validation_data_path}/{i}/*/*_{size}_*.png")
+                    Val_origin.extend(a)
 
-            ## Non-Ringをコピーする
-            NonRing_origin = []
-            a = [glob.glob(f"{self.args.validation_data_path}/{i}/NonRing/*.png") for i in self.val_l]
-            [NonRing_origin.extend(i) for i in a]
-            for k in NonRing_origin:
+            for k in Val_origin:
                 shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
                 shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.json")
 
