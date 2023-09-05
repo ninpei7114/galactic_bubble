@@ -50,6 +50,7 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
     parser.add_argument("--l18_infer", action="store_true")
+    parser.add_argument("--ring_select", action="store_true")
 
     return parser.parse_args()
 
