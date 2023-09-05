@@ -16,6 +16,7 @@ from make_figure import make_figure
 from nonring_augmentation import nonring_augmentation
 from training_sub import EarlyStopping_f1_score, calc_f1score_val, management_loss, print_and_log, write_train_log
 from utils.ssd_model import Detect
+import l18_infer
 
 
 def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device):
@@ -82,7 +83,6 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ## 学習開始 ##
         #############
         for phase in ["train", "val"]:
-            torch.cuda.empty_cache()
             if phase == "train":
                 print_and_log(f_log, f" ({phase}) ")
                 net.train()
@@ -171,5 +171,20 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     ## lossの推移を描画する
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
     make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f1_score_val)
+
+    # l18領域の推論
+    if args.l18_infer:
+        f1_score, pre, re, conf_thre = l18_infer.infer_l18(augmentation_name, args)
+        print_and_log(
+            f_log,
+            [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
+        )
+        wandb.run.summary["l18_f1_score"] = f1_score
+        wandb.run.summary["l18_precision"] = pre
+        wandb.run.summary["l18_recall"] = re
+        wandb.run.summary["l18_conf_threshold"] = conf_thre
+    else:
+        pass
+
     wandb.alert(title="学習が終了しました", text="学習が終了しました")
     wandb.finish()
