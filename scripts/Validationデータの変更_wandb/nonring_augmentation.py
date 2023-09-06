@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from numpy.random import default_rng
 from skimage import transform
 
 
@@ -26,10 +25,9 @@ def augmentation_func(data, augmentation_type):
     return np.array(data_l)
 
 
-def nonring_augmentation(iter_noring_list, NonRing_class_num, args):
+def nonring_augmentation(iter_noring_list, NonRing_class_num, NonRing_rg):
     non_ring_image = []
     non_ring_label = []
-    NonRing_rg = default_rng(args.fits_random_state)
 
     for class_num, noring in zip(NonRing_class_num, iter_noring_list):
         data, label = next(noring)

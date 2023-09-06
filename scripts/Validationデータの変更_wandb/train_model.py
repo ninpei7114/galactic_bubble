@@ -5,6 +5,7 @@ import time
 from itertools import product as product
 
 import numpy as np
+from numpy.random import default_rng
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -34,6 +35,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         device (torch.device)   : GPU or CPU
     """
     NonRing_class_num = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
+    NonRing_rg = default_rng(args.fits_random_state)
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
@@ -97,7 +99,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             for _ in dataloaders_dict[phase]:
                 if phase == "train":
                     images, targets = _[0], _[1]
-                    no_ring_image, no_ring_target = nonring_augmentation(NonRing_dl_l, NonRing_class_num, args)
+                    no_ring_image, no_ring_target = nonring_augmentation(NonRing_dl_l, NonRing_class_num, NonRing_rg)
                     images = np.concatenate((images, no_ring_image))
                     targets = targets + no_ring_target
                 else:
