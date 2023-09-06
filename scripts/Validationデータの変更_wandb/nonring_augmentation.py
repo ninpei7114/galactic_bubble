@@ -39,7 +39,7 @@ def nonring_augmentation(iter_noring_list, NonRing_class_num, NonRing_rg):
                 non_ring_image.append(augmentation_func(data, flag))
                 non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
         elif class_num == 1:
-            for flag in NonRing_rg.choice(np.arange(5), 1, replace=False):
+            for flag in NonRing_rg.choice(np.arange(5), 2, replace=False):
                 non_ring_image.append(augmentation_func(data, flag))
                 non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
         elif class_num == 2:
@@ -51,13 +51,13 @@ def nonring_augmentation(iter_noring_list, NonRing_class_num, NonRing_rg):
         elif class_num == 4:
             pass
         elif class_num == 5:
+            pass
+        elif class_num == 6:
             for flag in NonRing_rg.choice(np.arange(5), 3, replace=False):
                 non_ring_image.append(augmentation_func(data, flag))
                 non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
-        elif class_num == 6:
-            pass
         elif class_num == 7:
-            for flag in NonRing_rg.choice(np.arange(5), 2, replace=False):
+            for flag in NonRing_rg.choice(np.arange(5), 1, replace=False):
                 non_ring_image.append(augmentation_func(data, flag))
                 non_ring_label.extend([torch.tensor([]) for i in range(data.shape[0])])
 

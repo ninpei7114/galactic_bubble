@@ -121,13 +121,9 @@ def make_training_ring_dataloader(Training_data_path, args):
         pin_memory=True,
     )
 
-    return dl_ring_train
-
-
-def make_training_nonring_dataloader(Training_data_path, args):
     ## Training NonRing の Dataloader を作成
     NonRing_tar_path = sorted(glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"))
-    NonRing_rsample = [0.02, 0.03, 0.04, 0.02, 0.04, 0.02, 0.03]
+    NonRing_rsample = [0.03, 0.03, 0.06, 0.08, 0.04, 0.02, 0.05]
     NonRing_web_list = [
         webdataset.WebDataset(Nonring_tar_path)
         .rsample(rsample)
@@ -144,7 +140,7 @@ def make_training_nonring_dataloader(Training_data_path, args):
         for nr_w_l in NonRing_web_list
     ]
 
-    return [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
+    return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
 
 
 def make_validatoin_dataloader(Validation_data_path, args):

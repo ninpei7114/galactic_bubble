@@ -90,7 +90,7 @@ class make_training_val_data:
         os.makedirs(self.save_data_path, exist_ok=True)
         os.makedirs(self.args.savedir_path + "".join("dataset"), exist_ok=True)
 
-    def make_training_ring_data(self, train_cfg, epoch):
+    def make_training_data(self, train_cfg, epoch):
         """Trainingデータを作成する関数。
 
         Params:
@@ -101,18 +101,12 @@ class make_training_val_data:
         os.makedirs(self.save_data_path + "/train", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/ring", exist_ok=True)
         os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
-
-        make_ring(self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch, self.save_data_path)
-        with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_ring.tar", "w:gz") as tar:
-            tar.add(f"{self.save_data_path}/train/ring")
-
-        return self.save_data_path
-
-    def make_training_nonring_data(self):
         ## NonRingのクラスの内、使用しないクラスは除外する
         NonRing_class_num = np.delete(np.arange(self.args.NonRing_class_num), self.args.NonRing_remove_class_list)
         for cl in NonRing_class_num:
             os.makedirs(f"{self.save_data_path}/train/nonring/class{cl}", exist_ok=True)
+
+        make_ring(self.augmentation_name, train_cfg, self.args, self.train_l, self.Data_rg, epoch, self.save_data_path)
 
         ########################################
         ## Trainingに用いるNon-Ringデータをコピー ##
@@ -139,6 +133,9 @@ class make_training_val_data:
                 shutil.copyfile(
                     i[:-3] + "json", "%s/train/nonring/%s" % (self.save_data_path, i.split("/")[-1][:-3] + "json")
                 )
+
+        with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_ring.tar", "w:gz") as tar:
+            tar.add(f"{self.save_data_path}/train/ring")
 
         for cl in NonRing_class_num:
             with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_nonring_class{cl}.tar", "w:gz") as tar:
