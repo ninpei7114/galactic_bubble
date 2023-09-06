@@ -43,8 +43,8 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     save_training_val_loss = management_loss()
     logs, f1_score_val_l = [], []
     wandb.init(
-        project="Validationデータの変更とNonringのaugmentation",
-        name=augmentation_name.split("/")[-1],
+        project=args.wandb_project,
+        name=f"リング選定 : {args.ring_select}",
         config={
             "learning_rate": args.lr,
             "weight_decay": args.weight_decay,

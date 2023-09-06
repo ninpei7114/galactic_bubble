@@ -51,6 +51,8 @@ def parse_args():
     parser.add_argument("--weight_decay", type=float, default=0.001)
     parser.add_argument("--l18_infer", action="store_true")
     parser.add_argument("--ring_select", action="store_true")
+    parser.add_argument("--wandb_project", type=str, default="リングの選定")
+    # parser.add_argument("--wandb_name", type=str, default="リングの選定")
 
     return parser.parse_args()
 
