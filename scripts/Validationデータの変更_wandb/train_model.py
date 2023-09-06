@@ -34,7 +34,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         train_cfg (dictionary)  : augmentationのパラメータ
         device (torch.device)   : GPU or CPU
     """
-    NonRing_class_num = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
+    NonRing_class = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
     NonRing_rg = default_rng(args.fits_random_state)
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
@@ -48,7 +48,6 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         config={
             "learning_rate": args.lr,
             "weight_decay": args.weight_decay,
-            "augmentation_ratio": args.augmentation_ratio,
             "fits_index": args.fits_index,
             "n_splits": args.n_splits,
             "fits_random_state": args.fits_random_state,
@@ -62,7 +61,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     Make_data = make_training_val_data(augmentation_name, f_log, args)
     Validation_data_path, Val_num = Make_data.make_validation_data()
     dl_val = make_validatoin_dataloader(Validation_data_path, args)
-    Make_data.make_training_nonring_data()
+    NonRing_num_l = Make_data.make_training_nonring_data()
     all_iter_val = int(int(Val_num) / args.Val_mini_batch)
 
     for epoch in range(num_epochs):
@@ -76,10 +75,10 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ########################
         # png形式のRing画像とjson形式のlabelを作成
         Training_data_path = Make_data.make_training_ring_data(train_cfg, epoch)
-        # Training Ring の Dataloader を作成
-        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args)
-        dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
         train_Ring_num = Make_data.data_logger()
+        # Training Ring の Dataloader を作成
+        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, train_Ring_num, args, NonRing_num_l)
+        dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
         all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
 
         #############
@@ -100,9 +99,9 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             for _ in dataloaders_dict[phase]:
                 if phase == "train":
                     images, targets = _[0], _[1]
-                    no_ring_image, no_ring_target = nonring_augmentation(NonRing_dl_l, NonRing_class_num, NonRing_rg)
-                    images = np.concatenate((images, no_ring_image))
-                    targets = targets + no_ring_target
+                    noring_image, noring_target = nonring_augmentation(NonRing_dl_l, NonRing_class, NonRing_rg, args)
+                    images = np.concatenate((images, noring_image))
+                    targets = targets + noring_target
                 else:
                     images, targets, offset, region_info = _[0], _[1], _[2], _[3]
 
@@ -167,7 +166,6 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
 
         # データの削除
         os.remove(f"{Training_data_path}/bubble_dataset_train_ring.tar")
-
         shutil.rmtree(args.savedir_path + "".join("dataset") + "/" + augmentation_name.split("/")[-1] + "/train")
 
     ## lossの推移を描画する
