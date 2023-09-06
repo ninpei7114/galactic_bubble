@@ -219,6 +219,9 @@ def catalogue(choice, args):
         CH = pd.concat([bub_2006_change, bub_2007_change])
         CH["CH"] = CH.index
         if args.ring_select:
+            print("#######################")
+            print("   Ring selection")
+            print("#######################")
             rank_2_3 = np.load("rank_2_3.npy")
             CH = CH.loc[rank_2_3]
         return CH
