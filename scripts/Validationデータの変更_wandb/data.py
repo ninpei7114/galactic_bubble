@@ -104,7 +104,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
         return self.true_size + self.sample_negative_size
 
 
-def make_training_ring_dataloader(Training_data_path, args):
+def make_training_dataloader(Training_data_path, args):
     ## Training Ring の Dataloader を作成
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
