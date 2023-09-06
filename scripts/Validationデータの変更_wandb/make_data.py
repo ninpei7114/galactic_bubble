@@ -117,31 +117,35 @@ class make_training_val_data:
         ########################################
         ## Trainingに用いるNon-Ringデータをコピー ##
         ########################################
-        if self.args.region_suffle:
-            ## 領域ごとのNonRingをcopyする。
-            for cl in NonRing_class_num:
-                ## Non-RingのクラスごとにNonRingをコピーしていく
-                NonRing_path = []
-                _ = [glob.glob(f"{self.args.NonRing_data_path}/{i}/class{cl}/*.png") for i in self.train_l]
-                [NonRing_path.extend(i) for i in _]
-                for i, k in enumerate(NonRing_path):
-                    shutil.copyfile(k, f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.png")
-                    shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.json")
-        else:
-            ## デフォルトのNonRingをcopyする。
-            NonRing_origin = glob.glob("/workspace/NonRing_png/default_NonRing_png/train/*.png")
-            Choice_NonRing = self.Data_rg.choice(
-                NonRing_origin, int(self.train_data.shape[0]) * self.args.NonRing_ratio, replace=False
-            )
-            for i in Choice_NonRing:
-                shutil.copyfile(i, "%s/train/nonring/%s" % (self.save_data_path, i.split("/")[-1]))
-                shutil.copyfile(
-                    i[:-3] + "json", "%s/train/nonring/%s" % (self.save_data_path, i.split("/")[-1][:-3] + "json")
-                )
+        NonRing_num_list = []
+        # if self.args.region_suffle:
+        ## 領域ごとのNonRingをcopyする。
+        for cl in NonRing_class_num:
+            ## Non-RingのクラスごとにNonRingをコピーしていく
+            NonRing_path = []
+            _ = [glob.glob(f"{self.args.NonRing_data_path}/{i}/class{cl}/*.png") for i in self.train_l]
+            [NonRing_path.extend(i) for i in _]
+            NonRing_num_list.append(len(NonRing_path))
+            for i, k in enumerate(NonRing_path):
+                shutil.copyfile(k, f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.png")
+                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/train/nonring/class{cl}/NonRing_{i}.json")
+        # else:
+        #     ## デフォルトのNonRingをcopyする。
+        #     NonRing_origin = glob.glob("/workspace/NonRing_png/default_NonRing_png/train/*.png")
+        #     Choice_NonRing = self.Data_rg.choice(
+        #         NonRing_origin, int(self.train_data.shape[0]) * self.args.NonRing_ratio, replace=False
+        #     )
+        #     for i in Choice_NonRing:
+        #         shutil.copyfile(i, "%s/train/nonring/%s" % (self.save_data_path, i.split("/")[-1]))
+        #         shutil.copyfile(
+        #             i[:-3] + "json", "%s/train/nonring/%s" % (self.save_data_path, i.split("/")[-1][:-3] + "json")
+        #         )
 
         for cl in NonRing_class_num:
             with tarfile.open(f"{self.save_data_path}/bubble_dataset_train_nonring_class{cl}.tar", "w:gz") as tar:
                 tar.add(f"{self.save_data_path}/train/nonring/class{cl}")
+
+        return NonRing_num_list
 
     def make_validation_data(self):
         """Validationに用いるRing / NonRingをコピーする。
