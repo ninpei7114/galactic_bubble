@@ -28,31 +28,30 @@ def parse_args():
         help="NonRing data path",
         default="/workspace/NonRing_png/region_NonRing_png",
     )
-    parser.add_argument(
-        "--savedir_path",
-        metavar="DIR",
-        default="/workspace/weights/",
-        help="savedire path  (default: /workspace/weights/)",
-    )
+    parser.add_argument("--savedir_path", metavar="DIR", default="/workspace/weights/", help="savedire path")
+    # minibatch
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
     parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--Val_mini_batch", default=16, type=int, help="Validation mini-batch size (default: 16)")
-    parser.add_argument("--augmentation_ratio", default=1, type=int, help="1 Ring augmentation ratio (default: 1)")
     parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
     parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
+    # random seed
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
     parser.add_argument("--data_random_state", "-d", type=int, default=123)
-    parser.add_argument("--NonRing_class_num", type=int, default=8)
-    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
+    # 学習率
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
+    # option
     parser.add_argument("--l18_infer", action="store_true")
     parser.add_argument("--ring_select", action="store_true")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
-    # parser.add_argument("--wandb_name", type=str, default="リングの選定")
+    # NonRing
+    parser.add_argument("--NonRing_class_num", type=int, default=8)
+    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
+    parser.add_argument("--NonRing_aug_num", nargs="*", type=int, default=[5, 2, 1, 0, 0, 3, 1])
 
     return parser.parse_args()
 
@@ -62,9 +61,11 @@ def main(args):
     """SSDの学習を行う。
 
     :Example command:
-    >>> python /workspace/galactic_bubble/scripts/毎epochごとに学習データを作成する/train_main.py /dataset/spitzer_data/ \
-        --savedir_path /workspace/webdataset_weights//augmentationの数を決める/Change_region_123/augmentation_ratio_${i}/ \
-        --NonRing_ratio 1 --augmentation_ratio 1 -s -i 123 -n 3 -r 123
+    >>> python train_main.py /dataset/spitzer_data --savedir_path /workspace/webdataset_weights/Ring_selection_compare/ \
+        --NonRing_data_path /workspace/NonRing_png/region_NonRing_png/ \
+        --validation_data_path /workspace/cut_val_png/region_val_png/ \
+        -s -i 0 --NonRing_remove_class_list 3 --Ring_mini_batch 16 --NonRing_mini_batch 2 --Val_mini_batch 64 \
+        --l18_infer --ring_select
 
     """
     torch.manual_seed(args.fits_random_state)
