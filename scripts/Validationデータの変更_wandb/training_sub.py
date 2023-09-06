@@ -231,7 +231,7 @@ def calc_f1score_val(detections, position, regions, args):
         threthre (float): 0.3~0.8の数字
     """
     thresholds = [i / 20 for i in range(6, 16, 1)]
-    Ring_CATALOGUE = ring_augmentation.catalogue("MWP")
+    Ring_CATALOGUE = ring_augmentation.catalogue("MWP", args)
     F1_score = -10000
 
     for conf_thre in thresholds:

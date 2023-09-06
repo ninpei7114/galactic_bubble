@@ -104,7 +104,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
         return self.true_size + self.sample_negative_size
 
 
-def make_training_dataloader(Training_data_path, args):
+def make_training_ring_dataloader(Training_data_path, args):
     ## Training Ring の Dataloader を作成
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
@@ -121,6 +121,10 @@ def make_training_dataloader(Training_data_path, args):
         pin_memory=True,
     )
 
+    return dl_ring_train
+
+
+def make_training_nonring_dataloader(Training_data_path, args):
     ## Training NonRing の Dataloader を作成
     NonRing_tar_path = sorted(glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"))
     NonRing_rsample = [0.02, 0.03, 0.04, 0.02, 0.04, 0.02, 0.03]
@@ -140,7 +144,7 @@ def make_training_dataloader(Training_data_path, args):
         for nr_w_l in NonRing_web_list
     ]
 
-    return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
+    return [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
 
 
 def make_validatoin_dataloader(Validation_data_path, args):

@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import wandb
 
-from data import make_training_dataloader, make_validatoin_dataloader
+from data import make_training_ring_dataloader, make_training_nonring_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
 from make_figure import make_figure
 from nonring_augmentation import nonring_augmentation
@@ -62,6 +62,8 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     Make_data = make_training_val_data(augmentation_name, f_log, args)
     Validation_data_path, Val_num = Make_data.make_validation_data()
     dl_val = make_validatoin_dataloader(Validation_data_path, args)
+    Training_data_path = Make_data.make_training_nonring_data()
+    NonRing_dl_l = make_training_nonring_dataloader(Training_data_path, args)
     all_iter_val = int(int(Val_num) / args.Val_mini_batch)
 
     for epoch in range(num_epochs):
@@ -74,9 +76,9 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         ## Training dataの作成 ##
         ########################
         # png形式のRing画像とjson形式のlabelを作成
-        Training_data_path = Make_data.make_training_data(train_cfg, epoch)
+        Training_data_path = Make_data.make_training_ring_data(train_cfg, epoch)
         # Training Ring の Dataloader を作成
-        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, args)
+        dl_ring_train = make_training_ring_dataloader(Training_data_path, args)
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
         train_Ring_num = Make_data.data_logger()
         all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
@@ -166,8 +168,8 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
 
         # データの削除
         os.remove(f"{Training_data_path}/bubble_dataset_train_ring.tar")
-        for nonring_tar_path in glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"):
-            os.remove(nonring_tar_path)
+        # for nonring_tar_path in glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"):
+        #     os.remove(nonring_tar_path)
         shutil.rmtree(args.savedir_path + "".join("dataset") + "/" + augmentation_name.split("/")[-1] + "/train")
 
     ## lossの推移を描画する
