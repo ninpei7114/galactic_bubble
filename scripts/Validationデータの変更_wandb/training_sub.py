@@ -1,7 +1,7 @@
 import collections
+import time
 from itertools import product as product
 from math import sqrt as sqrt
-import time
 
 import astropy.io.fits
 import astropy.wcs
@@ -215,7 +215,7 @@ def calc_TP_FP_FN(mwp, infer):
 
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
-def calc_f1score_val(detections, position, regions, args):
+def calc_f1score_val(detections, position, regions, args, threshold=None):
     """f1scoreを計算する
 
     Args:
@@ -230,7 +230,10 @@ def calc_f1score_val(detections, position, regions, args):
         Recall (float): Recall
         threthre (float): 0.3~0.8の数字
     """
-    thresholds = [i / 20 for i in range(6, 16, 1)]
+    if threshold is None:
+        thresholds = [i / 20 for i in range(6, 16, 1)]
+    else:
+        thresholds = [threshold]
     Ring_CATALOGUE = ring_augmentation.catalogue("MWP", args)
     F1_score = -10000
 
