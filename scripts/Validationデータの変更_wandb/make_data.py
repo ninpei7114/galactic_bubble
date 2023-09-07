@@ -148,7 +148,7 @@ class make_training_val_data:
 
         return NonRing_num_list
 
-    def make_validation_data(self):
+    def make_validation_data(self, val_size):
         """Validationに用いるRing / NonRingをコピーする。
 
         Params:
@@ -163,7 +163,7 @@ class make_training_val_data:
             ## Ringデータをコピーする。
             Val_origin = []
             for i in self.val_l:
-                for size in [150, 300, 600, 900, 1200, 1800, 2500, 3000]:
+                for size in val_size:
                     a = glob.glob(f"{self.args.validation_data_path}/{i}/*/*_{size}_*.png")
                     Val_origin.extend(a)
 
