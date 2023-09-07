@@ -9,7 +9,6 @@ from numpy.random import default_rng
 import pandas as pd
 import torch
 import torch.nn as nn
-import wandb
 
 from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
@@ -17,10 +16,11 @@ from make_figure import make_figure
 from nonring_augmentation import nonring_augmentation
 from training_sub import EarlyStopping_f1_score, calc_f1score_val, management_loss, print_and_log, write_train_log
 from utils.ssd_model import Detect
-import l18_infer
 
 
-def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device):
+def train_model(
+    net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device, run, val_size
+):
     """モデルの学習を実行する関数
 
     Args:
@@ -42,24 +42,12 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.3)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
     save_training_val_loss = management_loss()
     logs, f1_score_val_l = [], []
-    wandb.init(
-        project=args.wandb_project,
-        name=f"リング選定 : {args.ring_select}",
-        config={
-            "learning_rate": args.lr,
-            "weight_decay": args.weight_decay,
-            "fits_index": args.fits_index,
-            "n_splits": args.n_splits,
-            "fits_random_state": args.fits_random_state,
-        },
-    )
-    wandb.watch(net, log_freq=100)
 
     ##########################
     ## Validation dataの作成 ##
     ##########################
     Make_data = make_training_val_data(augmentation_name, f_log, args)
-    Validation_data_path, Val_num = Make_data.make_validation_data()
+    Validation_data_path, Val_num = Make_data.make_validation_data(val_size)
     dl_val = make_validatoin_dataloader(Validation_data_path, args)
     NonRing_num_l = Make_data.make_training_nonring_data()
     all_iter_val = int(int(Val_num) / args.Val_mini_batch)
@@ -77,7 +65,9 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         Training_data_path = Make_data.make_training_ring_data(train_cfg, epoch)
         train_Ring_num = Make_data.data_logger()
         # Training Ring の Dataloader を作成
-        dl_ring_train, NonRing_dl_l = make_training_dataloader(Training_data_path, train_Ring_num, args, NonRing_num_l)
+        dl_ring_train, dl_nonring = make_training_dataloader(
+            Training_data_path, train_Ring_num, args, NonRing_num_l, NonRing_class
+        )
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
         all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
 
@@ -99,7 +89,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
             for _ in dataloaders_dict[phase]:
                 if phase == "train":
                     images, targets = _[0], _[1]
-                    noring_image, noring_target = nonring_augmentation(NonRing_dl_l, NonRing_class, NonRing_rg, args)
+                    noring_image, noring_target = nonring_augmentation(dl_nonring, NonRing_class, NonRing_rg, args)
                     images = np.concatenate((images, noring_image))
                     targets = targets + noring_target
                 else:
@@ -150,7 +140,7 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         log_epoch = write_train_log(
             f_log, epoch, loss_train, loss_val, f1_score_val, precision, recall, conf_threshold_val, start_time
         )
-        wandb.log(log_epoch)
+        run.log(log_epoch)
         logs.append(log_epoch)
         df = pd.DataFrame(logs)
         df.to_csv(augmentation_name + "/log_output.csv")
@@ -158,9 +148,6 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
         # early_stopping(epoch_val_loss, net)
         early_stopping(f1_score_val, net, epoch, optimizer, loss_train, loss_val)
         if early_stopping.early_stop:
-            artifact = wandb.Artifact("model", type="model")
-            artifact.add_file(augmentation_name + "/earlystopping.pth")
-            wandb.log_artifact(artifact, aliases=["latest", "best"])
             print_and_log(f_log, "Early_Stopping")
             break
 
@@ -171,20 +158,3 @@ def train_model(net, criterion, optimizer, num_epochs, f_log, augmentation_name,
     ## lossの推移を描画する
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
     make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f1_score_val)
-
-    # l18領域の推論
-    if args.l18_infer:
-        f1_score, pre, re, conf_thre = l18_infer.infer_l18(augmentation_name, args)
-        print_and_log(
-            f_log,
-            [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
-        )
-        wandb.run.summary["l18_f1_score"] = f1_score
-        wandb.run.summary["l18_precision"] = pre
-        wandb.run.summary["l18_recall"] = re
-        wandb.run.summary["l18_conf_threshold"] = conf_thre
-    else:
-        pass
-
-    wandb.alert(title="学習が終了しました", text="学習が終了しました")
-    wandb.finish()
