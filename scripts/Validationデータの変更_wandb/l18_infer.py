@@ -1,19 +1,18 @@
-import os
 import glob
+import os
+import shutil
+import tarfile
 
 import numpy as np
 import torch
-import tarfile
-import shutil
 import webdataset
 
-from utils.ssd_model import Detect
-from utils.ssd_model import SSD
-from data import preprocess_validation, od_collate_fn_validation
+from data import od_collate_fn_validation, preprocess_validation
 from training_sub import calc_f1score_val
+from utils.ssd_model import SSD, Detect
 
 
-def infer_l18(model_path, args, val_size):
+def infer_l18(model_path, args, val_size, val_best_confthre):
     """l18の推論を行う関数
 
     Args:
@@ -88,7 +87,7 @@ def infer_l18(model_path, args, val_size):
             regions.extend(region_info)
 
     f1_score, precision, recall, conf_threshold = calc_f1score_val(
-        np.concatenate(result), np.array(position), regions, args
+        np.concatenate(result), np.array(position), regions, args, threshold=val_best_confthre
     )
 
     return f1_score, precision, recall, conf_threshold
