@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import sys
 
@@ -7,13 +6,12 @@ import astropy.io.fits
 import astropy.wcs
 import numpy as np
 import pandas as pd
-from PIL import Image
 from tqdm import tqdm
 
 sys.path.append("../")
+import select_catalogue
 import label_caliculator
 import processing
-import select_catalogue
 
 """
 example command:
