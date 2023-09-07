@@ -126,7 +126,6 @@ def main(args):
                 "fits_random_state": args.fits_random_state,
             },
         )
-        wandb.watch(net, log_freq=100)
 
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print_and_log(f_log, f"使用デバイス： {device}")
@@ -136,6 +135,7 @@ def main(args):
         for net_sub in [net.vgg, net.extras, net.loc, net.conf]:
             net_sub.apply(weights_init)
         net.to(device)
+        wandb.watch(net, log_freq=100)
 
         train_model_params = {
             "net": net,
