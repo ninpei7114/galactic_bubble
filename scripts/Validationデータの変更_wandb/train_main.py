@@ -100,7 +100,6 @@ def main(args):
             "#######################",
             "   args parameters",
             "#######################",
-            f"augmentation_ratio: {args.augmentation_ratio}",
             f"region shuffle: {args.region_suffle}",
             f"fits_index: {args.fits_index}",
             f"n_splits: {args.n_splits}",
