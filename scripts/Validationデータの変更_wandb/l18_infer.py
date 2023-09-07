@@ -13,7 +13,7 @@ from data import preprocess_validation, od_collate_fn_validation
 from training_sub import calc_f1score_val
 
 
-def infer_l18(model_path, args):
+def infer_l18(model_path, args, val_size):
     """l18の推論を行う関数
 
     Args:
@@ -38,7 +38,9 @@ def infer_l18(model_path, args):
     if os.path.exists(f"{save_data_path}/bubble_dataset_l18.tar"):
         pass
     else:
-        l18_path = glob.glob(f"{args.validation_data_path}/spitzer_01800+0000_rgb/*/*.png")
+        l18_path = []
+        for size in val_size:
+            l18_path.append(glob.glob(f"{args.validation_data_path}/spitzer_01800+0000_rgb/*/*_{size}_*.png"))
         for k in l18_path:
             shutil.copyfile(k, f"{save_data_path}/l18/{k.split('/')[-1][:-4]}.png")
             shutil.copyfile(k[:-3] + "json", f"{save_data_path}/l18/{k.split('/')[-1][:-4]}.json")
