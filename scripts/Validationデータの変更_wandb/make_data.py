@@ -4,12 +4,12 @@ import os
 import shutil
 import tarfile
 
-from numpy.random import default_rng
 import numpy as np
+from numpy.random import default_rng
 from sklearn.model_selection import ShuffleSplit
-from training_sub import print_and_log
 
 from make_Ring_data import make_ring
+from training_sub import print_and_log
 
 
 class make_training_val_data:
