@@ -5,15 +5,15 @@ from itertools import product as product
 from math import sqrt as sqrt
 
 import numpy as np
-from PIL import ImageFile
 import torch
 import torch.optim as optim
 import wandb
+from PIL import ImageFile
 
+import l18_infer
 from train_model import train_model
 from training_sub import print_and_log, weights_init
 from utils.ssd_model import SSD, MultiBoxLoss
-import l18_infer
 
 
 def parse_args():
@@ -161,7 +161,7 @@ def main(args):
         ####################
         ## Training Model ##
         ####################
-        train_model(**train_model_params)
+        val_best_confthre = train_model(**train_model_params)
 
         artifact = wandb.Artifact("model", type="model")
         artifact.add_dir(name)
@@ -170,7 +170,7 @@ def main(args):
 
         # l18領域の推論
         if args.l18_infer:
-            f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args, default_val_size)
+            f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
                 [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
