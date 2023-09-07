@@ -182,8 +182,8 @@ def main(args):
         else:
             pass
 
-        wandb.alert(title="学習が終了しました", text="学習が終了しました")
-        wandb.finish()
+        run.alert(title="学習が終了しました", text="学習が終了しました")
+        run.finish()
 
 
 if __name__ == "__main__":
