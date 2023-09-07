@@ -7,8 +7,8 @@ import astropy.io.fits
 import astropy.wcs
 import numpy as np
 import pandas as pd
-from PIL import Image
 import tqdm
+from PIL import Image
 
 import label_caliculator
 import processing
