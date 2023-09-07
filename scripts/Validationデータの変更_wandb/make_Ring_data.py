@@ -97,74 +97,58 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                     #######################
                     ## Ring augmentation ##
                     #######################
-                    for _ in range(args.augmentation_ratio):
-                        label_cal_for_trans = label_caliculator.label_caliculator(choice_catalogue, w)
-                        label_cal_for_trans.all_star(Ring_catalogue)
-                        trans_params = {
-                            "row": row,
-                            "fits_path": fits_path,
-                            "GLON_min": GLON_min,
-                            "GLON_max": GLON_max,
-                            "GLAT_min": GLAT_min,
-                            "GLAT_max": GLAT_max,
-                            "Ring_catalogue": Ring_catalogue,
-                            "data": data,
-                            "label_cal": label_cal_for_trans,
-                            "trans_rg": trans_rng,
-                        }
+                    # for _ in range(args.augmentation_ratio):
+                    label_cal_for_trans = label_caliculator.label_caliculator(choice_catalogue, w)
+                    label_cal_for_trans.all_star(Ring_catalogue)
+                    trans_params = {
+                        "row": row,
+                        "fits_path": fits_path,
+                        "GLON_min": GLON_min,
+                        "GLON_max": GLON_max,
+                        "GLAT_min": GLAT_min,
+                        "GLAT_max": GLAT_max,
+                        "Ring_catalogue": Ring_catalogue,
+                        "data": data,
+                        "label_cal": label_cal_for_trans,
+                        "trans_rg": trans_rng,
+                    }
 
-                        ###### 並行移動 ######
+                    ###### 並行移動 ######
+                    if translation:
+                        fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
+                        ## データやlabelの作成に不備があれば、fl=False(例えば、xmin<0や、xmin=xmaxなど)
+                        ## 問題がなければ、fl=True
+                        if fl:
+                            trans_data_ = trans_data.copy()
+                            count = make_png_and_json(
+                                save_data_path, count, processing.norm_res(trans_data_), trans_info
+                            )
+                            frame_mwp_train.append(trans_info)
+                    ###### 回転 ######
+                    if rot:
                         if translation:
-                            fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
-                            ## データやlabelの作成に不備があれば、fl=False(例えば、xmin<0や、xmin=xmaxなど)
-                            ## 問題がなければ、fl=True
                             if fl:
-                                trans_data_ = trans_data.copy()
-                                count = make_png_and_json(
-                                    save_data_path, count, processing.norm_res(trans_data_), trans_info
-                                )
-                                frame_mwp_train.append(trans_info)
-                        ###### 回転 ######
-                        if rot:
-                            if translation:
-                                if fl:
-                                    for deg in [90, 180, 270]:
-                                        rot_data, rotate_info = ring_augmentation.rotate_data(
-                                            deg, trans_data, trans_info
-                                        )
-                                        count = make_png_and_json(
-                                            save_data_path, count, processing.norm_res(rot_data), rotate_info
-                                        )
-                                        frame_mwp_train.append(rotate_info)
-                                else:
-                                    pass
-                            else:
                                 for deg in [90, 180, 270]:
-                                    rot_data, rotate_info = ring_augmentation.rotate_data(deg, res_data, info)
+                                    rot_data, rotate_info = ring_augmentation.rotate_data(deg, trans_data, trans_info)
                                     count = make_png_and_json(
                                         save_data_path, count, processing.norm_res(rot_data), rotate_info
                                     )
                                     frame_mwp_train.append(rotate_info)
-                        ###### 上下反転 ######
-                        if flip:
-                            if translation:
-                                if fl:
-                                    ud_res_data, lr_res_data, ud_info, lr_info = ring_augmentation.flip_data(
-                                        trans_data, trans_info
-                                    )
-                                    count = make_png_and_json(
-                                        save_data_path, count, processing.norm_res(ud_res_data), ud_info
-                                    )
-                                    count = make_png_and_json(
-                                        save_data_path, count, processing.norm_res(lr_res_data), lr_info
-                                    )
-                                    frame_mwp_train.append(lr_info)
-                                    frame_mwp_train.append(ud_info)
-                                else:
-                                    pass
                             else:
+                                pass
+                        else:
+                            for deg in [90, 180, 270]:
+                                rot_data, rotate_info = ring_augmentation.rotate_data(deg, res_data, info)
+                                count = make_png_and_json(
+                                    save_data_path, count, processing.norm_res(rot_data), rotate_info
+                                )
+                                frame_mwp_train.append(rotate_info)
+                    ###### 上下反転 ######
+                    if flip:
+                        if translation:
+                            if fl:
                                 ud_res_data, lr_res_data, ud_info, lr_info = ring_augmentation.flip_data(
-                                    res_data, info
+                                    trans_data, trans_info
                                 )
                                 count = make_png_and_json(
                                     save_data_path, count, processing.norm_res(ud_res_data), ud_info
@@ -174,6 +158,14 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 )
                                 frame_mwp_train.append(lr_info)
                                 frame_mwp_train.append(ud_info)
+                            else:
+                                pass
+                        else:
+                            ud_res_data, lr_res_data, ud_info, lr_info = ring_augmentation.flip_data(res_data, info)
+                            count = make_png_and_json(save_data_path, count, processing.norm_res(ud_res_data), ud_info)
+                            count = make_png_and_json(save_data_path, count, processing.norm_res(lr_res_data), lr_info)
+                            frame_mwp_train.append(lr_info)
+                            frame_mwp_train.append(ud_info)
 
     ##################################
     ## 学習に用いるリングのpdf画像を作成 ##
