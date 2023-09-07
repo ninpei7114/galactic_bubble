@@ -78,7 +78,7 @@ def main(args):
     print("Clustering")
 
     features_list = []
-    batch = np.linspace(0, data.shape[0], int(data.shape[0] / 32))
+    batch = np.linspace(0, data.shape[0], 3000)
     ## データをモデルに入力する
     for i in tqdm.tqdm(range(len(batch) - 1)):
         x = data[int(batch[i]) : int(batch[i + 1])]
