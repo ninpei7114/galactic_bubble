@@ -1,14 +1,13 @@
-import glob
 import os
 import shutil
 import time
 from itertools import product as product
 
 import numpy as np
-from numpy.random import default_rng
 import pandas as pd
 import torch
 import torch.nn as nn
+from numpy.random import default_rng
 
 from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
@@ -158,3 +157,5 @@ def train_model(
     ## lossの推移を描画する
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
     make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f1_score_val)
+
+    return df.iloc[df["val_f1_score"].idxmax()]["val_conf_threshold"]  # Valのf1_scoreが最大の時のconf_thresholdを返す
