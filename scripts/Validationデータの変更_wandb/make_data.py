@@ -108,6 +108,7 @@ class make_training_val_data:
         return self.save_data_path
 
     def make_training_nonring_data(self):
+        print("MAKE NONRING DATA ...")
         os.makedirs(self.save_data_path + "/train/nonring", exist_ok=True)
         ## NonRingのクラスの内、使用しないクラスは除外する
         NonRing_class_num = np.delete(np.arange(self.args.NonRing_class_num), self.args.NonRing_remove_class_list)
@@ -157,6 +158,7 @@ class make_training_val_data:
         ## ********* 各領域ごとに *********
         if self.args.region_suffle:
             os.makedirs(f"{self.save_data_path}/val", exist_ok=True)
+            print("MAKE VALITDATION DATA ...")
 
             ## Ringデータをコピーする。
             Val_origin = []
