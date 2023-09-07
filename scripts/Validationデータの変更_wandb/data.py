@@ -104,7 +104,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
         return self.true_size + self.sample_negative_size
 
 
-def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonring_num):
+def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonring_num, NonRing_class):
     ## Training Ring の Dataloader を作成
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
@@ -122,18 +122,17 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
     )
 
     ## Training NonRing の Dataloader を作成
-    NonRing_tar_path = sorted(glob.glob(f"{Training_data_path}/bubble_dataset_train_nonring_class*.tar"))
-    nonring_num = train_Ring_num // len(NonRing_tar_path)
+    nonring_num = train_Ring_num // len(NonRing_class)
     aug_num = np.array(args.NonRing_aug_num) + 1
     NonRing_rsample = [round(nonring_num / e / a, 2) for e, a in zip(each_nonring_num, aug_num)]
     NonRing_web_list = [
-        webdataset.WebDataset(Nonring_tar_path)
+        webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_nonring_class{cl}.tar")
         .rsample(rsample)
         .shuffle(10000000000)
         .decode("pil")
         .to_tuple("png", "json")
         .map(preprocess)
-        for rsample, Nonring_tar_path in zip(NonRing_rsample, NonRing_tar_path)
+        for rsample, cl in zip(NonRing_rsample, NonRing_class)
     ]
     NonRing_dl_l = [
         torch.utils.data.DataLoader(
