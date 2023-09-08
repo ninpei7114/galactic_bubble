@@ -215,7 +215,7 @@ def calc_TP_FP_FN(mwp, infer):
 
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
-def calc_f1score_val(detections, position, regions, args, threshold=None):
+def calc_f1score_val(detections, position, regions, args, threshold=None, save=False, save_path=None):
     """f1scoreを計算する
 
     Args:
@@ -223,6 +223,9 @@ def calc_f1score_val(detections, position, regions, args, threshold=None):
         position (numpy array): 画像を切り出した際のpixel座標
         regions (list): どのfitsファイルかを示すstrのlist
         args (args): argparseの引数
+        threshold (float, optional): 0.3~0.8の数字. Defaults to None.
+        save (bool, optional): Trueにすると推論結果を保存する. Defaults to False.
+        save_path (str, optional): 推論結果を保存するパス. Defaults to None.
 
     Returns:
         F1_score (float): f1score
@@ -250,8 +253,8 @@ def calc_f1score_val(detections, position, regions, args, threshold=None):
             region_dict[w][0].append(p)
             region_dict[w][1].append(s)
 
-        mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
-        _, FP, mwp_mask = calc_TP_FP_FN(mwp, catalogue)
+        mwp, catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
+        _, FP, mwp_mask = calc_TP_FP_FN(mwp, catalogue_)
 
         TP = mwp_mask.count(True)
         FN = mwp_mask.count(False)
@@ -265,7 +268,10 @@ def calc_f1score_val(detections, position, regions, args, threshold=None):
             threthre = conf_thre
             Precision = Precision_
             Recall = Recall_
+            catalogue = catalogue_
 
+    if save:
+        catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
     return F1_score, Precision, Recall, threthre
 
 

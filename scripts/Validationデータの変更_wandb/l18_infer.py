@@ -35,17 +35,17 @@ def infer_l18(model_path, args, val_size, val_best_confthre):
     ## データの作成 ##
     ################
     if os.path.exists(f"{save_data_path}/bubble_dataset_l18.tar"):
-        pass
-    else:
-        l18_path = []
-        for size in val_size:
-            l18_path.append(glob.glob(f"{args.validation_data_path}/spitzer_01800+0000_rgb/*/*_{size}_*.png"))
-        for k in l18_path:
-            shutil.copyfile(k, f"{save_data_path}/l18/{k.split('/')[-1][:-4]}.png")
-            shutil.copyfile(k[:-3] + "json", f"{save_data_path}/l18/{k.split('/')[-1][:-4]}.json")
+        os.remove(f"{save_data_path}/bubble_dataset_l18.tar")
 
-        with tarfile.open(f"{save_data_path}/bubble_dataset_l18.tar", "w:gz") as tar:
-            tar.add(f"{save_data_path}/l18")
+    l18_path = []
+    for size in val_size:
+        l18_path.extend(glob.glob(f"{args.validation_data_path}/spitzer_01800+0000_rgb/*/*_{size}_*.png"))
+    for k in l18_path:
+        shutil.copyfile(k, f"{save_data_path}/l18/{k.split('/')[-1][:-4]}.png")
+        shutil.copyfile(k[:-3] + "json", f"{save_data_path}/l18/{k.split('/')[-1][:-4]}.json")
+
+    with tarfile.open(f"{save_data_path}/bubble_dataset_l18.tar", "w:gz") as tar:
+        tar.add(f"{save_data_path}/l18")
 
     Dataset_l18 = (
         webdataset.WebDataset(f"{save_data_path}/bubble_dataset_l18.tar")
@@ -87,7 +87,13 @@ def infer_l18(model_path, args, val_size, val_best_confthre):
             regions.extend(region_info)
 
     f1_score, precision, recall, conf_threshold = calc_f1score_val(
-        np.concatenate(result), np.array(position), regions, args, threshold=val_best_confthre
+        np.concatenate(result),
+        np.array(position),
+        regions,
+        args,
+        threshold=val_best_confthre,
+        save=True,
+        save_path=model_path,
     )
 
     return f1_score, precision, recall, conf_threshold
