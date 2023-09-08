@@ -1,6 +1,7 @@
 import argparse
 import itertools
 import os
+import shutil
 from itertools import product as product
 from math import sqrt as sqrt
 
@@ -51,6 +52,7 @@ def parse_args():
     parser.add_argument("--l18_infer", action="store_true")
     parser.add_argument("--ring_select", action="store_true")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
+    parser.add_argument("--wandb_name", type=str, default="search_validation_size")
     # NonRing
     parser.add_argument("--NonRing_class_num", type=int, default=8)
     parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[6])
@@ -117,13 +119,17 @@ def main(args):
         print_and_log(f_log, log_list)
         run = wandb.init(
             project=args.wandb_project,
-            name=f"リング選定 : {args.ring_select}",
+            name=args.wandb_name,
             config={
                 "learning_rate": args.lr,
                 "weight_decay": args.weight_decay,
                 "fits_index": args.fits_index,
                 "n_splits": args.n_splits,
                 "fits_random_state": args.fits_random_state,
+                "data_random_state": args.data_random_state,
+                "Ring_mini_batch": args.Ring_mini_batch,
+                "NonRing_mini_batch": args.NonRing_mini_batch,
+                "NonRing_remove_class_list": args.NonRing_remove_class_list,
             },
         )
 
@@ -184,6 +190,9 @@ def main(args):
 
         run.alert(title="学習が終了しました", text="学習が終了しました")
         run.finish()
+
+        shutil.rmtree(args.savedir_path)
+        os.makedirs(args.savedir_path, exist_ok=True)
 
 
 if __name__ == "__main__":
