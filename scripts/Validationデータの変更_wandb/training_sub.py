@@ -317,11 +317,11 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
             region_dict[w][1].append(s)
 
         mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
-        _, FP, mwp_mask = calc_TP_FP_FN(mwp, catalogue)
+        _, FP_, mwp_mask = calc_TP_FP_FN(mwp, catalogue)
 
         TP = mwp_mask.count(True)
         FN = mwp_mask.count(False)
-        FP = len(FP)
+        FP = len(FP_)
         Precision_ = TP / (TP + FP)
         Recall_ = TP / (TP + FN)
         F1_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_)
@@ -334,9 +334,9 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
 
     if save:
         catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
-        imaging_infer_result(args, mwp[TP], save_path + "/l18_TP.png")
-        imaging_infer_result(args, mwp[FN], save_path + "/l18_FN.png")
-        imaging_infer_result(args, FP, save_path + "/l18_FP.png")
+        imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png")
+        imaging_infer_result(args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png")
+        imaging_infer_result(args, FP_, save_path + "/l18_FP.png")
     return F1_score, Precision, Recall, threthre
 
 
