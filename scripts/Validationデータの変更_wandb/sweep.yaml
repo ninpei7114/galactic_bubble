@@ -10,3 +10,16 @@ parameters:
   weight_decay:
     min: 1e-10
     max: 1e-3
+  fits_random_state:
+    min: 0
+    max: 300
+  data_random_state:
+    min: 0
+    max: 300
+  fits_index:
+    min: 0
+    max: 7
+  Ring_mini_batch:
+    values: [16, 32, 64, 96, 128]
+  NonRing_mini_batch:
+    values: [16, 32, 64, 96, 128]
