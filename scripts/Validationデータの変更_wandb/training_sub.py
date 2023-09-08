@@ -1,4 +1,5 @@
 import collections
+import copy
 import time
 from itertools import product as product
 from math import sqrt as sqrt
@@ -13,6 +14,7 @@ import torch.nn.init as init
 
 import ring_augmentation
 from utils.ssd_model import nm_suppression
+from processing import remove_nan, conv, norm_res, data_view_rectangl
 
 
 class EarlyStopping_f1_score:
@@ -214,6 +216,67 @@ def calc_TP_FP_FN(mwp, infer):
     return TP, FP, mwp_mask
 
 
+def imaging_infer_result(args, frame, save_name):
+    """推論結果を保存する関数
+
+    Args:
+        args (args): argparseの引数
+        frame (pandas dataframe): 推論結果
+        save_name (str): 保存するファイル名
+
+    """
+    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
+    data_list = []
+    data_fits_R = args.spitzer_path + "/spitzer_01800+0000_rgb/r.fits"  ##2D
+    data_fits_G = args.spitzer_path + "/spitzer_01800+0000_rgb/g.fits"  ##2D
+    data_fits_B = args.spitzer_path + "/spitzer_01800+0000_rgb/b.fits"
+
+    spitzer_g = astropy.io.fits.open(data_fits_G)[0]
+    w = astropy.wcs.WCS(spitzer_g.header)
+    data = np.concatenate(
+        [
+            remove_nan(astropy.io.fits.getdata(data_fits_R)[:, :, None]),
+            remove_nan(astropy.io.fits.getdata(data_fits_G)[:, :, None]),
+            remove_nan(astropy.io.fits.getdata(data_fits_B)[:, :, None]),
+        ],
+        axis=2,
+    )
+
+    for _, row in frame.iterrows():
+        l_center = row["GLON"]
+        b_center = row["GLAT"]
+        x_center, y_center = w.all_world2pix(l_center, b_center, 0)
+        x_min = int(x_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+        x_max = int(x_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+        y_min = int(y_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+        y_max = int(y_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+
+        width = x_max - x_min
+        height = y_max - y_min
+        x_pix_min = x_min - width / 50
+        y_pix_min = y_min - height / 50
+        x_pix_max = x_max + width / 50
+        y_pix_max = y_max + height / 50
+
+        if x_pix_min <= 0 or y_pix_min <= 0:
+            pass
+        else:
+            c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
+            cut_data = copy.deepcopy(c_data)
+            pi = conv(300, sig1, cut_data)
+            r_shape_y = pi.shape[0]
+            r_shape_x = pi.shape[1]
+            res_data = pi[
+                int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
+            ]
+            res_data = norm_res(res_data)
+            data_list.append(res_data)
+
+    data_list = np.uint8(np.array(data_list) * 255)
+    data_list[:, :, :, 2] = 0
+    data_view_rectangl(10, data_list).save(save_name)
+
+
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
 def calc_f1score_val(detections, position, regions, args, threshold=None, save=False, save_path=None):
     """f1scoreを計算する
@@ -253,8 +316,8 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
             region_dict[w][0].append(p)
             region_dict[w][1].append(s)
 
-        mwp, catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
-        _, FP, mwp_mask = calc_TP_FP_FN(mwp, catalogue_)
+        mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
+        _, FP, mwp_mask = calc_TP_FP_FN(mwp, catalogue)
 
         TP = mwp_mask.count(True)
         FN = mwp_mask.count(False)
@@ -268,10 +331,12 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
             threthre = conf_thre
             Precision = Precision_
             Recall = Recall_
-            catalogue = catalogue_
 
     if save:
         catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
+        imaging_infer_result(args, mwp[TP], save_path + "/l18_TP.png")
+        imaging_infer_result(args, mwp[FN], save_path + "/l18_FN.png")
+        imaging_infer_result(args, FP, save_path + "/l18_FP.png")
     return F1_score, Precision, Recall, threthre
 
 
