@@ -158,7 +158,7 @@ class make_training_val_data:
         ## ********* 各領域ごとに *********
         if self.args.region_suffle:
             os.makedirs(f"{self.save_data_path}/val", exist_ok=True)
-            print("MAKE VALITDATION DATA ...")
+            print("MAKE VALIDATION DATA ...")
 
             ## Ringデータをコピーする。
             Val_origin = []
