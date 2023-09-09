@@ -46,44 +46,44 @@ class make_training_val_data:
         ]
         # fmt: on
 
-        if args.region_suffle:
-            ss = ShuffleSplit(n_splits=args.n_splits, random_state=args.fits_random_state)
-            train_index, val_index = list(ss.split(list(range(len(fits_name)))))[args.fits_index]
-            self.train_l = [fits_name[i] for i in sorted(train_index)]
-            self.val_l = [fits_name[i] for i in sorted(val_index)]
-            print_and_log(
-                self.f_log,
-                [
-                    "This training is shuffled Train region ",
-                    "#################",
-                    "  train_region",
-                    "#################",
-                    str(self.train_l),
-                    " ",
-                    "#################",
-                    "   val_region",
-                    "#################",
-                    str(self.val_l),
-                    " ",
-                ],
-            )
+        # if args.region_suffle:
+        ss = ShuffleSplit(n_splits=args.n_splits, random_state=args.fits_random_state)
+        train_index, val_index = list(ss.split(list(range(len(fits_name)))))[args.fits_index]
+        self.train_l = [fits_name[i] for i in sorted(train_index)]
+        self.val_l = [fits_name[i] for i in sorted(val_index)]
+        print_and_log(
+            self.f_log,
+            [
+                "This training is shuffled Train region ",
+                "#################",
+                "  train_region",
+                "#################",
+                str(self.train_l),
+                " ",
+                "#################",
+                "   val_region",
+                "#################",
+                str(self.val_l),
+                " ",
+            ],
+        )
 
-        else:
-            ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
-            # fmt: off
-            train_l = [
-                "spitzer_02100+0000_rgb", "spitzer_04200+0000_rgb", "spitzer_33300+0000_rgb", "spitzer_35400+0000_rgb",
-                "spitzer_00300+0000_rgb", "spitzer_02400+0000_rgb", "spitzer_04500+0000_rgb", "spitzer_31500+0000_rgb",
-                "spitzer_33600+0000_rgb", "spitzer_35700+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_02700+0000_rgb",
-                "spitzer_04800+0000_rgb", "spitzer_29700+0000_rgb", "spitzer_31800+0000_rgb", "spitzer_03000+0000_rgb",
-                "spitzer_05100+0000_rgb", "spitzer_30000+0000_rgb", "spitzer_32100+0000_rgb", "spitzer_01200+0000_rgb",
-                "spitzer_03300+0000_rgb", "spitzer_05400+0000_rgb", "spitzer_30300+0000_rgb", "spitzer_32400+0000_rgb",
-                "spitzer_34500+0000_rgb", "spitzer_01500+0000_rgb", "spitzer_03600+0000_rgb", "spitzer_05700+0000_rgb",
-                "spitzer_30600+0000_rgb", "spitzer_32700+0000_rgb", "spitzer_34800+0000_rgb", "spitzer_01800+0000_rgb",
-                "spitzer_06000+0000_rgb", "spitzer_30900+0000_rgb", "spitzer_33000+0000_rgb", "spitzer_35100+0000_rgb"
-                ]
-            # fmt: on
-            self.train_l = sorted(train_l)
+        # else:
+        #     ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+        #     # fmt: off
+        #     train_l = [
+        #         "spitzer_02100+0000_rgb", "spitzer_04200+0000_rgb", "spitzer_33300+0000_rgb", "spitzer_35400+0000_rgb",
+        #         "spitzer_00300+0000_rgb", "spitzer_02400+0000_rgb", "spitzer_04500+0000_rgb", "spitzer_31500+0000_rgb",
+        #         "spitzer_33600+0000_rgb", "spitzer_35700+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_02700+0000_rgb",
+        #         "spitzer_04800+0000_rgb", "spitzer_29700+0000_rgb", "spitzer_31800+0000_rgb", "spitzer_03000+0000_rgb",
+        #         "spitzer_05100+0000_rgb", "spitzer_30000+0000_rgb", "spitzer_32100+0000_rgb", "spitzer_01200+0000_rgb",
+        #         "spitzer_03300+0000_rgb", "spitzer_05400+0000_rgb", "spitzer_30300+0000_rgb", "spitzer_32400+0000_rgb",
+        #         "spitzer_34500+0000_rgb", "spitzer_01500+0000_rgb", "spitzer_03600+0000_rgb", "spitzer_05700+0000_rgb",
+        #         "spitzer_30600+0000_rgb", "spitzer_32700+0000_rgb", "spitzer_34800+0000_rgb", "spitzer_01800+0000_rgb",
+        #         "spitzer_06000+0000_rgb", "spitzer_30900+0000_rgb", "spitzer_33000+0000_rgb", "spitzer_35100+0000_rgb"
+        #         ]
+        #     # fmt: on
+        #     self.train_l = sorted(train_l)
 
         ## 必要なフォルダの作成
         self.save_data_path = args.savedir_path + "".join("dataset") + "/" + augmentation_name.split("/")[-1]
@@ -156,37 +156,37 @@ class make_training_val_data:
         """
 
         ## ********* 各領域ごとに *********
-        if self.args.region_suffle:
-            os.makedirs(f"{self.save_data_path}/val", exist_ok=True)
-            print("MAKE VALIDATION DATA ...")
+        # if self.args.region_suffle:
+        os.makedirs(f"{self.save_data_path}/val", exist_ok=True)
+        print("MAKE VALIDATION DATA ...")
 
-            ## Ringデータをコピーする。
-            Val_origin = []
-            for i in self.val_l:
-                for size in val_size:
-                    a = glob.glob(f"{self.args.validation_data_path}/{i}/*/*_{size}_*.png")
-                    Val_origin.extend(a)
+        ## Ringデータをコピーする。
+        Val_origin = []
+        for i in self.val_l:
+            for size in val_size:
+                a = glob.glob(f"{self.args.validation_data_path}/{i}/*/*_{size}_*.png")
+                Val_origin.extend(a)
 
-            for k in Val_origin:
-                shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
-                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.json")
+        for k in Val_origin:
+            shutil.copyfile(k, f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.png")
+            shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/{k.split('/')[-1][:-4]}.json")
 
         ## ********* デフォルト領域で *********
-        else:
-            ## Validationデータをcopyする。
-            ## Ringデータのコピー
-            shutil.copytree("/workspace/val_png/default_val", f"{self.save_data_path}/val", dirs_exist_ok=True)
+        # else:
+        #     ## Validationデータをcopyする。
+        #     ## Ringデータのコピー
+        #     shutil.copytree("/workspace/val_png/default_val", f"{self.save_data_path}/val", dirs_exist_ok=True)
 
-            ## Non-Ringデータのコピー
-            Val_default_path = glob.glob("/workspace/NonRing_png/default_NonRing_png/val/*.png")
-            Choice_NonRing = self.Data_rg.choice(
-                Val_default_path,
-                int(len(glob.glob(f"{self.save_data_path}/val/*"))) * self.args.NonRing_ratio,
-                replace=False,
-            )
-            for i, k in enumerate(Choice_NonRing):
-                shutil.copyfile(k, f"{self.save_data_path}/val/NonRing_{i}.png")
-                shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/NonRing_{i}.json")
+        #     ## Non-Ringデータのコピー
+        #     Val_default_path = glob.glob("/workspace/NonRing_png/default_NonRing_png/val/*.png")
+        #     Choice_NonRing = self.Data_rg.choice(
+        #         Val_default_path,
+        #         int(len(glob.glob(f"{self.save_data_path}/val/*"))) * self.args.NonRing_ratio,
+        #         replace=False,
+        #     )
+        #     for i, k in enumerate(Choice_NonRing):
+        #         shutil.copyfile(k, f"{self.save_data_path}/val/NonRing_{i}.png")
+        #         shutil.copyfile(k[:-3] + "json", f"{self.save_data_path}/val/NonRing_{i}.json")
 
         ## tarファイルに変換
         with tarfile.open(f"{self.save_data_path}/bubble_dataset_val.tar", "w:gz") as tar:
