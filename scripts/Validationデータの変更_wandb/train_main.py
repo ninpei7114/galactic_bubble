@@ -169,7 +169,7 @@ def main(args):
         ####################
         val_best_confthre = train_model(**train_model_params)
 
-        artifact = wandb.Artifact("model", type="model")
+        artifact = wandb.Artifact("training_log", type="dir")
         artifact.add_dir(name)
         run.log_artifact(artifact, aliases=["latest", "best"])
         f_log.close()
