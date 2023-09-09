@@ -19,7 +19,7 @@ from utils.ssd_model import SSD, MultiBoxLoss
 
 def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
-    parser.add_argument("spitzer_path", metavar="DIR", help="spitzer_path", default="/dataset/spitzer_data/")
+    parser.add_argument("--spitzer_path", metavar="DIR", help="spitzer_path", default="/dataset/spitzer_data/")
     parser.add_argument(
         "--validation_data_path",
         metavar="DIR",
@@ -39,7 +39,7 @@ def parse_args():
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--Val_mini_batch", default=16, type=int, help="Validation mini-batch size (default: 16)")
     parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
-    parser.add_argument("--region_suffle", "-s", action="store_true")
+    # parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     # random seed
@@ -109,7 +109,7 @@ def main(args):
             "#######################",
             "   args parameters",
             "#######################",
-            f"region shuffle: {args.region_suffle}",
+            # f"region shuffle: {args.region_suffle}",
             f"fits_index: {args.fits_index}",
             f"n_splits: {args.n_splits}",
             f"fits_random_state: {args.fits_random_state}",
