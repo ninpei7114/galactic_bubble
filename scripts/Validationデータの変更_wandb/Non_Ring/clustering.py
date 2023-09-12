@@ -45,6 +45,8 @@ def main(args):
     torch.backends.cudnn.benchmark = True
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+    os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result", exist_ok=True)
+
     print("Loading Model....")
     net_weights = torch.load(args.model_checkpoint)
     ssd_cfg = {
@@ -97,6 +99,7 @@ def main(args):
 
     ## 特徴量をクラスタリング
     features_list = np.concatenate(features_list)
+    np.save("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/features_list.npy", features_list)
     prediction = KMeans(n_clusters=int(args.class_num), random_state=123, n_init="auto").fit_predict(
         features_list.reshape(features_list.shape[0], -1)
     )
@@ -123,7 +126,6 @@ def main(args):
     ##############
     ## 画像の作成 ##
     ##############
-    os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result", exist_ok=True)
 
     fig, ax = plt.subplots()
     ax.hist(prediction, bins=i)
