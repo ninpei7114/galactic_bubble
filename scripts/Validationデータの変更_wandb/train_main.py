@@ -32,7 +32,7 @@ def parse_args():
         help="NonRing data path",
         default="/workspace/NonRing_png/region_NonRing_png",
     )
-    parser.add_argument("--savedir_path", metavar="DIR", default="/workspace/weights/search", help="savedire path")
+    parser.add_argument("--savedir_path", metavar="DIR", default="/workspace/weights/search/", help="savedire path")
     # minibatch
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
     parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
