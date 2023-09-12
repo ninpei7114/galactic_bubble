@@ -216,13 +216,14 @@ def calc_TP_FP_FN(mwp, infer):
     return TP, FP, mwp_mask
 
 
-def imaging_infer_result(args, frame, save_name):
+def imaging_infer_result(args, frame, save_name, infer_result=False):
     """推論結果を保存する関数
 
     Args:
         args (args): argparseの引数
         frame (pandas dataframe): 推論結果
         save_name (str): 保存するファイル名
+        infer_result (bool, optional): 推論結果の場合はTrue. Defaults to False.
 
     """
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
@@ -243,13 +244,17 @@ def imaging_infer_result(args, frame, save_name):
     )
 
     for _, row in frame.iterrows():
-        l_center = row["GLON"]
-        b_center = row["GLAT"]
-        x_center, y_center = w.all_world2pix(l_center, b_center, 0)
-        x_min = int(x_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
-        x_max = int(x_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
-        y_min = int(y_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
-        y_max = int(y_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+        if infer_result:
+            x_min, y_min = w.all_world2pix(row["ra_max"], row["dec_min"], 0)
+            x_max, y_max = w.all_world2pix(row["ra_min"], row["dec_max"], 0)
+        else:
+            l_center = row["GLON"]
+            b_center = row["GLAT"]
+            x_center, y_center = w.all_world2pix(l_center, b_center, 0)
+            x_min = int(x_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+            x_max = int(x_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+            y_min = int(y_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+            y_max = int(y_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
 
         width = x_max - x_min
         height = y_max - y_min
@@ -336,7 +341,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
         catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
         imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png")
         imaging_infer_result(args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png")
-        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/l18_FP.png")
+        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/l18_FP.png", infer_result=True)
     return F1_score, Precision, Recall, threthre
 
 
