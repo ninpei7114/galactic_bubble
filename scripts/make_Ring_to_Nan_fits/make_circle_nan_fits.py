@@ -39,20 +39,18 @@ def remove_nan(data1):
 
 
 def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_catalog2):
-    for i in range(len(pandas_catalog1)):
-        series_i = pandas_catalog1.iloc[i]
+    for i, series_i in pandas_catalog1.iterrows():
+        l = series_i["GLON"]
+        b = series_i["GLAT"]
         # 左端
-        lmax = series_i["GLON"] + series_i["Rout"] / 60
-        bmin = series_i["GLAT"] - series_i["Rout"] / 60
+        lmax = l + series_i["Rout"] / 60
+        bmin = b - series_i["Rout"] / 60
         # 右端
-        lmin = series_i["GLON"] - series_i["Rout"] / 60
-        bmax = series_i["GLAT"] + series_i["Rout"] / 60
-
+        lmin = l - series_i["Rout"] / 60
+        bmax = b + series_i["Rout"] / 60
         x_pix_min, y_pix_min = w.all_world2pix(lmax, bmin, 0)
         x_pix_max, y_pix_max = w.all_world2pix(lmin, bmax, 0)
 
-        l = series_i["GLON"]
-        b = series_i["GLAT"]
         lpix, bpix = w.all_world2pix(l, b, 0)
 
         rout = (x_pix_max - x_pix_min) / 2
@@ -121,17 +119,14 @@ def main(args):
             else:
                 pass
 
-            cut_MWP = CH.query("@GLON_min < GLON < @GLON_max")
+            cut_CH = CH.query("@GLON_min < GLON < @GLON_max")
             c = np.zeros_like(fits)
-            data = circle_nan(fits, c, cut_MWP, w)
+            data = circle_nan(fits, c, cut_CH, w)
 
             new_hdu = astropy.io.fits.PrimaryHDU(data, header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
             save_name = pathlib.Path(args.save_dir) / i
-            if os.path.exists(save_name):
-                pass
-            else:
-                os.mkdir(save_name)
+            os.makedirs(save_name, exist_ok=True)
             new_hdu_list.writeto(save_name / rgb, overwrite=True)
 
 
