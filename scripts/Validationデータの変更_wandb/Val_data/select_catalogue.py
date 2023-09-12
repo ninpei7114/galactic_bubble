@@ -25,7 +25,7 @@ def catalogue(choice, ring_select):
             print("#######################")
             print("   Ring selection")
             print("#######################")
-            rank_2_3 = np.load("rank_3.npy")
+            rank_2_3 = np.load("../rank_3.npy")
             CH = CH.loc[rank_2_3]
         return CH
 
