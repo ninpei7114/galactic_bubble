@@ -103,7 +103,7 @@ def main(args):
     for i in pbar:
         pbar.set_description(l[i])
         for rgb in ["r.fits", "g.fits", "b.fits"]:
-            hdu = astropy.io.fits.open(pathlib.Path(args.fits_path) / i / rgb)[0]
+            hdu = astropy.io.fits.open(args.fits_path + f"{i}/rgb")[0]
             header = hdu.header
             fits = remove_nan(hdu.data)
 
