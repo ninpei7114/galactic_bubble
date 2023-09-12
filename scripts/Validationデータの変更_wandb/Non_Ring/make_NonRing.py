@@ -63,11 +63,7 @@ def main(args):
         ]
         # fmt: on
         mode_l = ["all"]
-        if os.path.exists("/workspace/NonRing_png/region_NonRing_png"):
-            pass
-        else:
-            os.mkdir("/workspace/NonRing_png/region_NonRing_png")
-
+        os.makedirs("/workspace/NonRing_png/region_NonRing_png", exist_ok=True)
     else:
         ## デフォルトの領域を用いて、Non-Ringを作成する
         ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
@@ -121,10 +117,7 @@ def main(args):
         for k in pbar:
             if args.each_region:
                 path = ref_path_list[k]
-                if os.path.exists("/workspace/NonRing_png/region_NonRing_png/%s" % path):
-                    pass
-                else:
-                    os.mkdir("/workspace/NonRing_png/region_NonRing_png/%s" % path)
+                os.makedirs(f"/workspace/NonRing_png/region_NonRing_png/{path}", exist_ok=True)
             else:
                 path = ref_path_list[choice_list[k]]
             pbar.set_description(path)
@@ -165,21 +158,17 @@ def main(args):
 
                 if args.each_region:
                     ## 領域ごとに保存していく
-                    pil_image.save(
-                        "/workspace/NonRing_png/region_NonRing_png/%s/NonRing_%s.png" % (path, k * iter + i)
-                    )
+                    pil_image.save(f"/workspace/NonRing_png/region_NonRing_png/{path}/NonRing_{k * iter + i}.png")
                     with open(
-                        "/workspace/NonRing_png/region_NonRing_png/%s/NonRing_%s.json" % (path, k * iter + i),
+                        f"/workspace/NonRing_png/region_NonRing_png/{path}/NonRing_{k * iter + i}.json",
                         "w",
                     ) as f:
                         json.dump([], f, indent=4)
                 else:
                     ## デフォルトフォルダに保存
-                    pil_image.save(
-                        "/workspace/NonRing_png/default_NonRing_png/%s/NonRing_%s.png" % (mode, k * iter + i)
-                    )
+                    pil_image.save(f"/workspace/NonRing_png/default_NonRing_png/{mode}/NonRing_{k * iter + i}.png")
                     with open(
-                        "/workspace/NonRing_png/default_NonRing_png/%s/NonRing_%s.json" % (mode, k * iter + i),
+                        f"/workspace/NonRing_png/default_NonRing_png/{mode}/NonRing_{k * iter + i}.json",
                         "w",
                     ) as f:
                         json.dump([], f, indent=4)
