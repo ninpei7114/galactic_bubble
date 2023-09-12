@@ -104,7 +104,7 @@ def main(args):
         elif mode == "all":
             epoch = len(all_l)
             ref_path_list = all_l
-            iter = 2000
+            iter = 3000
 
         start = time.time()
         fits_path = pathlib.Path(args.fits_path)
