@@ -1,17 +1,16 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.ndimage
-import pandas as pd
-
-import pathlib
-import cv2
 import argparse
 import os
+import pathlib
 
-import astroquery.vizier
-import astropy.wcs
-import astropy.io.fits
 import astropy
+import astropy.io.fits
+import astropy.wcs
+import astroquery.vizier
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import scipy.ndimage
 
 
 def parse_args():
@@ -98,7 +97,7 @@ def main(args):
     bub_2007_change = bub_2007.set_index("__CWP2007_")
     CH = pd.concat([bub_2006_change, bub_2007_change])
     CH["CH"] = CH.index
-    rank_2_3 = np.load("Validationデータの変更_wandb/rank_3.npy")
+    rank_2_3 = np.load("../Validationデータの変更_wandb/rank_3.npy")
     CH = CH.loc[rank_2_3]
 
     for i in l:
