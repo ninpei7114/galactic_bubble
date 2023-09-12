@@ -57,8 +57,8 @@ def main(args):
     os.makedirs("/workspace/cut_val_png/region_val_png", exist_ok=True)
 
     ## choice catalogue from 'CH' or 'MWP'
-    choice = "MWP"
-    Ring_CATALOGUE = select_catalogue.catalogue(choice)
+    choice = "CH"
+    Ring_CATALOGUE = select_catalogue.catalogue(choice, ring_select=True)
     obj_sig = 1 / (2 * (np.log(2)) ** (1 / 2))
 
     #####################
@@ -98,7 +98,7 @@ def main(args):
             data, ring_count, non_ring_count, obj_sig, fits_path, savedir_name, label_cal
         )
 
-        size_list = [150, 300, 600, 900, 1200, 1800, 2500, 3000]
+        size_list = [150, 300, 600, 900, 1200, 1800, 2400, 3000]
         fragment = 3
         all_size_ring = []
         all_size_ring_info = pd.DataFrame(columns=["fits", "name", "xmin", "xmax", "ymin", "ymax"])

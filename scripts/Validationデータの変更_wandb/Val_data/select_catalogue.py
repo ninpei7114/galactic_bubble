@@ -1,12 +1,17 @@
+import sys
+
+sys.path.append("../")
+
 import astroquery.vizier
 import pandas as pd
+import numpy as np
 
 """
 リングのaugmentationパターンを作成するスクリプト
 """
 
 
-def catalogue(choice):
+def catalogue(choice, ring_select):
     if choice == "CH":
         viz = astroquery.vizier.Vizier(columns=["*"])
         viz.ROW_LIMIT = -1
@@ -16,6 +21,12 @@ def catalogue(choice):
         bub_2007_change = bub_2007.set_index("__CWP2007_")
         CH = pd.concat([bub_2006_change, bub_2007_change])
         CH["CH"] = CH.index
+        if ring_select:
+            print("#######################")
+            print("   Ring selection")
+            print("#######################")
+            rank_2_3 = np.load("rank_3.npy")
+            CH = CH.loc[rank_2_3]
         return CH
 
     elif choice == "MWP":
