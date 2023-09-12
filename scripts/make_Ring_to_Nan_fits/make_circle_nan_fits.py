@@ -42,11 +42,11 @@ def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_cata
     for i in range(len(pandas_catalog1)):
         series_i = pandas_catalog1.iloc[i]
         # 左端
-        lmax = series_i["GLON"] + series_i["Reff"] / 60
-        bmin = series_i["GLAT"] - series_i["Reff"] / 60
+        lmax = series_i["GLON"] + series_i["Rout"] / 60
+        bmin = series_i["GLAT"] - series_i["Rout"] / 60
         # 右端
-        lmin = series_i["GLON"] - series_i["Reff"] / 60
-        bmax = series_i["GLAT"] + series_i["Reff"] / 60
+        lmin = series_i["GLON"] - series_i["Rout"] / 60
+        bmax = series_i["GLAT"] + series_i["Rout"] / 60
 
         x_pix_min, y_pix_min = w.all_world2pix(lmax, bmin, 0)
         x_pix_max, y_pix_max = w.all_world2pix(lmin, bmax, 0)
@@ -66,6 +66,14 @@ def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_cata
 
 
 def main(args):
+    """リングの箇所をnanにする
+
+    Args:
+        args (argparse): argparse
+
+    >>> example command
+    python make_circle_nan_fits.py /dataset/spitzer_data/ /workspace/ring_to_circle_nan_fits/
+    """
     # fmt: off
     l = [
         'spitzer_02100+0000_rgb','spitzer_04200+0000_rgb','spitzer_33300+0000_rgb','spitzer_35400+0000_rgb',
@@ -84,9 +92,14 @@ def main(args):
 
     viz = astroquery.vizier.Vizier(columns=["*"])
     viz.ROW_LIMIT = -1
-    MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
-    MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
-    MWP = MWP.set_index("MWP")
+    bub_2006 = viz.query_constraints(catalog="J/ApJ/649/759/bubbles")[0].to_pandas()
+    bub_2007 = viz.query_constraints(catalog="J/ApJ/670/428/bubble")[0].to_pandas()
+    bub_2006_change = bub_2006.set_index("__CPA2006_")
+    bub_2007_change = bub_2007.set_index("__CWP2007_")
+    CH = pd.concat([bub_2006_change, bub_2007_change])
+    CH["CH"] = CH.index
+    rank_2_3 = np.load("Validationデータの変更_wandb/rank_3.npy")
+    CH = CH.loc[rank_2_3]
 
     for i in l:
         print(i)
@@ -107,7 +120,7 @@ def main(args):
             else:
                 pass
 
-            cut_MWP = MWP.query("@GLON_min < GLON < @GLON_max")
+            cut_MWP = CH.query("@GLON_min < GLON < @GLON_max")
             c = np.zeros_like(fits)
             data = circle_nan(fits, c, cut_MWP, w)
 
