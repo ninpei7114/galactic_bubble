@@ -36,6 +36,14 @@ def append_data(data, info, data_list, frame):
 
 
 def main(args):
+    """Validationデータを作成する
+
+    Args:
+        args (argparser): argparser
+
+    example command:
+    >>> python make_val_data.py /dataset/spitzer_data/
+    """
     ## 各領域ごとにVal-Ringを作成する
     ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
     # fmt: off
