@@ -1,6 +1,7 @@
 import argparse
 import os
 import pathlib
+import tqdm
 
 import astropy
 import astropy.io.fits
@@ -71,7 +72,7 @@ def main(args):
         args (argparse): argparse
 
     >>> example command
-    python make_circle_nan_fits.py /dataset/spitzer_data/ /workspace/ring_to_circle_nan_fits/
+    python make_circle_nan_fits.py /dataset/spitzer_data/ /workspace/fits_data/ring_to_circle_nan_fits/
     """
     # fmt: off
     l = [
@@ -88,6 +89,7 @@ def main(args):
         'spitzer_33900+0000_rgb','spitzer_29400+0000_rgb','spitzer_06300+0000_rgb','spitzer_00000+0000_rgb']
     # fmt: on
     l = sorted(l)
+    pbar = tqdm.tqdm(range(len(l)))
 
     viz = astroquery.vizier.Vizier(columns=["*"])
     viz.ROW_LIMIT = -1
@@ -100,8 +102,8 @@ def main(args):
     rank_2_3 = np.load("../Validationデータの変更_wandb/rank_3.npy")
     CH = CH.loc[rank_2_3]
 
-    for i in l:
-        print(i)
+    for i in pbar:
+        pbar.set_description(l[i])
         for rgb in ["r.fits", "g.fits", "b.fits"]:
             hdu = astropy.io.fits.open(pathlib.Path(args.fits_path) / i / rgb)[0]
             header = hdu.header
