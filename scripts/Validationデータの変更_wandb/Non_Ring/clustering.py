@@ -10,9 +10,12 @@ import torch.nn as nn
 import tqdm
 from PIL import Image
 from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import pandas as pd
 
 sys.path.append("../")
 from utils.ssd_model import SSD
+from processing import data_view_rectangl
 
 """
 Non-Ringをクラスタリングするためのスクリプト
@@ -82,7 +85,7 @@ def main(args):
     ## データをモデルに入力する
     for i in tqdm.tqdm(range(len(batch) - 1)):
         x = data[int(batch[i]) : int(batch[i + 1])]
-        p_data = torch.from_numpy(x)
+        p_data = torch.from_numpy(x) / 255
         p_data = p_data.permute(0, 3, 1, 2)
 
         with torch.no_grad():
@@ -101,6 +104,7 @@ def main(args):
     print(
         f"Class 0 : {sum(prediction == 0)}\nClass 1 : {sum(prediction == 1)}\nClass 2 : {sum(prediction == 2)}\nClass 3 : {sum(prediction == 3)}\nClass 4 : {sum(prediction == 4)}\nClass 5 : {sum(prediction == 5)}\nClass 6 : {sum(prediction == 6)}\nClass 7 : {sum(prediction == 7)}"
     )
+
     #################################
     ## Non-Ringデータをクラスごとに移動##
     #################################
@@ -115,6 +119,31 @@ def main(args):
 
         shutil.move(photo, "/".join(photo.split("/")[:-1]) + f"/class{pred}/" + photo.split("/")[-1])
         shutil.move(json, "/".join(json.split("/")[:-1]) + f"/class{pred}/" + json.split("/")[-1])
+
+    ##############
+    ## 画像の作成 ##
+    ##############
+    os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result", exist_ok=True)
+
+    fig, ax = plt.subplots()
+    ax.hist(prediction, bins=i)
+    ax.set_xlabel("クラス数", size=15)
+    ax.set_ylabel("個数", size=15)
+    fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/クラスの内訳.png")
+
+    num_list = []
+    for k in range(args.class_num):
+        class_path = glob.glob(args.NonRing_dir + f"/*/class{k}/*.png")
+        slice_ = int(len(class_path) / 90)
+        class_data_list = []
+        for i in class_path[::slice_]:
+            class_data_list.append(np.array(Image.open(i)))
+        data_view_rectangl(25, np.array(class_data_list)).save(
+            args.NonRing_dir.split("/")[:-1] + f"/clustering_result/clus_{k}.png"
+        )
+        num_list.append(len(class_path))
+    df = pd.DataFrame(num_list).T
+    df.to_csv(args.NonRing_dir.split("/")[:-1] + "/clustering_result/クラス個数.csv")
 
 
 if __name__ == "__main__":
