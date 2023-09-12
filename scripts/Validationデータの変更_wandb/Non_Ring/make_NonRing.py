@@ -33,6 +33,14 @@ def parse_args():
 
 
 def main(args):
+    """Non-Ringのpng画像を作成する
+
+    Args:
+        args (argparse): argparse
+
+    example command:
+    >>> python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r
+    """
     ################################################
     ## 領域ごとに作るのか、デフォルトの領域で作るのか選択 ##
     ################################################
