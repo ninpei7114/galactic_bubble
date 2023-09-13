@@ -131,7 +131,7 @@ def main(args):
     ax.hist(prediction, bins=int(args.class_num))
     ax.set_xlabel("クラス数", size=15)
     ax.set_ylabel("個数", size=15)
-    fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/クラスの内訳.png")
+    fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/クラスの内訳.png")
 
     num_list = []
     for k in range(int(args.class_num)):
