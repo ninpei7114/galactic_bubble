@@ -24,24 +24,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def remove_nan(data1):
-    # fits???????????????max?????s
-    mask1_10 = data1 == data1
-    mask1_1010 = np.where(mask1_10, 0, 1)
-    label1, name1 = scipy.ndimage.label(mask1_1010)
-    data_areas1 = scipy.ndimage.sum(mask1_1010, label1, np.arange(name1 + 1))
-    minsize1 = 70000
-    data_mask1_10 = (data_areas1 < minsize1) & (0 < data_areas1)
-    small_mask1_10 = data_mask1_10[label1.ravel()].reshape(label1.shape)
-    data1[small_mask1_10] = np.nanmax(data1)
-
-    return data1
-
-
 def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_catalog2):
-    for i, series_i in pandas_catalog1.iterrows():
+    for _, series_i in pandas_catalog1.iterrows():
         l = series_i["GLON"]
         b = series_i["GLAT"]
+        lpix, bpix = w.all_world2pix(l, b, 0)
         # 左端
         lmax = l + series_i["Rout"] / 60
         bmin = b - series_i["Rout"] / 60
@@ -50,8 +37,6 @@ def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_cata
         bmax = b + series_i["Rout"] / 60
         x_pix_min, y_pix_min = w.all_world2pix(lmax, bmin, 0)
         x_pix_max, y_pix_max = w.all_world2pix(lmin, bmax, 0)
-
-        lpix, bpix = w.all_world2pix(l, b, 0)
 
         rout = (x_pix_max - x_pix_min) / 2
         same_shape_zero = cv2.circle(
@@ -108,12 +93,11 @@ def main(args):
         for rgb in ["r.fits", "g.fits", "b.fits"]:
             hdu = astropy.io.fits.open(args.fits_path + f"{l[i]}/{rgb}")[0]
             header = hdu.header
-            fits = remove_nan(hdu.data)
+            fits = hdu.data
 
             w = astropy.wcs.WCS(header)
             a = fits.shape[0]
             b = fits.shape[1]
-
             GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
             GLON_max, GLAT_max = w.all_pix2world(0, a, 0)
 
@@ -123,8 +107,11 @@ def main(args):
                 pass
 
             cut_CH = CH.query("@GLON_min < GLON < @GLON_max")
-            c = np.zeros_like(fits)
-            data = circle_nan(fits, c, cut_CH, w)
+            if len(cut_CH) == 0:
+                data = fits
+            else:
+                c = np.zeros_like(fits)
+                data = circle_nan(fits, c, cut_CH, w)
 
             new_hdu = astropy.io.fits.PrimaryHDU(data, header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
