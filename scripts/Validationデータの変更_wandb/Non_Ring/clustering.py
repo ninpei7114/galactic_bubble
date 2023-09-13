@@ -134,7 +134,7 @@ def main(args):
     fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/クラスの内訳.png")
 
     num_list = []
-    for k in range(args.class_num):
+    for k in range(int(args.class_num)):
         class_path = glob.glob(args.NonRing_dir + f"/*/class{k}/*.png")
         slice_ = int(len(class_path) / 90)
         class_data_list = []
