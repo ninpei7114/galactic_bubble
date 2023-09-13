@@ -141,11 +141,11 @@ def main(args):
         for i in class_path[::slice_]:
             class_data_list.append(np.array(Image.open(i)))
         data_view_rectangl(25, np.array(class_data_list)).save(
-            args.NonRing_dir.split("/")[:-1] + f"/clustering_result/clus_{k}.png"
+            "/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/clus_{k}.png"
         )
         num_list.append(len(class_path))
     df = pd.DataFrame(num_list).T
-    df.to_csv(args.NonRing_dir.split("/")[:-1] + "/clustering_result/クラス個数.csv")
+    df.to_csv("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/クラス個数.csv")
 
 
 if __name__ == "__main__":
