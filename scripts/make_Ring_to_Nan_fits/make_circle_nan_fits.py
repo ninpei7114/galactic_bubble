@@ -102,6 +102,9 @@ def main(args):
 
     for i in pbar:
         pbar.set_description(l[i])
+        save_name = pathlib.Path(args.save_dir) / l[i]
+        os.makedirs(save_name, exist_ok=True)
+
         for rgb in ["r.fits", "g.fits", "b.fits"]:
             hdu = astropy.io.fits.open(args.fits_path + f"{l[i]}/{rgb}")[0]
             header = hdu.header
@@ -125,8 +128,6 @@ def main(args):
 
             new_hdu = astropy.io.fits.PrimaryHDU(data, header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
-            save_name = pathlib.Path(args.save_dir) / l[i]
-            os.makedirs(save_name, exist_ok=True)
             new_hdu_list.writeto(save_name / rgb, overwrite=True)
 
 
