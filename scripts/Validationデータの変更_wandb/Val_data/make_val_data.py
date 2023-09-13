@@ -139,13 +139,17 @@ def main(args):
                 all_size_ring.append(ring_data)
                 all_size_ring_info = pd.concat([all_size_ring_info, ring_info])
 
-        if len(ring_data) > 3000:
-            slice = int(len(ring_data) / 1000)
+        if len(all_size_ring) > 3000:
+            slice = int(len(all_size_ring) / 1000)
         else:
             slice = 1
-        processing.data_view_rectangl(
-            25, np.uint8(np.concatenate(all_size_ring)[::slice] * 255), pd.DataFrame(all_size_ring_info)[::slice]
-        ).save(f"{savedir_name}/Ring_data.png")
+
+        if len(all_size_ring) == 0:
+            pass
+        else:
+            processing.data_view_rectangl(
+                25, np.uint8(np.concatenate(all_size_ring)[::slice] * 255), pd.DataFrame(all_size_ring_info)[::slice]
+            ).save(f"{savedir_name}/Ring_data.png")
 
 
 if __name__ == "__main__":
