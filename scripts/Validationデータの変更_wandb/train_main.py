@@ -143,17 +143,13 @@ def main(args):
         net.to(device)
         wandb.watch(net, log_freq=100)
 
+        optimizer = optim.AdamW(
+            net.parameters(), lr=args.lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=args.weight_decay, amsgrad=False
+        )
         train_model_params = {
             "net": net,
             "criterion": MultiBoxLoss(jaccard_thresh=args.True_iou, neg_pos=3, device=device),
-            "optimizer": optim.AdamW(
-                net.parameters(),
-                lr=args.lr,
-                betas=(0.9, 0.999),
-                eps=1e-08,
-                weight_decay=args.weight_decay,
-                amsgrad=False,
-            ),
+            "optimizer": optimizer,
             "num_epochs": args.num_epoch,
             "f_log": f_log,
             "augmentation_name": name,
