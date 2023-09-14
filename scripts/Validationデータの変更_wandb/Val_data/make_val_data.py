@@ -23,7 +23,7 @@ python make_val_data.py /dataset/spitzer_data/
 def parse_args():
     parser = argparse.ArgumentParser(description="make validataion data for SSD")
     parser.add_argument("spitzer_path", metavar="DIR", help="spitzer_path")
-    # parser.add_argument('savedir_name', metavar='DIR', help='savedir_name')
+    parser.add_argument("savedir_name", metavar="DIR", help="savedir_name")
     # parser.add_argument("--each_region", "-r", action="store_true")
 
     return parser.parse_args()
@@ -61,8 +61,8 @@ def main(args):
     'spitzer_35700+0000_rgb']
     # fmt: on
     val_l = sorted(val_l)
-    os.makedirs("/workspace/cut_val_png/", exist_ok=True)
-    os.makedirs("/workspace/cut_val_png/region_val_png", exist_ok=True)
+    os.makedirs(f"{args.savedir_name}/cut_val_png/", exist_ok=True)
+    os.makedirs(f"{args.savedir_name}/cut_val_png/region_val_png", exist_ok=True)
 
     ## choice catalogue from 'CH' or 'MWP'
     choice = "CH"
@@ -78,7 +78,7 @@ def main(args):
         pbar.set_description(fits_path)
         ring_count, non_ring_count = 0, 0
 
-        savedir_name = "/workspace/cut_val_png/region_val_png/%s" % fits_path
+        savedir_name = f"{args.savedir_name}/cut_val_png/region_val_png/{fits_path}"
         os.makedirs(savedir_name, exist_ok=True)
         os.makedirs(savedir_name + "/Ring", exist_ok=True)
         os.makedirs(savedir_name + "/NonRing", exist_ok=True)
