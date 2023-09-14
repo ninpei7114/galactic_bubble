@@ -114,7 +114,7 @@ def main(args):
         start = time.time()
         fits_path = pathlib.Path(args.fits_path)
         pbar = tqdm(range(epoch))
-        savedir_name = f"{args.savedir_name}/NonRing_png/default_NonRing_png/"
+        savedir_name = f"{args.savedir_name}/NonRing_png/region_NonRing_png/"
 
         for k in pbar:
             # if args.each_region:
