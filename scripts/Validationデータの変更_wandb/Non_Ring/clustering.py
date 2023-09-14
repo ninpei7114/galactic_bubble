@@ -131,7 +131,7 @@ def main(args):
     ax.hist(prediction, bins=int(args.class_num))
     ax.set_xlabel("クラス数", size=15)
     ax.set_ylabel("個数", size=15)
-    fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/クラスの内訳.png")
+    fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/class_detail.png")
 
     num_list = []
     for k in range(int(args.class_num)):
@@ -145,7 +145,7 @@ def main(args):
         )
         num_list.append(len(class_path))
     df = pd.DataFrame(num_list).T
-    df.to_csv("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/クラス個数.csv")
+    df.to_csv("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/class_num.csv")
 
 
 if __name__ == "__main__":
