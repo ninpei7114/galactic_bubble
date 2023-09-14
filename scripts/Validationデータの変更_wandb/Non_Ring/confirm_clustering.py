@@ -37,7 +37,7 @@ def main(args):
     data = []
     for i in path_list:
         data.append(np.array(Image.open(i)))
-    data = np.array(data)[:, :, :, :2]
+    data = np.array(data)
 
     for class_num in range(2, 10):
         features_list = np.load(args.features_list)
