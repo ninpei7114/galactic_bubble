@@ -43,8 +43,14 @@ def main(args):
     for class_num in range(2, 10):
         features_list = np.load(args.features_list)
         os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/class{class_num}", exist_ok=True)
+        print("===========")
+        print(f"start clustering by {class_num}....")
         prediction = KMeans(n_clusters=int(class_num), random_state=123, n_init="auto").fit_predict(
             features_list.reshape(features_list.shape[0], -1)
+        )
+        print("Clustering is done")
+        print(
+            f"Class 0 : {sum(prediction == 0)}\nClass 1 : {sum(prediction == 1)}\nClass 2 : {sum(prediction == 2)}\nClass 3 : {sum(prediction == 3)}\nClass 4 : {sum(prediction == 4)}\nClass 5 : {sum(prediction == 5)}\nClass 6 : {sum(prediction == 6)}\nClass 7 : {sum(prediction == 7)}\nClass 8 : {sum(prediction == 8)}"
         )
         fig, ax = plt.subplots()
         ax.hist(prediction, bins=int(class_num))
