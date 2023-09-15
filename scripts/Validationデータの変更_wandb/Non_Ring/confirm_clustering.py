@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import sys
+import tqdm
 
 import numpy as np
 from PIL import Image
@@ -35,7 +36,7 @@ def main(args):
     ## データの取得と形成
     path_list = sorted(glob.glob("%s/*/*.png" % args.NonRing_dir))
     data = []
-    for i in path_list:
+    for i in tqdm.tqdm(path_list):
         data.append(np.array(Image.open(i)))
     data = np.array(data)
 
