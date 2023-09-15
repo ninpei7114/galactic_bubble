@@ -43,7 +43,7 @@ def main(args):
     for class_num in range(2, 10):
         features_list = np.load(args.features_list)
         os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/class{class_num}", exist_ok=True)
-        print("===========")
+        print("======================================")
         print(f"start clustering by {class_num}....")
         prediction = KMeans(n_clusters=int(class_num), random_state=123, n_init="auto").fit_predict(
             features_list.reshape(features_list.shape[0], -1)
