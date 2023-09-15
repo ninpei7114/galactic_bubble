@@ -40,11 +40,11 @@ def main(args):
     #################################
     ## クラスタリングのモデルを読み込む ##
     #################################
+    np.random.seed(123)
     torch.manual_seed(123)
-    torch.cuda.manual_seed_all(123)
     # cuDNN用
     torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = False
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result", exist_ok=True)
@@ -75,7 +75,7 @@ def main(args):
     ## データの取得と形成
     path_list = sorted(glob.glob("%s/*/*.png" % args.NonRing_dir))
     data = []
-    for i in path_list:
+    for i in tqdm.tqdm(path_list):
         data.append(np.array(Image.open(i)))
     data = np.array(data)[:, :, :, :2]
 
