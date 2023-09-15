@@ -41,6 +41,7 @@ def main(args):
     ## クラスタリングのモデルを読み込む ##
     #################################
     torch.manual_seed(123)
+    torch.cuda.manual_seed_all(123)
     # cuDNN用
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
