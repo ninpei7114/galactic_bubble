@@ -12,6 +12,7 @@ from PIL import Image
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import pandas as pd
+import japanize_matplotlib
 
 sys.path.append("../")
 from utils.ssd_model import SSD
@@ -83,7 +84,7 @@ def main(args):
     print("Clustering")
 
     features_list = []
-    batch = np.linspace(0, data.shape[0], 3000)
+    batch = np.linspace(0, data.shape[0], 500)
     ## データをモデルに入力する
     for i in tqdm.tqdm(range(len(batch) - 1)):
         x = data[int(batch[i]) : int(batch[i + 1])]
