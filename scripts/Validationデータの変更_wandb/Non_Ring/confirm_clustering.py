@@ -32,6 +32,10 @@ def parse_args():
 
 
 def main(args):
+    if len(args.NonRing_dir.split("/")[-1]) == 0:
+        savedir_name = "/".join(args.NonRing_dir.split("/")[:-2]) + "/clustering_result"
+    else:
+        savedir_name = "/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result"
     print("Loading data....")
     ## データの取得と形成
     path_list = sorted(glob.glob("%s/*/*.png" % args.NonRing_dir))
@@ -42,7 +46,7 @@ def main(args):
 
     for class_num in range(2, 10):
         features_list = np.load(args.features_list)
-        os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/class{class_num}", exist_ok=True)
+        os.makedirs(savedir_name + f"/class{class_num}", exist_ok=True)
         print("======================================")
         print(f"start clustering by {class_num}....")
         prediction = KMeans(n_clusters=int(class_num), random_state=123, n_init="auto").fit_predict(
@@ -56,19 +60,17 @@ def main(args):
         ax.hist(prediction, bins=int(class_num))
         ax.set_xlabel("クラス数", size=15)
         ax.set_ylabel("個数", size=15)
-        fig.savefig(
-            "/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/class{class_num}/class_detail.png"
-        )
+        fig.savefig(savedir_name + f"/class{class_num}/class_detail.png")
 
         num_list = []
         for k in range(int(class_num)):
             slice_ = int(np.sum(prediction == k) / 90)
             data_view_rectangl(25, data[prediction == k][::slice_]).save(
-                "/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/class{class_num}/clus_{k}.png"
+                savedir_name + f"/class{class_num}/clus_{k}.png"
             )
             num_list.append(np.sum(prediction == k))
         df = pd.DataFrame(num_list).T
-        df.to_csv("/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/class{class_num}/class_num.csv")
+        df.to_csv(savedir_name + f"/class{class_num}/class_num.csv")
 
 
 if __name__ == "__main__":
