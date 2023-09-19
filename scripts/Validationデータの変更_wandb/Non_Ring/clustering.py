@@ -47,21 +47,15 @@ def main(args):
     torch.backends.cudnn.benchmark = False
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    os.makedirs("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result", exist_ok=True)
+    if len(args.NonRing_dir.split("/")[-1]) == 0:
+        savedir_name = "/".join(args.NonRing_dir.split("/")[:-2]) + "/clustering_result"
+    else:
+        savedir_name = "/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result"
+    os.makedirs(savedir_name, exist_ok=True)
 
     print("Loading Model....")
     net_weights = torch.load(args.model_checkpoint)
-    ssd_cfg = {
-        "num_classes": 2,  # 背景クラスを含めた合計クラス数
-        "input_size": 300,  # 画像の入力サイズ
-        "bbox_aspect_num": [4, 6, 6, 6, 4, 4],  # 出力するDBoxのアスペクト比の種類
-        "feature_maps": [38, 19, 10, 5, 3, 1],  # 各sourceの画像サイズ
-        "steps": [8, 16, 32, 64, 100, 300],  # DBOXの大きさを決める
-        "min_sizes": [30, 60, 111, 162, 213, 264],  # DBOXの大きさを決める
-        "max_sizes": [60, 111, 162, 213, 264, 315],  # DBOXの大きさを決める
-        "aspect_ratios": [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
-    }
-    net_w = SSD(cfg=ssd_cfg)
+    net_w = SSD()
     net_w.load_state_dict(net_weights)
     ## vggとextraで構成されるモデルを構築
     ## 特徴量サイズ、1x1x256
@@ -101,7 +95,7 @@ def main(args):
 
     ## 特徴量をクラスタリング
     features_list = np.concatenate(features_list)
-    np.save("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/features_list.npy", features_list)
+    np.save(savedir_name + "/features_list.npy", features_list)
     prediction = KMeans(n_clusters=int(args.class_num), random_state=123, n_init="auto").fit_predict(
         features_list.reshape(features_list.shape[0], -1)
     )
@@ -133,7 +127,7 @@ def main(args):
     ax.hist(prediction, bins=int(args.class_num))
     ax.set_xlabel("クラス数", size=15)
     ax.set_ylabel("個数", size=15)
-    fig.savefig("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/class_detail.png")
+    fig.savefig(savedir_name + "/class_detail.png")
 
     num_list = []
     for k in range(int(args.class_num)):
@@ -142,12 +136,10 @@ def main(args):
         class_data_list = []
         for i in class_path[::slice_]:
             class_data_list.append(np.array(Image.open(i)))
-        data_view_rectangl(25, np.array(class_data_list)).save(
-            "/".join(args.NonRing_dir.split("/")[:-1]) + f"/clustering_result/clus_{k}.png"
-        )
+        data_view_rectangl(25, np.array(class_data_list)).save(savedir_name + f"/clus_{k}.png")
         num_list.append(len(class_path))
     df = pd.DataFrame(num_list).T
-    df.to_csv("/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result/class_num.csv")
+    df.to_csv(savedir_name + "/class_num.csv")
 
 
 if __name__ == "__main__":
