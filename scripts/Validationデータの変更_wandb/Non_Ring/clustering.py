@@ -4,19 +4,19 @@ import os
 import shutil
 import sys
 
+import japanize_matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import tqdm
 from PIL import Image
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import pandas as pd
-import japanize_matplotlib
 
 sys.path.append("../")
-from utils.ssd_model import SSD
 from processing import data_view_rectangl
+from utils.ssd_model import SSD
 
 """
 Non-Ringをクラスタリングするためのスクリプト

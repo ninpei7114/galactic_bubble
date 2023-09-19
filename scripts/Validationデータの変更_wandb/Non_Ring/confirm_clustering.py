@@ -2,14 +2,14 @@ import argparse
 import glob
 import os
 import sys
-import tqdm
 
+import japanize_matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import tqdm
 from PIL import Image
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import pandas as pd
-import japanize_matplotlib
 
 sys.path.append("../")
 from processing import data_view_rectangl

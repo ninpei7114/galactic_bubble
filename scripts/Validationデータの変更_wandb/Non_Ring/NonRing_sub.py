@@ -1,6 +1,6 @@
-import numpy as np
-import astroquery.vizier
 import astropy.wcs
+import astroquery.vizier
+import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
