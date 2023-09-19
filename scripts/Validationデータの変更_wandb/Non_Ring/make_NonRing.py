@@ -18,7 +18,7 @@ webdatasetを使用するための、Non-Ringのpng画像を作成する
 さらに、json形式のlabelも作成する
 
 example command:
-python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r
+python make_NonRing.py /home/cygnus/jupyter/リング研究/fits_data/ring_to_circle_nan_fits_CHrank3/ /home/cygnus/jupyter/workspase/
 """
 
 
@@ -108,7 +108,7 @@ def main(args):
             with open(f"{savedir_name}/{path}/NonRing_{k * iter + i}.json", "w") as f:
                 json.dump([], f, indent=4)
 
-        print((time.time() - start) / 60)
+    print((time.time() - start) / 60)
 
 
 if __name__ == "__main__":
