@@ -168,7 +168,6 @@ def main(args):
         artifact = wandb.Artifact("training_log", type="dir")
         artifact.add_dir(name)
         run.log_artifact(artifact, aliases=["latest", "best"])
-        f_log.close()
 
         # l18領域の推論
         if args.l18_infer:
@@ -184,6 +183,7 @@ def main(args):
         else:
             pass
 
+        f_log.close()
         run.alert(title="学習が終了しました", text="学習が終了しました")
         run.finish()
 
