@@ -122,7 +122,6 @@ def main(args):
     ##############
     ## 画像の作成 ##
     ##############
-
     fig, ax = plt.subplots()
     ax.hist(prediction, bins=int(args.class_num))
     ax.set_xlabel("クラス数", size=15)
