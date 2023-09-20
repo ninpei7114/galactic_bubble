@@ -82,7 +82,7 @@ def main(args):
     bub_2007_change = bub_2007.set_index("__CWP2007_")
     CH = pd.concat([bub_2006_change, bub_2007_change])
     CH["CH"] = CH.index
-    rank_2_3 = np.load("../Validationデータの変更_wandb/rank_3.npy")
+    rank_2_3 = np.load("../wandb_training/rank_3.npy")
     CH = CH.loc[rank_2_3]
 
     for i in pbar:
