@@ -124,7 +124,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
     ## Training NonRing の Dataloader を作成
     nonring_num = train_Ring_num // len(NonRing_class)
     aug_num = np.array(args.NonRing_aug_num) + 1
-    NonRing_rsample = [round(nonring_num / e / a, 2) for e, a in zip(each_nonring_num, aug_num)]
+    NonRing_rsample = [round(nonring_num / e / a, 2) + 0.1 for e, a in zip(each_nonring_num, aug_num)]
     NonRing_web_list = [
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_nonring_class{cl}.tar")
         .rsample(rsample)
