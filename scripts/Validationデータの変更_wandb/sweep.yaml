@@ -1,7 +1,7 @@
 program: ./train_main.py
 method: bayes
 command:
-- ${args_no_boolean_flags}
+- ${args}
 - --l18_infer
 - --ring_select
 metric:
