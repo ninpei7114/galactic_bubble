@@ -1,5 +1,3 @@
-[![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=ninpei7114)](https://github.com/anuraghazra/github-readme-stats)
-
 # galactic_bubble
 
 Single Shot MultiBox Detectorにおける赤外線リング構造の同定に用いたコード
