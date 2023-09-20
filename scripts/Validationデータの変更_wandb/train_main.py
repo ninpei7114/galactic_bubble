@@ -93,7 +93,7 @@ def main(args):
         train_cfg = {"flip": flip, "rotate": rotate, "scale": scale, "translation": translation}
         name_ = []
         [name_.append(k + "_" + str(v) + "__") for k, v in zip(list(train_cfg.keys()), list(train_cfg.values()))]
-        name = args.savedir_path + "".join(name_)
+        name = args.savedir_path + "/" + "".join(name_)
         os.makedirs(name, exist_ok=True)
 
         ############
@@ -180,8 +180,6 @@ def main(args):
             wandb.run.summary["l18_precision"] = pre
             wandb.run.summary["l18_recall"] = re
             wandb.run.summary["l18_conf_threshold"] = conf_thre
-        else:
-            pass
 
         f_log.close()
         run.alert(title="学習が終了しました", text="学習が終了しました")
