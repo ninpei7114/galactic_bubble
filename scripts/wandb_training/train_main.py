@@ -165,10 +165,6 @@ def main(args):
         ####################
         val_best_confthre = train_model(**train_model_params)
 
-        artifact = wandb.Artifact("training_log", type="dir")
-        artifact.add_dir(name)
-        run.log_artifact(artifact, aliases=["latest", "best"])
-
         # l18領域の推論
         if args.l18_infer:
             f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args, default_val_size, val_best_confthre)
@@ -180,6 +176,10 @@ def main(args):
             wandb.run.summary["l18_precision"] = pre
             wandb.run.summary["l18_recall"] = re
             wandb.run.summary["l18_conf_threshold"] = conf_thre
+
+        artifact = wandb.Artifact("training_log", type="dir")
+        artifact.add_dir(name)
+        run.log_artifact(artifact, aliases=["latest", "best"])
 
         f_log.close()
         run.alert(title="学習が終了しました", text="学習が終了しました")
