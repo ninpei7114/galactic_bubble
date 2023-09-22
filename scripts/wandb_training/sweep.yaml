@@ -1,9 +1,5 @@
 program: ./train_main.py
 method: bayes
-command:
-- ${args}
-- --l18_infer
-- --ring_select
 metric:
   name: val_f1_score
   goal: maximize

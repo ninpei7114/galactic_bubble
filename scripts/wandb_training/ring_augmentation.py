@@ -218,7 +218,7 @@ def catalogue(choice, args):
         bub_2007_change = bub_2007.set_index("__CWP2007_")
         CH = pd.concat([bub_2006_change, bub_2007_change])
         CH["CH"] = CH.index
-        if args.ring_select:
+        if args.ring_select_false:
             print("#######################")
             print("   Ring selection")
             print("#######################")

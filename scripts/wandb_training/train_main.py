@@ -49,8 +49,8 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
     # option
-    parser.add_argument("--l18_infer", action="store_true")
-    parser.add_argument("--ring_select", action="store_true")
+    parser.add_argument("--l18_infer_false", action="store_false")
+    parser.add_argument("--ring_select_false", action="store_false")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
     # NonRing
@@ -166,7 +166,7 @@ def main(args):
         val_best_confthre = train_model(**train_model_params)
 
         # l18領域の推論
-        if args.l18_infer:
+        if args.l18_infer_false:
             f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
