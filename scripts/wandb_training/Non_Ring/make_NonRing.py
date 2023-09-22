@@ -39,7 +39,7 @@ def main(args):
         args (argparse): argparse
 
     example command:
-    >>> python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits -r
+    >>> python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits /workspace/NonRing_png/region_NonRing_png
     """
     ################################################
     ## 領域ごとに作るのか、デフォルトの領域で作るのか選択 ##
