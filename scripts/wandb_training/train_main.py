@@ -37,7 +37,7 @@ def parse_args():
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
     parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
-    parser.add_argument("--Val_mini_batch", default=16, type=int, help="Validation mini-batch size (default: 16)")
+    parser.add_argument("--Val_mini_batch", default=128, type=int, help="Validation mini-batch size (default: 128)")
     parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
     # parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
