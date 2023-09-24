@@ -174,7 +174,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     return mwp, catalogue
 
 
-def calc_TP_FP_FN(mwp, infer):
+def calc_TP_FP_FN(mwp, infer, Rout):
     """TP, FP, FNを計算する
 
     Args:
@@ -192,10 +192,10 @@ def calc_TP_FP_FN(mwp, infer):
     for _, infer_row in infer.iterrows():
         judge = []
         for mwp_i, mwp_row in mwp.iterrows():
-            mwp_GLON_min = mwp_row["GLON"] - mwp_row["Reff"] / 60
-            mwp_GLON_max = mwp_row["GLON"] + mwp_row["Reff"] / 60
-            mwp_GLAT_min = mwp_row["GLAT"] - mwp_row["Reff"] / 60
-            mwp_GLAT_max = mwp_row["GLAT"] + mwp_row["Reff"] / 60
+            mwp_GLON_min = mwp_row["GLON"] - mwp_row[Rout] / 60
+            mwp_GLON_max = mwp_row["GLON"] + mwp_row[Rout] / 60
+            mwp_GLAT_min = mwp_row["GLAT"] - mwp_row[Rout] / 60
+            mwp_GLAT_max = mwp_row["GLAT"] + mwp_row[Rout] / 60
             star_area = (mwp_GLON_max - mwp_GLON_min) * (mwp_GLAT_max - mwp_GLAT_min)
 
             clip_GLON = np.clip([infer_row["ra_min"], infer_row["ra_max"]], mwp_GLON_min, mwp_GLON_max)
@@ -216,7 +216,7 @@ def calc_TP_FP_FN(mwp, infer):
     return TP, FP, mwp_mask
 
 
-def imaging_infer_result(args, frame, save_name, infer_result=False):
+def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
     """推論結果を保存する関数
 
     Args:
@@ -251,10 +251,10 @@ def imaging_infer_result(args, frame, save_name, infer_result=False):
             l_center = row["GLON"]
             b_center = row["GLAT"]
             x_center, y_center = w.all_world2pix(l_center, b_center, 0)
-            x_min = int(x_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
-            x_max = int(x_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
-            y_min = int(y_center) - row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
-            y_max = int(y_center) + row["MajAxis"] / 60 / spitzer_g.header["CD2_2"]
+            x_min = int(x_center) - row[Rout] / 60 / spitzer_g.header["CD2_2"]
+            x_max = int(x_center) + row[Rout] / 60 / spitzer_g.header["CD2_2"]
+            y_min = int(y_center) - row[Rout] / 60 / spitzer_g.header["CD2_2"]
+            y_max = int(y_center) + row[Rout] / 60 / spitzer_g.header["CD2_2"]
 
         width = x_max - x_min
         height = y_max - y_min
@@ -305,7 +305,13 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
         thresholds = [i / 20 for i in range(6, 16, 1)]
     else:
         thresholds = [threshold]
-    Ring_CATALOGUE = ring_augmentation.catalogue("CH", args)
+
+    choice = "CH"
+    if choice == "MWP":
+        Rout = "Reff"
+    else:
+        Rout = "Rout"
+    Ring_CATALOGUE = ring_augmentation.catalogue(choice, args)
     F1_score = -10000
 
     for conf_thre in thresholds:
@@ -322,7 +328,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
             region_dict[w][1].append(s)
 
         mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
-        _, FP_, mwp_mask = calc_TP_FP_FN(mwp, catalogue)
+        _, FP_, mwp_mask = calc_TP_FP_FN(mwp, catalogue, Rout)
 
         TP = mwp_mask.count(True)
         FN = mwp_mask.count(False)
@@ -339,9 +345,11 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
 
     if save:
         catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
-        imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png")
-        imaging_infer_result(args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png")
-        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/l18_FP.png", infer_result=True)
+        imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png", Rout, infer_result=True)
+        imaging_infer_result(
+            args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png", Rout, infer_result=True
+        )
+        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/l18_FP.png", Rout, infer_result=True)
     return F1_score, Precision, Recall, threthre
 
 
