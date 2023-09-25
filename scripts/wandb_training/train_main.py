@@ -37,7 +37,7 @@ def parse_args():
     parser.add_argument("--num_epoch", type=int, default=300, help="number of total epochs to run (default: 300)")
     parser.add_argument("--Ring_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
-    parser.add_argument("--Val_mini_batch", default=256, type=int, help="Validation mini-batch size (default: 256)")
+    parser.add_argument("--Val_mini_batch", default=128, type=int, help="Validation mini-batch size (default: 128)")
     parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
     # parser.add_argument("--region_suffle", "-s", action="store_true")
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
@@ -78,6 +78,8 @@ def main(args):
     torch.backends.cudnn.benchmark = True
     ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+    if os.path.exists(args.savedir_path):
+        shutil.rmtree(args.savedir_path)
     os.makedirs(args.savedir_path, exist_ok=True)
     default_val_size = np.array([150, 300, 600, 900, 1200, 1800, 2500, 3000])
     for remove_size in args.Val_remove_size_list:
