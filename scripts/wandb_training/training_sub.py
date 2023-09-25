@@ -345,10 +345,8 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
 
     if save:
         catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
-        imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png", Rout, infer_result=True)
-        imaging_infer_result(
-            args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png", Rout, infer_result=True
-        )
+        imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png", Rout)
+        imaging_infer_result(args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png", Rout)
         imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/l18_FP.png", Rout, infer_result=True)
     return F1_score, Precision, Recall, threthre
 
