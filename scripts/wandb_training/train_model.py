@@ -78,7 +78,7 @@ def train_model(
                 print_and_log(f_log, f" ({phase}) ")
                 net.train()
             else:
-                print_and_log(f_log, f" \n ({phase}) ")
+                print_and_log(f_log, f" \n ({phase}) \n")
                 net.eval()
                 result, position, regions = [], [], []
 
