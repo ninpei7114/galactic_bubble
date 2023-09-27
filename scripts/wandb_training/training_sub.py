@@ -308,7 +308,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
 
     choice = "CH"
     if choice == "MWP":
-        Rout = "Reff"
+        Rout = "MajAxis"
     else:
         Rout = "Rout"
     Ring_CATALOGUE = ring_augmentation.catalogue(choice, args)
@@ -316,32 +316,32 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
 
     for conf_thre in thresholds:
         predict_bbox, scores, wcs_regions = calc_location_each_region(detections, position, regions, conf_thre)
+        if len(predict_bbox) > 0:
+            ## 領域ごとの位置情報とscoreを格納する辞書を作成
+            region_dict = {}
+            for i in list(collections.Counter(wcs_regions).keys()):
+                region_dict[i] = [[], []]
 
-        ## 領域ごとの位置情報とscoreを格納する辞書を作成
-        region_dict = {}
-        for i in list(collections.Counter(wcs_regions).keys()):
-            region_dict[i] = [[], []]
+            ## 領域ごとのbboxとscoreを格納
+            for p, s, w in zip(predict_bbox, scores, wcs_regions):
+                region_dict[w][0].append(p)
+                region_dict[w][1].append(s)
 
-        ## 領域ごとのbboxとscoreを格納
-        for p, s, w in zip(predict_bbox, scores, wcs_regions):
-            region_dict[w][0].append(p)
-            region_dict[w][1].append(s)
+            mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
+            _, FP_, mwp_mask = calc_TP_FP_FN(mwp, catalogue, Rout)
 
-        mwp, catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
-        _, FP_, mwp_mask = calc_TP_FP_FN(mwp, catalogue, Rout)
+            TP = mwp_mask.count(True)
+            FN = mwp_mask.count(False)
+            FP = len(FP_)
+            Precision_ = TP / (TP + FP)
+            Recall_ = TP / (TP + FN)
+            F1_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
 
-        TP = mwp_mask.count(True)
-        FN = mwp_mask.count(False)
-        FP = len(FP_)
-        Precision_ = TP / (TP + FP)
-        Recall_ = TP / (TP + FN)
-        F1_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_)
-
-        if F1_score_ > F1_score:
-            F1_score = F1_score_
-            threthre = conf_thre
-            Precision = Precision_
-            Recall = Recall_
+            if F1_score_ > F1_score:
+                F1_score = F1_score_
+                threthre = conf_thre
+                Precision = Precision_
+                Recall = Recall_
 
     if save:
         catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
