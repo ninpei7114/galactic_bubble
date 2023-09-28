@@ -32,7 +32,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
     """
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     choice_catalogue = "CH"  # choice catalogue from 'CH' or 'MWP'
-    Ring_CATALOGUE = ring_augmentation.catalogue(choice_catalogue, args)
+    Ring_CATALOGUE = ring_augmentation.catalogue(choice_catalogue, args.ring_select_false)
     pbar = tqdm.tqdm(range(len(train_l)))
     flip = train_cfg["flip"]
     rot = train_cfg["rotate"]
