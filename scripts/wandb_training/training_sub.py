@@ -139,7 +139,8 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
         catalogue (pandas dataframe): wcs座標系に変換した検出リングの位置座標
     """
     target_MWP_catalogue = []
-    catalogue = pd.DataFrame(columns=["dec_min", "ra_min", "dec_max", "ra_max"])
+    target_MWP_catalogue_fits_path = []
+    catalogue = []
 
     for key, value in region_dict.items():
         bbox = torch.Tensor(np.concatenate(value[0]))
@@ -158,18 +159,21 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
 
         MWP_ = Ring_CATALOGUE.query("@GLON_min < GLON <= @GLON_max")
         target_MWP_catalogue.append(MWP_)
+        target_MWP_catalogue_fits_path.extend([f"spitzer_{key}_rgb"] * len(MWP_))
 
         for i in bbox:
             GLONmax, GLATmin = w.all_pix2world(i[0], i[1], 0)
             GLONmin, GLATmax = w.all_pix2world(i[2], i[3], 0)
             temp = pd.DataFrame(
-                columns=["dec_min", "ra_min", "dec_max", "ra_max"],
-                data=[[GLATmin, GLONmin, GLATmax, GLONmax]],
+                columns=["dec_min", "ra_min", "dec_max", "ra_max", "fits_path"],
+                data=[[GLATmin, GLONmin, GLATmax, GLONmax, f"spitzer_{key}_rgb"]],
                 dtype="float64",
             )
-            catalogue = pd.concat([catalogue, temp])
+            catalogue.append(temp)
 
+    catalogue = pd.concat(catalogue)
     mwp = pd.concat(target_MWP_catalogue).reset_index()
+    mwp["fits_path"] = target_MWP_catalogue_fits_path
 
     return mwp, catalogue
 
@@ -227,23 +231,33 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
 
     """
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
+    test_region = [
+        "spitzer_01200+0000_rgb",
+        "spitzer_01500+0000_rgb",
+        "spitzer_01800+0000_rgb",
+        "spitzer_02100+0000_rgb",
+    ]
+    fits_data_dict = {}
+    for fits in test_region:
+        data_fits_R = args.spitzer_path + f"/{fits}/r.fits"  ##2D
+        data_fits_G = args.spitzer_path + f"/{fits}/g.fits"  ##2D
+        data_fits_B = args.spitzer_path + f"/{fits}/b.fits"
+
+        spitzer_g = astropy.io.fits.open(data_fits_G)[0]
+        w = astropy.wcs.WCS(spitzer_g.header)
+        data = np.concatenate(
+            [
+                remove_nan(astropy.io.fits.getdata(data_fits_R)[:, :, None]),
+                remove_nan(astropy.io.fits.getdata(data_fits_G)[:, :, None]),
+                remove_nan(astropy.io.fits.getdata(data_fits_B)[:, :, None]),
+            ],
+            axis=2,
+        )
+        fits_data_dict[fits] = [data, w]
+
     data_list = []
-    data_fits_R = args.spitzer_path + "/spitzer_01800+0000_rgb/r.fits"  ##2D
-    data_fits_G = args.spitzer_path + "/spitzer_01800+0000_rgb/g.fits"  ##2D
-    data_fits_B = args.spitzer_path + "/spitzer_01800+0000_rgb/b.fits"
-
-    spitzer_g = astropy.io.fits.open(data_fits_G)[0]
-    w = astropy.wcs.WCS(spitzer_g.header)
-    data = np.concatenate(
-        [
-            remove_nan(astropy.io.fits.getdata(data_fits_R)[:, :, None]),
-            remove_nan(astropy.io.fits.getdata(data_fits_G)[:, :, None]),
-            remove_nan(astropy.io.fits.getdata(data_fits_B)[:, :, None]),
-        ],
-        axis=2,
-    )
-
     for _, row in frame.iterrows():
+        data, w = fits_data_dict[row["fits_path"]]
         if infer_result:
             x_min, y_min = w.all_world2pix(row["ra_max"], row["dec_min"], 0)
             x_max, y_max = w.all_world2pix(row["ra_min"], row["dec_max"], 0)
@@ -312,7 +326,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
         Rout = "MajAxis"
     else:
         Rout = "Rout"
-    Ring_CATALOGUE = ring_augmentation.catalogue(choice, args)
+    Ring_CATALOGUE = ring_augmentation.catalogue(choice, ring_select=True)
     F1_score = -10000
 
     for conf_thre in thresholds:
@@ -345,10 +359,10 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
                 Recall = Recall_
 
     if save:
-        catalogue.to_csv(save_path + "/infer_catalogue_l18.csv")
-        imaging_infer_result(args, mwp[mwp_mask], save_path + "/l18_TP.png", Rout)
-        imaging_infer_result(args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/l18_FN.png", Rout)
-        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/l18_FP.png", Rout, infer_result=True)
+        catalogue.to_csv(save_path + "/infer_catalogue_test.csv")
+        imaging_infer_result(args, mwp[mwp_mask], save_path + "/test_TP.png", Rout)
+        imaging_infer_result(args, mwp[list(map(lambda x: not x, mwp_mask))], save_path + "/test_FN.png", Rout)
+        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/test_FP.png", Rout, infer_result=True)
     return F1_score, Precision, Recall, threthre
 
 
