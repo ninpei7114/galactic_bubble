@@ -167,7 +167,6 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
             temp = pd.DataFrame(
                 columns=["dec_min", "ra_min", "dec_max", "ra_max", "fits_path"],
                 data=[[GLATmin, GLONmin, GLATmax, GLONmax, f"spitzer_{key}_rgb"]],
-                dtype="float64",
             )
             catalogue.append(temp)
 
