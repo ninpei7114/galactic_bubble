@@ -172,7 +172,7 @@ def main(args):
             f1_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
-                [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
+                [f"test F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
             )
             wandb.run.summary["test_f1_score"] = f1_score
             wandb.run.summary["test_precision"] = pre
