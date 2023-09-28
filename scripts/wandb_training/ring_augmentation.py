@@ -208,7 +208,7 @@ def flip_data(trans_data, trans_info):
     return ud, lr, ud_info, lr_info
 
 
-def catalogue(choice, args):
+def catalogue(choice, ring_select=False):
     if choice == "CH":
         viz = astroquery.vizier.Vizier(columns=["*"])
         viz.ROW_LIMIT = -1
@@ -218,7 +218,7 @@ def catalogue(choice, args):
         bub_2007_change = bub_2007.set_index("__CWP2007_")
         CH = pd.concat([bub_2006_change, bub_2007_change])
         CH["CH"] = CH.index
-        if args.ring_select_false:
+        if ring_select:
             print("\n#######################")
             print("   Ring selection")
             print("#######################")
