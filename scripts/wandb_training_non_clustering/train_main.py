@@ -11,7 +11,7 @@ import torch.optim as optim
 import wandb
 from PIL import ImageFile
 
-import l18_infer
+import test_infer
 from train_model import train_model
 from training_sub import print_and_log, weights_init
 from utils.ssd_model import SSD, MultiBoxLoss
@@ -49,7 +49,7 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
     # option
-    parser.add_argument("--l18_infer_false", action="store_false")
+    parser.add_argument("--test_infer_false", action="store_false")
     parser.add_argument("--ring_select_false", action="store_false")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
@@ -168,16 +168,16 @@ def main(args):
         val_best_confthre = train_model(**train_model_params)
 
         # l18領域の推論
-        if args.l18_infer_false:
-            f1_score, pre, re, conf_thre = l18_infer.infer_l18(name, args, default_val_size, val_best_confthre)
+        if args.test_infer_false:
+            f1_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
                 [f"l18 F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
             )
-            wandb.run.summary["l18_f1_score"] = f1_score
-            wandb.run.summary["l18_precision"] = pre
-            wandb.run.summary["l18_recall"] = re
-            wandb.run.summary["l18_conf_threshold"] = conf_thre
+            wandb.run.summary["test_f1_score"] = f1_score
+            wandb.run.summary["test_precision"] = pre
+            wandb.run.summary["test_recall"] = re
+            wandb.run.summary["test_conf_threshold"] = conf_thre
 
         artifact = wandb.Artifact("training_log", type="dir")
         artifact.add_dir(name)
