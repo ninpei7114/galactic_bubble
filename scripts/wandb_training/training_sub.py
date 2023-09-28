@@ -277,9 +277,10 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
             res_data = norm_res(res_data)
             data_list.append(res_data)
 
-    data_list = np.uint8(np.array(data_list) * 255)
-    data_list[:, :, :, 2] = 0
-    data_view_rectangl(10, data_list).save(save_name)
+    if len(data_list) >= 1:
+        data_list = np.uint8(np.array(data_list) * 255)
+        data_list[:, :, :, 2] = 0
+        data_view_rectangl(10, data_list).save(save_name)
 
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
