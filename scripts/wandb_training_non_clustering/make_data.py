@@ -23,7 +23,7 @@ class make_training_val_data:
     :注意書き:
     >>> NonRingは毎回作成は高コストなため、事前に作成して、copyする。
     >>> 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない。
-    >>> "spitzer_01800+0000_rgb"は、Ueda Modelとの比較で用いるため使用しない。
+    >>> "spitzer_01200+0000_rgb", "spitzer_01500+0000_rgb", "spitzer_01800+0000_rgb", "spitzer_02100+0000_rgb"は、テスト領域なため使用しない。
     """
 
     def __init__(self, augmentation_name, f_log, args):
@@ -33,16 +33,16 @@ class make_training_val_data:
         self.args = args
         # fmt: off
         fits_name = [
-            "spitzer_00300+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_00900+0000_rgb", "spitzer_01200+0000_rgb",
-            "spitzer_01500+0000_rgb", "spitzer_02100+0000_rgb", "spitzer_02400+0000_rgb", "spitzer_02700+0000_rgb",
-            "spitzer_03000+0000_rgb", "spitzer_03300+0000_rgb", "spitzer_03600+0000_rgb", "spitzer_03900+0000_rgb",
-            "spitzer_04200+0000_rgb", "spitzer_04500+0000_rgb", "spitzer_04800+0000_rgb", "spitzer_05100+0000_rgb",
-            "spitzer_05400+0000_rgb", "spitzer_05700+0000_rgb", "spitzer_06000+0000_rgb", "spitzer_29700+0000_rgb",
-            "spitzer_30000+0000_rgb", "spitzer_30300+0000_rgb", "spitzer_30600+0000_rgb", "spitzer_30900+0000_rgb",
-            "spitzer_31200+0000_rgb", "spitzer_31500+0000_rgb", "spitzer_31800+0000_rgb", "spitzer_32100+0000_rgb",
-            "spitzer_32400+0000_rgb", "spitzer_32700+0000_rgb", "spitzer_33000+0000_rgb", "spitzer_33300+0000_rgb",
-            "spitzer_33600+0000_rgb", "spitzer_33900+0000_rgb", "spitzer_34200+0000_rgb", "spitzer_34500+0000_rgb",
-            "spitzer_34800+0000_rgb", "spitzer_35100+0000_rgb", "spitzer_35400+0000_rgb", "spitzer_35700+0000_rgb",
+            "spitzer_00300+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_00900+0000_rgb", "spitzer_02400+0000_rgb",
+            "spitzer_02700+0000_rgb", "spitzer_03000+0000_rgb", "spitzer_03300+0000_rgb", "spitzer_03600+0000_rgb",
+            "spitzer_03900+0000_rgb", "spitzer_04200+0000_rgb", "spitzer_04500+0000_rgb", "spitzer_04800+0000_rgb",
+            "spitzer_05100+0000_rgb", "spitzer_05400+0000_rgb", "spitzer_05700+0000_rgb", "spitzer_06000+0000_rgb",
+            "spitzer_29700+0000_rgb", "spitzer_30000+0000_rgb", "spitzer_30300+0000_rgb", "spitzer_30600+0000_rgb",
+            "spitzer_30900+0000_rgb", "spitzer_31200+0000_rgb", "spitzer_31500+0000_rgb", "spitzer_31800+0000_rgb",
+            "spitzer_32100+0000_rgb", "spitzer_32400+0000_rgb", "spitzer_32700+0000_rgb", "spitzer_33000+0000_rgb",
+            "spitzer_33300+0000_rgb", "spitzer_33600+0000_rgb", "spitzer_33900+0000_rgb", "spitzer_34200+0000_rgb",
+            "spitzer_34500+0000_rgb", "spitzer_34800+0000_rgb", "spitzer_35100+0000_rgb", "spitzer_35400+0000_rgb",
+            "spitzer_35700+0000_rgb",
         ]
         # fmt: on
 
@@ -154,7 +154,7 @@ class make_training_val_data:
         ## TrainingとValidationの Ring & NonRing の枚数を取得
         train_Ring_num = len(glob.glob(f"{self.save_data_path}/train/ring/Ring_*.json"))
         val_Ring_num = len(glob.glob(f"{self.save_data_path}/val/Ring_*.json"))
-        Train_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/train/nonring/*/NonRing_*.json"))
+        Train_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/train/nonring/NonRing_*.json"))
         Val_Non_Ring_num = len(glob.glob(f"{self.save_data_path}/val/NonRing_*.json"))
 
         print_and_log(
