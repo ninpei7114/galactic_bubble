@@ -102,7 +102,7 @@ class make_training_val_data:
         ## Trainingに用いるNon-Ringデータをコピー ##
         ########################################
         NonRing_num_list = []
-        # if self.args.region_suffle:
+
         ## 領域ごとのNonRingをcopyする。
         for cl in NonRing_class_num:
             ## Non-RingのクラスごとにNonRingをコピーしていく
