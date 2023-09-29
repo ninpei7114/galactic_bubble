@@ -47,14 +47,14 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
     if flag:
         ## 画像処理のconvolutionをする際に耳ができるため、
         ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
-        half_width = (x_pix_max - x_pix_min) * 25 / 52
+        half_width = (x_pix_max - x_pix_min) * 2 / 52
         ## rはRingの半径pixを求めている
         r = int(((x_pix_max - half_width) - (x_pix_min + half_width)) / (2 * random_num))
 
         ## Ringが画像にはみ出さないように、切り出す位置をずらし、
         ## 画像内のRingの位置を変える。
-        x_offset = trans_rg.uniform(-(random_num - 0.5) * r, (random_num - 0.5) * r)
-        y_offset = trans_rg.uniform(-(random_num - 0.5) * r, (random_num - 0.5) * r)
+        x_offset = trans_rg.uniform(-(random_num - 1) * r, (random_num - 1) * r)
+        y_offset = trans_rg.uniform(-(random_num - 1) * r, (random_num - 1) * r)
         x_pix_min = x_pix_min + int(x_offset)
         x_pix_max = x_pix_max + int(x_offset)
         y_pix_min = y_pix_min + int(y_offset)
