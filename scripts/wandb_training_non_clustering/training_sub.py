@@ -138,9 +138,9 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
         mwp (pandas dataframe): Validation領域内のMWPリングカタログ
         catalogue (pandas dataframe): wcs座標系に変換した検出リングの位置座標
     """
-    target_MWP_catalogue = []
-    target_MWP_catalogue_fits_path = []
-    catalogue = []
+    target_catalogue = []
+    target_catalogue_fits_path = []
+    infer_catalogue = []
 
     for key, value in region_dict.items():
         bbox = torch.Tensor(np.concatenate(value[0]))
@@ -158,8 +158,8 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
         GLON_max, GLAT_max = w.all_pix2world(0, a, 0)
 
         MWP_ = Ring_CATALOGUE.query("@GLON_min < GLON <= @GLON_max")
-        target_MWP_catalogue.append(MWP_)
-        target_MWP_catalogue_fits_path.extend([f"spitzer_{key}_rgb"] * len(MWP_))
+        target_catalogue.append(MWP_)
+        target_catalogue_fits_path.extend([f"spitzer_{key}_rgb"] * len(MWP_))
 
         for i in bbox:
             GLONmax, GLATmin = w.all_pix2world(i[0], i[1], 0)
@@ -168,13 +168,15 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
                 columns=["dec_min", "ra_min", "dec_max", "ra_max", "fits_path"],
                 data=[[GLATmin, GLONmin, GLATmax, GLONmax, f"spitzer_{key}_rgb"]],
             )
-            catalogue.append(temp)
+            infer_catalogue.append(temp)
 
-    catalogue = pd.concat(catalogue)
-    mwp = pd.concat(target_MWP_catalogue).reset_index()
-    mwp["fits_path"] = target_MWP_catalogue_fits_path
+    infer_catalogue = pd.concat(infer_catalogue)
+    target_catalogue = pd.concat(target_catalogue)  # .reset_index()
+    mask = ~target_catalogue.duplicated()
+    target_catalogue = target_catalogue[mask]
+    target_catalogue["fits_path"] = list(np.array(target_catalogue_fits_path)[mask])
 
-    return mwp, catalogue
+    return target_catalogue.reset_index(), infer_catalogue
 
 
 def calc_TP_FP_FN(mwp, infer, Rout):
