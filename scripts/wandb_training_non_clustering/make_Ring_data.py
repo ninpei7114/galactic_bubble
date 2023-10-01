@@ -156,8 +156,8 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 count = make_png_and_json(
                                     save_data_path, count, processing.norm_res(lr_res_data), lr_info
                                 )
-                                frame_mwp_train.append(lr_info)
                                 frame_mwp_train.append(ud_info)
+                                frame_mwp_train.append(lr_info)
                             else:
                                 pass
                         else:
