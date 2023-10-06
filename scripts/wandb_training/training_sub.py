@@ -322,12 +322,11 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
     else:
         thresholds = [threshold]
 
-    choice = "CH"
-    if choice == "MWP":
+    if args.val_ring_catalogue == "MWP":
         Rout = "MajAxis"
     else:
         Rout = "Rout"
-    Ring_CATALOGUE = ring_augmentation.catalogue(choice, ring_select=True)
+    Ring_CATALOGUE = ring_augmentation.catalogue(args.val_ring_catalogue, ring_select=True)
     F1_score = -10000
 
     for conf_thre in thresholds:
