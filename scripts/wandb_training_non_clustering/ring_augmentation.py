@@ -208,7 +208,7 @@ def flip_data(trans_data, trans_info):
     return ud, lr, ud_info, lr_info
 
 
-def catalogue(choice, ring_select=False):
+def catalogue(choice, ring_select=False, rank_path="rank_3.npy"):
     if choice == "CH":
         viz = astroquery.vizier.Vizier(columns=["*"])
         viz.ROW_LIMIT = -1
@@ -222,7 +222,7 @@ def catalogue(choice, ring_select=False):
             print("\n#######################")
             print("   Ring selection")
             print("#######################")
-            rank_2_3 = np.load("rank_3.npy")
+            rank_2_3 = np.load(rank_path)
             CH = CH.loc[rank_2_3]
         return CH
 
@@ -232,6 +232,13 @@ def catalogue(choice, ring_select=False):
         MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
         MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
         MWP = MWP.set_index("MWP")
+        MWP["MWP"] = MWP.index
+        if ring_select:
+            print("\n#######################")
+            print("   Ring selection")
+            print("#######################")
+            rank_3 = np.load("MWP_rank3_name.npy")
+            MWP = MWP.loc[rank_3]
         return MWP
 
     else:
