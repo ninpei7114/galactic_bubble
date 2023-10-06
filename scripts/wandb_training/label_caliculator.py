@@ -4,7 +4,7 @@ import numpy as np
 class label_caliculator(object):
     def __init__(self, choice, world):
         if choice == "MWP":
-            self.Rout = "Reff"
+            self.Rout = "MajAxis"
         else:
             self.Rout = "Rout"
 
