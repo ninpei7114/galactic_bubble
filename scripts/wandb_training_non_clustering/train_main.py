@@ -51,6 +51,8 @@ def parse_args():
     # option
     parser.add_argument("--test_infer_false", action="store_false")
     parser.add_argument("--ring_select_false", action="store_false")
+    parser.add_argument("--training_ring_catalogue", type=str, default="CH")
+    parser.add_argument("--val_ring_catalogue", type=str, default="CH")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
     # NonRing
@@ -74,14 +76,14 @@ def main(args):
         --l18_infer --ring_select
 
     """
-    torch.manual_seed(args.fits_random_state)
+    torch.manual_seed(args.data_random_state)
     torch.backends.cudnn.benchmark = True
     ImageFile.LOAD_TRUNCATED_IMAGES = True
 
     if os.path.exists(args.savedir_path):
         shutil.rmtree(args.savedir_path)
     os.makedirs(args.savedir_path, exist_ok=True)
-    default_val_size = np.array([150, 300, 600, 900, 1200, 1800, 2500, 3000])
+    default_val_size = np.array([150, 300, 600, 900, 1200, 1800, 2400, 3000])
     for remove_size in args.Val_remove_size_list:
         default_val_size = default_val_size[default_val_size != remove_size]
 
