@@ -114,10 +114,12 @@ def main(args):
             "#######################",
             "   args parameters",
             "#######################",
-            # f"region shuffle: {args.region_suffle}",
             f"fits_index: {args.fits_index}",
             f"n_splits: {args.n_splits}",
             f"fits_random_state: {args.fits_random_state}",
+            f"data_random_state: {args.data_random_state}",
+            f"training_ring_catalogue: {args.training_ring_catalogue}",
+            f"val_ring_catalogue: {args.val_ring_catalogue}",
             " ",
             "====================================",
         ]
