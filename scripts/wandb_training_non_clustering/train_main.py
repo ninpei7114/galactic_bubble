@@ -81,6 +81,7 @@ def main(args):
     ImageFile.LOAD_TRUNCATED_IMAGES = True
 
     if os.path.exists(args.savedir_path):
+        print("REMOVE FILES...")
         shutil.rmtree(args.savedir_path)
     os.makedirs(args.savedir_path, exist_ok=True)
     default_val_size = np.array([150, 300, 600, 900, 1200, 1800, 2400, 3000])
