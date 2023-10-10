@@ -231,8 +231,7 @@ def catalogue(choice, ring_select=False, rank_path="rank_3.npy"):
         viz.ROW_LIMIT = -1
         MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
         MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
-        MWP = MWP.set_index("MWP")
-        MWP["MWP"] = MWP.index
+        MWP.index = MWP["MWP"].tolist()
         if ring_select:
             print("\n#######################")
             print("   Ring selection")
