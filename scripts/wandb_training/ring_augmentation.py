@@ -266,7 +266,7 @@ def catalogue(choice, ring_select=False, rank_path="rank_3.npy"):
             MWP_name = np.load("MWP_rank3_name.npy")
             CH_name = np.load("rank_3.npy")
             CH_MWP_name = np.concatenate([CH_name, MWP_name])
-            CH_MWP.loc[CH_MWP_name]
+            CH_MWP = CH_MWP.loc[CH_MWP_name]
 
         return CH_MWP
 
