@@ -5,7 +5,9 @@ class label_caliculator(object):
     def __init__(self, choice, world):
         if choice == "MWP":
             self.Rout = "MajAxis"
-        else:
+        elif choice == "CH":
+            self.Rout = "Rout"
+        elif choice == "SUM":
             self.Rout = "Rout"
 
         self.world = world
