@@ -248,7 +248,7 @@ def catalogue(choice, ring_select=False, rank_path="rank_3.npy"):
         bub_2006_change = bub_2006.set_index("__CPA2006_")
         bub_2007_change = bub_2007.set_index("__CWP2007_")
         CH = pd.concat([bub_2006_change, bub_2007_change])
-        CH["CH"] = CH.index
+        CH["SUM"] = CH.index
 
         viz = astroquery.vizier.Vizier(columns=["*"])
         viz.ROW_LIMIT = -1
@@ -256,6 +256,7 @@ def catalogue(choice, ring_select=False, rank_path="rank_3.npy"):
         MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
         MWP.index = MWP["MWP"].tolist()
         MWP = MWP.rename({"MajAxis": "Rout"}, axis="columns")
+        MWP = MWP.rename({"MWP": "SUM"}, axis="columns")
         CH_MWP = pd.concat([CH, MWP])
 
         if ring_select:
