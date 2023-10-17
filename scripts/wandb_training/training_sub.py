@@ -363,6 +363,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
 
     if save:
         infer_catalogue.to_csv(save_path + "/infer_catalogue_test.csv")
+        target_catalogue.to_csv(save_path + "/target_catalogue_test.csv")
         imaging_infer_result(args, target_catalogue[target_mask], save_path + "/test_TP.png", Rout)
         imaging_infer_result(
             args, target_catalogue[list(map(lambda x: not x, target_mask))], save_path + "/test_FN.png", Rout
