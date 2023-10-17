@@ -342,11 +342,11 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
                 region_dict[w][0].append(p)
                 region_dict[w][1].append(s)
 
-            target_catalogue, infer_catalogue = make_catalogue(region_dict, Ring_CATALOGUE, args)
-            _, FP_, target_mask = calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout)
+            target_catalogue_, infer_catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
+            _, FP_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout)
 
-            TP = target_mask.count(True)
-            FN = target_mask.count(False)
+            TP = target_mask_.count(True)
+            FN = target_mask_.count(False)
             FP = len(FP_)
             Precision_ = TP / (TP + FP)
             Recall_ = TP / (TP + FN)
@@ -357,6 +357,9 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
                 threthre = conf_thre
                 Precision = Precision_
                 Recall = Recall_
+                infer_catalogue = infer_catalogue_
+                target_catalogue = target_catalogue_
+                target_mask = target_mask_
 
     if save:
         infer_catalogue.to_csv(save_path + "/infer_catalogue_test.csv")
