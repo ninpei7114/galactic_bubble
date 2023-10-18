@@ -289,8 +289,9 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
             res_data = pi[
                 int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
             ]
-            res_data = norm_res(res_data)
-            data_list.append(res_data)
+            if np.isnan(res_data.sum()) or np.std(res_data[:, :, 0]) < 1e-9:
+                res_data = norm_res(res_data)
+                data_list.append(res_data)
 
     if len(data_list) >= 1:
         data_list = np.uint8(np.array(data_list) * 255)
