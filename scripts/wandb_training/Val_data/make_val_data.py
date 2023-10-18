@@ -98,7 +98,7 @@ def main(args):
         w = astropy.wcs.WCS(spitzer_rfits.header)
         GLON_min, GLAT_min = w.all_pix2world(data.shape[1], 0, 0)
         GLON_max, GLAT_max = w.all_pix2world(0, data.shape[0], 0)
-        Ring_catalogue = Ring_CATALOGUE.query("@GLON_min < GLON <= @GLON_max")
+        Ring_catalogue = Ring_CATALOGUE.query("@GLON_min <= GLON <= @GLON_max")
         label_cal = label_caliculator.label_caliculator(choice, w)
         label_cal.all_star(Ring_catalogue)
 
