@@ -290,6 +290,8 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
                 int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
             ]
             if np.isnan(res_data.sum()) or np.std(res_data[:, :, 0]) < 1e-9:
+                pass
+            else:
                 res_data = norm_res(res_data)
                 data_list.append(res_data)
 
