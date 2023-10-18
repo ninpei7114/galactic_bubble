@@ -138,14 +138,16 @@ class imaging_validation:
             extra_y_min = self.offset_ymin - self.cut_shape / 50
             extra_y_max = self.offset_ymin + self.cut_shape + self.cut_shape / 50
             data_c = self.data[int(extra_y_min) : int(extra_y_max), int(extra_x_min) : int(extra_x_max)].view()
+            d = copy.deepcopy(data_c)
+            d = conv(300, self.obj_sig, d)
+            d = d[
+                int(self.cut_shape / 52) : int(self.cut_shape * 51 / 52),
+                int(self.cut_shape / 52) : int(self.cut_shape * 51 / 52),
+            ]
 
-            if not np.isnan(data_c).any():
-                d = copy.deepcopy(data_c)
-                d = conv(300, self.obj_sig, d)
-                d = d[
-                    int(self.cut_shape / 50) : int(self.cut_shape * 51 / 50),
-                    int(self.cut_shape / 50) : int(self.cut_shape * 51 / 50),
-                ]
+            if np.isnan(d.sum()) or np.std(d[:, :, 0]) < 1e-9:
+                pass
+            else:
                 self.cut_region = norm_res(d).astype(np.float32)
 
                 self.label_cal.make_label(self.offset_xmin, self.offset_ymin, self.cut_shape)
@@ -162,8 +164,6 @@ class imaging_validation:
                 if Ring_or_NonRing == "Ring":
                     Ring_data.append(self.cut_region)
                     Ring_info.append(self.info)
-            else:
-                pass
 
         Ring_info = pd.DataFrame(Ring_info)
         return np.array(Ring_data), Ring_info
