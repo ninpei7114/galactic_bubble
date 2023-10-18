@@ -89,7 +89,7 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
                 int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
             ]
 
-            if np.isnan(pi_conv.sum()):
+            if np.isnan(pi_conv.sum()) or np.std(pi_conv[:, :, 0]) < 1e-9:
                 return False, 0, 0
 
             else:
