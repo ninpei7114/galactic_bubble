@@ -145,7 +145,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     for key, value in region_dict.items():
         bbox = torch.Tensor(np.concatenate(value[0]))
         scores = torch.Tensor(np.concatenate(value[1]))
-        keep, count = nm_suppression(bbox, scores, overlap=0.3, top_k=3000)
+        keep, count = nm_suppression(bbox, scores, overlap=0.3, top_k=5000)
         keep = keep[:count]
         bbox = bbox[keep]
         scores = scores[keep]
