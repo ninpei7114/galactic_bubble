@@ -16,8 +16,8 @@ def infer_test(model_path, args, val_size, val_best_confthre):
     """l18の推論を行う関数
 
     Args:
-        model_path (str): 推論を行うモデルのパス
-        args (args)     : argparseの引数
+        model_path (str): path of the model to infer
+        args (args)     : argparse
 
     Returns:
         f1_score (float)      : F1 score
