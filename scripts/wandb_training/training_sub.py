@@ -322,7 +322,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
         threthre (float): 0.3~0.8の数字
     """
     if threshold is None:
-        thresholds = [i / 20 for i in range(6, 16, 1)]
+        thresholds = [i / 20 for i in range(6, 17, 1)]
     else:
         thresholds = [threshold]
 
