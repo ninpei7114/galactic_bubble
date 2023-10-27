@@ -266,10 +266,11 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
             l_center = row["GLON"]
             b_center = row["GLAT"]
             x_center, y_center = w.all_world2pix(l_center, b_center, 0)
-            x_min = int(x_center) - row[Rout] / 60 / spitzer_g.header["CD2_2"]
-            x_max = int(x_center) + row[Rout] / 60 / spitzer_g.header["CD2_2"]
-            y_min = int(y_center) - row[Rout] / 60 / spitzer_g.header["CD2_2"]
-            y_max = int(y_center) + row[Rout] / 60 / spitzer_g.header["CD2_2"]
+            w_rout = 1.3 * row[Rout] / 60 / spitzer_g.header["CD2_2"]
+            x_min = int(x_center) - w_rout
+            x_max = int(x_center) + w_rout
+            y_min = int(y_center) - w_rout
+            y_max = int(y_center) + w_rout
 
         width = x_max - x_min
         height = y_max - y_min
