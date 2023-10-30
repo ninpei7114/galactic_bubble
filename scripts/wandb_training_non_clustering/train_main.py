@@ -51,8 +51,8 @@ def parse_args():
     # option
     parser.add_argument("--test_infer_false", action="store_false")
     parser.add_argument("--ring_select_false", action="store_false")
-    parser.add_argument("--training_ring_catalogue", type=str, default="CH")
-    parser.add_argument("--val_ring_catalogue", type=str, default="CH")
+    parser.add_argument("--training_ring_catalogue", type=str, default="MWP")
+    parser.add_argument("--val_ring_catalogue", type=str, default="MWP")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
     # NonRing
@@ -120,6 +120,9 @@ def main(args):
             f"data_random_state: {args.data_random_state}",
             f"training_ring_catalogue: {args.training_ring_catalogue}",
             f"val_ring_catalogue: {args.val_ring_catalogue}",
+            f"NoRing_class_num: {args.NonRing_class_num}",
+            f"NoRing_remove_class_list: {args.NonRing_remove_class_list}",
+            f"NoRing_aug_num: {args.NonRing_aug_num}",
             " ",
             "====================================",
         ]
