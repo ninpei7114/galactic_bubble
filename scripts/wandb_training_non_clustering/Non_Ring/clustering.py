@@ -56,7 +56,7 @@ def main(args):
     print("Loading Model....")
     net_weights = torch.load(args.model_checkpoint)
     net_w = SSD()
-    net_w.load_state_dict(net_weights)
+    net_w.load_state_dict(net_weights["model_state_dict"])
     ## vggとextraで構成されるモデルを構築
     ## 特徴量サイズ、1x1x256
     for i in net_w.extras:
