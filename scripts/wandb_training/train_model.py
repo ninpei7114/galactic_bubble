@@ -13,7 +13,7 @@ from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
 from make_figure import make_figure
 from nonring_augmentation import nonring_augmentation
-from training_sub import EarlyStopping_f1_score, calc_f1score_val, management_loss, print_and_log, write_train_log
+from training_sub import EarlyStopping_f1_score, calc_fscore_val, management_loss, print_and_log, write_train_log
 from utils.ssd_model import Detect
 
 
@@ -40,7 +40,7 @@ def train_model(
     )
     detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.3)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
     save_training_val_loss = management_loss()
-    logs, f1_score_val_l = [], []
+    logs, f_score_val_l = [], []
 
     ##########################
     ## Validation dataの作成 ##
@@ -131,13 +131,13 @@ def train_model(
         ##############################
         ## Validation F1 scoreの計算 ##
         ##############################
-        f1_score_val, precision, recall, conf_threshold_val = calc_f1score_val(
+        f_score_val, precision, recall, conf_threshold_val = calc_fscore_val(
             np.concatenate(result), np.array(position), regions, args
         )
-        f1_score_val_l.append(f1_score_val)
+        f_score_val_l.append(f_score_val)
 
         log_epoch = write_train_log(
-            f_log, epoch, loss_train, loss_val, f1_score_val, precision, recall, conf_threshold_val, start_time
+            f_log, epoch, loss_train, loss_val, f_score_val, precision, recall, conf_threshold_val, start_time, args
         )
         run.log(log_epoch)
         logs.append(log_epoch)
@@ -145,7 +145,7 @@ def train_model(
         df.to_csv(augmentation_name + "/log_output.csv")
 
         # early_stopping(epoch_val_loss, net)
-        early_stopping(f1_score_val, net, epoch, optimizer, loss_train, loss_val)
+        early_stopping(f_score_val, net, epoch, optimizer, loss_train, loss_val)
         if early_stopping.early_stop:
             print_and_log(f_log, "Early_Stopping")
             break
@@ -156,6 +156,6 @@ def train_model(
 
     ## lossの推移を描画する
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
-    make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f1_score_val)
+    make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f_score_val_l)
 
     return df.iloc[df["val_f1_score"].idxmax()]["val_conf_threshold"]  # Valのf1_scoreが最大の時のconf_thresholdを返す
