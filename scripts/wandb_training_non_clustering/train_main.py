@@ -39,7 +39,7 @@ def parse_args():
     parser.add_argument("--NonRing_mini_batch", default=32, type=int, help="mini-batch size (default: 32)")
     parser.add_argument("--Val_mini_batch", default=128, type=int, help="Validation mini-batch size (default: 128)")
     parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
-    # parser.add_argument("--region_suffle", "-s", action="store_true")
+    # fits index
     parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     # random seed
@@ -55,10 +55,12 @@ def parse_args():
     parser.add_argument("--val_ring_catalogue", type=str, default="MWP")
     parser.add_argument("--wandb_project", type=str, default="リングの選定")
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
+    parser.add_argument("--fscore", type=str, default="f2_score")
     # NonRing
     parser.add_argument("--NonRing_class_num", type=int, default=8)
     parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 4])
     parser.add_argument("--NonRing_aug_num", nargs="*", type=int, default=[5, 0, 0, 0, 0, 0, 2, 3])
+    # Valiation
     parser.add_argument("--Val_remove_size_list", nargs="*", type=int, default=[])
 
     return parser.parse_args()
@@ -177,12 +179,12 @@ def main(args):
 
         # l18領域の推論
         if args.test_infer_false:
-            f1_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
+            f_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
-                [f"test F1 score: {f1_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
+                [f"test {args.fscore}: {f_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
             )
-            wandb.run.summary["test_f1_score"] = f1_score
+            wandb.run.summary[f"test_{args.fscore}"] = f_score
             wandb.run.summary["test_precision"] = pre
             wandb.run.summary["test_recall"] = re
             wandb.run.summary["test_conf_threshold"] = conf_thre
