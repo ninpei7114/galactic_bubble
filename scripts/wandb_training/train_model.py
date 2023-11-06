@@ -158,4 +158,4 @@ def train_model(
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
     make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f_score_val_l)
 
-    return df.iloc[df["val_f1_score"].idxmax()]["val_conf_threshold"]  # Valのf1_scoreが最大の時のconf_thresholdを返す
+    return df.iloc[df[f"val_{args.fscore}"].idxmax()]["val_conf_threshold"]  # Valのf1_scoreが最大の時のconf_thresholdを返す
