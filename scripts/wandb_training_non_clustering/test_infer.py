@@ -8,7 +8,7 @@ import torch
 import webdataset
 
 from data import od_collate_fn_validation, preprocess_validation
-from training_sub import calc_f1score_val
+from training_sub import calc_fscore_val
 from utils.ssd_model import SSD, Detect
 
 
@@ -93,7 +93,7 @@ def infer_test(model_path, args, val_size, val_best_confthre):
             position.extend(offset)
             regions.extend(region_info)
 
-    f1_score, precision, recall, conf_threshold = calc_f1score_val(
+    f_score, precision, recall, conf_threshold = calc_fscore_val(
         np.concatenate(result),
         np.array(position),
         regions,
@@ -103,4 +103,4 @@ def infer_test(model_path, args, val_size, val_best_confthre):
         save_path=model_path,
     )
 
-    return f1_score, precision, recall, conf_threshold
+    return f_score, precision, recall, conf_threshold
