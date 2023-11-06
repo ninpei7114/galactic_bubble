@@ -303,7 +303,7 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
 
 
 ## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
-def calc_f1score_val(detections, position, regions, args, threshold=None, save=False, save_path=None):
+def calc_fscore_val(detections, position, regions, args, threshold=None, save=False, save_path=None):
     """f1scoreを計算する
 
     Args:
@@ -316,7 +316,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
         save_path (str, optional): 推論結果を保存するパス. Defaults to None.
 
     Returns:
-        F1_score (float): f1score
+        F_score (float): f1score
         Precision (float): Precision
         Recall (float): Recall
         threthre (float): 0.3~0.8の数字
@@ -331,10 +331,10 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
     else:
         Rout = "Rout"
     Ring_CATALOGUE = ring_augmentation.catalogue(args.val_ring_catalogue, ring_select=True)
-    F1_score = -10000
+    F_score = -10000
 
-    for conf_thre in thresholds:
-        predict_bbox, scores, wcs_regions = calc_location_each_region(detections, position, regions, conf_thre)
+    for conf_thre_ in thresholds:
+        predict_bbox, scores, wcs_regions = calc_location_each_region(detections, position, regions, conf_thre_)
         if len(predict_bbox) > 0:
             ## 領域ごとの位置情報とscoreを格納する辞書を作成
             region_dict = {}
@@ -354,11 +354,16 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
             FP = len(FP_)
             Precision_ = TP / (TP + FP)
             Recall_ = TP / (TP + FN)
-            F1_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
+            if args.fscore == "f2_score":
+                F_score_ = 5 * Precision_ * Recall_ / (4 * Precision_ + Recall_ + 1e-9)
+            elif args.fscore == "f1_score":
+                F_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
+            elif args.fscore == "f0.5_score":
+                F_score_ = 1.25 * Precision_ * Recall_ / (0.25 * Precision_ + Recall_ + 1e-9)
 
-            if F1_score_ > F1_score:
-                F1_score = F1_score_
-                threthre = conf_thre
+            if F_score_ > F_score:
+                F_score = F_score_
+                conf_thre = conf_thre_
                 Precision = Precision_
                 Recall = Recall_
                 infer_catalogue = infer_catalogue_
@@ -373,7 +378,7 @@ def calc_f1score_val(detections, position, regions, args, threshold=None, save=F
             args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.png", Rout
         )
         imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/test_FP.png", Rout, infer_result=True)
-    return F1_score, Precision, Recall, threthre
+    return F_score, Precision, Recall, conf_thre
 
 
 def print_and_log(f, moji):
@@ -444,7 +449,7 @@ class management_loss:
 
 
 def write_train_log(
-    f_log, epoch, each_loss_train, each_loss_val, val_f1_score, Precision, Recall, val_conf_threshold, epoch_start_time
+    f_log, epoch, each_loss_train, each_loss_val, val_f_score, Precision, Recall, val_conf_threshold, epoch_start_time, args
 ):
     """epochごとのlogを出力する
     Args:
@@ -476,8 +481,8 @@ def write_train_log(
                 each_loss_val["conf_loss_positive"],
                 each_loss_val["conf_loss_negative"],
             ),
-            "val_f1_score : {:.4f}, Precision : {:.4f}, Recall : {:.4f}, threshold : {:.4f}".format(
-                val_f1_score, Precision, Recall, val_conf_threshold
+            "val_{} : {:.4f}, Precision : {:.4f}, Recall : {:.4f}, threshold : {:.4f}".format(
+                args.fscore, val_f_score, Precision, Recall, val_conf_threshold
             ),
             "time:  {:.4f} sec.".format(epoch_finish_time - epoch_start_time),
         ],
@@ -492,7 +497,7 @@ def write_train_log(
         "avarage_conf_loss": each_loss_val["conf_loss"],
         "avarage_conf_loss_positive": each_loss_val["conf_loss_positive"],
         "avarage_conf_loss_negative": each_loss_val["conf_loss_negative"],
-        "val_f1_score": val_f1_score,
+        f"val_{args.fscore}": val_f_score,
         "val_precision": Precision,
         "val_recall": Recall,
         "val_conf_threshold": val_conf_threshold,
