@@ -358,7 +358,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 F_score_ = 5 * Precision_ * Recall_ / (4 * Precision_ + Recall_ + 1e-9)
             elif args.fscore == "f1_score":
                 F_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
-            elif args.fscore == "f0.5_score":
+            elif args.fscore == "f05_score":
                 F_score_ = 1.25 * Precision_ * Recall_ / (0.25 * Precision_ + Recall_ + 1e-9)
 
             if F_score_ > F_score:
