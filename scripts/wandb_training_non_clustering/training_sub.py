@@ -358,7 +358,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 F_score_ = 5 * Precision_ * Recall_ / (4 * Precision_ + Recall_ + 1e-9)
             elif args.fscore == "f1_score":
                 F_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
-            elif args.fscore == "f0.5_score":
+            elif args.fscore == "f05_score":
                 F_score_ = 1.25 * Precision_ * Recall_ / (0.25 * Precision_ + Recall_ + 1e-9)
 
             if F_score_ > F_score:
@@ -497,7 +497,9 @@ def write_train_log(
         "avarage_conf_loss": each_loss_val["conf_loss"],
         "avarage_conf_loss_positive": each_loss_val["conf_loss_positive"],
         "avarage_conf_loss_negative": each_loss_val["conf_loss_negative"],
-        f"val_{args.fscore}": val_f_score,
+        "F05_score": 1.25 * Precision * Recall / (0.25 * Precision + Recall + 1e-9),
+        "F1_score": 2 * Precision * Recall / (Precision + Recall + 1e-9),
+        "F2_score": 5 * Precision * Recall / (4 * Precision + Recall + 1e-9),
         "val_precision": Precision,
         "val_recall": Recall,
         "val_conf_threshold": val_conf_threshold,
