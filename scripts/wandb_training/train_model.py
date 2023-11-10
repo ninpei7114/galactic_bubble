@@ -131,19 +131,14 @@ def train_model(
         ##############################
         ## Validation F1 scoreの計算 ##
         ##############################
-        F05_score, F1_score, F2_score, precision, recall, conf_threshold = calc_fscore_val(
+        f_score_val, precision, recall, conf_threshold = calc_fscore_val(
             np.concatenate(result), np.array(position), regions, args
         )
-        if args.fscore == "f05_score":
-            f_score_val = F05_score
-        elif args.fscore == "f1_score":
-            f_score_val = F1_score
-        elif args.fscore == "f2_score":
-            f_score_val = F2_score
+
         f_score_val_l.append(f_score_val)
 
         log_epoch = write_train_log(
-            f_log, epoch, loss_train, loss_val, f_score_val, F05_score, F1_score, F2_score, precision, recall, conf_threshold, start_time, args
+            f_log, epoch, loss_train, loss_val, f_score_val, precision, recall, conf_threshold, start_time, args
         )
         run.log(log_epoch)
         logs.append(log_epoch)

@@ -354,21 +354,15 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
             FP = len(FP_)
             Precision_ = TP / (TP + FP)
             Recall_ = TP / (TP + FN)
-            F2_score_ = 5 * Precision_ * Recall_ / (4 * Precision_ + Recall_ + 1e-9)
-            F1_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
-            F05_score_ = 1.25 * Precision_ * Recall_ / (0.25 * Precision_ + Recall_ + 1e-9)
             if args.fscore == "f2_score":
-                F_score_ = F2_score_
+                F_score_ = 5 * Precision_ * Recall_ / (4 * Precision_ + Recall_ + 1e-9)
             elif args.fscore == "f1_score":
-                F_score_ = F1_score_
-            elif args.fscore == "f05_score":
-                F_score_ = F05_score_
+                F_score_ = 2 * Precision_ * Recall_ / (Precision_ + Recall_ + 1e-9)
+            elif args.fscore == "f0.5_score":
+                F_score_ = 1.25 * Precision_ * Recall_ / (0.25 * Precision_ + Recall_ + 1e-9)
 
             if F_score_ > F_score:
                 F_score = F_score_
-                F2_score = F2_score_
-                F1_score = F1_score_
-                F05_score = F05_score_
                 conf_thre = conf_thre_
                 Precision = Precision_
                 Recall = Recall_
@@ -384,7 +378,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
             args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.png", Rout
         )
         imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/test_FP.png", Rout, infer_result=True)
-    return F05_score, F1_score, F2_score, Precision, Recall, conf_thre
+    return F_score, Precision, Recall, conf_thre
 
 
 def print_and_log(f, moji):
@@ -455,7 +449,7 @@ class management_loss:
 
 
 def write_train_log(
-    f_log, epoch, each_loss_train, each_loss_val, val_f_score, F05_score, F1_score, F2_score, Precision, Recall, conf_threshold, epoch_start_time, args
+    f_log, epoch, each_loss_train, each_loss_val, val_f_score, Precision, Recall, conf_threshold, epoch_start_time, args
 ):
     """epochごとのlogを出力する
     Args:
@@ -503,9 +497,9 @@ def write_train_log(
         "avarage_conf_loss": each_loss_val["conf_loss"],
         "avarage_conf_loss_positive": each_loss_val["conf_loss_positive"],
         "avarage_conf_loss_negative": each_loss_val["conf_loss_negative"],
-        "F05_score": F05_score,
-        "F1_score": F1_score,
-        "F2_score": F2_score,
+        "F05_score": 1.25 * Precision * Recall / (0.25 * Precision + Recall + 1e-9),
+        "F1_score": 2 * Precision * Recall / (Precision + Recall + 1e-9),
+        "F2_score": 5 * Precision * Recall / (4 * Precision + Recall + 1e-9),
         "val_precision": Precision,
         "val_recall": Recall,
         "val_conf_threshold": conf_threshold,
