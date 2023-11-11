@@ -45,7 +45,7 @@ def parse_args():
     # random seed
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
     parser.add_argument("--data_random_state", "-d", type=int, default=123)
-    parser.add_argument("--init_random_state", "-d", type=int, default=123)
+    parser.add_argument("--init_random_state", type=int, default=123)
     # 学習率
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
