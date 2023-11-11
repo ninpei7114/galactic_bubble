@@ -45,6 +45,7 @@ def parse_args():
     # random seed
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
     parser.add_argument("--data_random_state", "-d", type=int, default=123)
+    parser.add_argument("--init_random_state", "-d", type=int, default=123)
     # 学習率
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight_decay", type=float, default=0.001)
@@ -78,7 +79,7 @@ def main(args):
         --l18_infer --ring_select
 
     """
-    torch.manual_seed(args.data_random_state)
+    torch.manual_seed(args.init_random_state)
     torch.backends.cudnn.benchmark = True
     ImageFile.LOAD_TRUNCATED_IMAGES = True
 
