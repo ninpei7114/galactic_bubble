@@ -13,6 +13,9 @@ parameters:
   data_random_state:
     min: 0
     max: 300
+  init_random_state:
+    min: 0
+    max: 300
   Ring_mini_batch:
     values: [2, 4, 8, 16, 32]
   NonRing_mini_batch:
