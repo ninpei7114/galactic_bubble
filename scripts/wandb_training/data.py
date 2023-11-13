@@ -128,7 +128,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
     mini_batch = np.clip(args.NonRing_mini_batch/aug_num/len(NonRing_class), 1, None).astype(int)
     NonRing_web_list = [
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_nonring_class{cl}.tar")
-        .rsample(int(rsample))
+        .rsample(float(rsample))
         .shuffle(10000000000)
         .decode("pil")
         .to_tuple("png", "json")
