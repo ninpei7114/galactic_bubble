@@ -40,7 +40,7 @@ def parse_args():
     parser.add_argument("--Val_mini_batch", default=128, type=int, help="Validation mini-batch size (default: 128)")
     parser.add_argument("--True_iou", default=0.5, type=float, help="True IoU in MultiBoxLoss(default: 0.5)")
     # fits index
-    parser.add_argument("--fits_index", "-i", type=int)  # , required=True)
+    parser.add_argument("--fits_index", "-i", type=int, default=0)  # , required=True)
     parser.add_argument("--n_splits", "-n", type=int, default=8)
     # random seed
     parser.add_argument("--fits_random_state", "-r", type=int, default=123)
