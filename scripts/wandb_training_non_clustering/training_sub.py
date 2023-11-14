@@ -347,11 +347,11 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 region_dict[w][1].append(s)
 
             target_catalogue_, infer_catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
-            _, FP_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout)
+            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout)
 
             TP = target_mask_.count(True)
             FN = target_mask_.count(False)
-            FP = len(FP_)
+            FP = len(FP_c_)
             Precision_ = TP / (TP + FP)
             Recall_ = TP / (TP + FN)
             if args.fscore == "f2_score":
@@ -369,6 +369,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 infer_catalogue = infer_catalogue_
                 target_catalogue = target_catalogue_
                 target_mask = target_mask_
+                FP_c = FP_c_
 
     if save:
         infer_catalogue.to_csv(save_path + "/infer_catalogue_test.csv")
@@ -377,7 +378,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
         imaging_infer_result(
             args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.png", Rout
         )
-        imaging_infer_result(args, pd.DataFrame(FP_), save_path + "/test_FP.png", Rout, infer_result=True)
+        imaging_infer_result(args, pd.DataFrame(FP_c), save_path + "/test_FP.png", Rout, infer_result=True)
     return F_score, Precision, Recall, conf_thre
 
 
