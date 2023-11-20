@@ -82,6 +82,74 @@ class EarlyStopping_f1_score:
         self.f1_score_max = f1_score
 
 
+class EarlyStopping_loss:
+    """Early stops the training if validation loss doesn't improve after a given patience."""
+
+    def __init__(self, path, flog, patience=7, verbose=False, delta=0, trace_func=print):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                            Default: 7
+            verbose (bool): If True, prints a message for each validation loss improvement.
+                            Default: False
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: 0
+            path (str): Path for the checkpoint to be saved to.
+                            Default: 'checkpoint.pt'
+            trace_func (function): trace print function.
+                            Default: print
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_loss_min = np.Inf
+        self.delta = delta
+        self.path = path
+        self.trace_func = trace_func
+        self.flog = flog
+
+    def __call__(self, loss_val, model, epoch, optimizer, loss_train, f1_score):
+        score = -loss_val
+
+        if self.best_score is None:
+            self.best_score = score
+            self.save_checkpoint(loss_val, model, epoch, optimizer, loss_train, f1_score)
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            self.trace_func(f"EarlyStopping counter: {self.counter} out of {self.patience}")
+            self.flog.write(f"EarlyStopping counter: {self.counter} out of {self.patience}\n")
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.save_checkpoint(loss_val, model, epoch, optimizer, loss_train, f1_score)
+            self.counter = 0
+
+    def save_checkpoint(self, loss_val, model, epoch, optimizer, loss_train, f1_score):
+        """Saves model when validation loss decrease."""
+        if self.verbose:
+            self.trace_func(
+                f"Validation loss decreased ({self.val_loss_min:.6f} --> {loss_val:.6f}).  Saving model ..."
+            )
+            self.flog.write(
+                f"Validation loss decreased ({self.val_loss_min:.6f} --> {loss_val:.6f}).  Saving model ...\n"
+            )
+        torch.save(
+            {
+                "epoch": epoch,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "f1_score": f1_score,
+                "loss_train": loss_train,
+                "loss_eval": loss_val,
+            },
+            self.path,
+        )
+        self.val_loss_min = loss_val
+
+
 def weights_init(m):
     """モデルのパラメーターを初期化する
 
@@ -375,9 +443,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
         infer_catalogue.to_csv(save_path + "/infer_catalogue_test.csv")
         target_catalogue.to_csv(save_path + "/target_catalogue_test.csv")
         imaging_infer_result(args, target_catalogue[target_mask], save_path + "/test_TP.png", Rout)
-        imaging_infer_result(
-            args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.png", Rout
-        )
+        imaging_infer_result(args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.png", Rout)
         imaging_infer_result(args, pd.DataFrame(FP_c), save_path + "/test_FP.png", Rout, infer_result=True)
     return F_score, Precision, Recall, conf_thre
 
@@ -450,7 +516,16 @@ class management_loss:
 
 
 def write_train_log(
-    f_log, epoch, each_loss_train, each_loss_val, val_f_score, Precision, Recall, val_conf_threshold, epoch_start_time, args
+    f_log,
+    epoch,
+    each_loss_train,
+    each_loss_val,
+    val_f_score,
+    Precision,
+    Recall,
+    val_conf_threshold,
+    epoch_start_time,
+    args,
 ):
     """epochごとのlogを出力する
     Args:
