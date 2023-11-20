@@ -13,7 +13,9 @@ from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
 from make_figure import make_figure
 from nonring_augmentation import nonring_augmentation
-from training_sub import EarlyStopping_f1_score, calc_fscore_val, management_loss, print_and_log, write_train_log
+from training_sub import (EarlyStopping_f1_score, EarlyStopping_loss,
+                          calc_fscore_val, management_loss, print_and_log,
+                          write_train_log)
 from utils.ssd_model import Detect
 
 
@@ -35,6 +37,9 @@ def train_model(
     """
     NonRing_class = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
     NonRing_rg = default_rng(args.fits_random_state)
+    # early_stopping = EarlyStopping_loss(
+    #     patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
+    # )
     early_stopping = EarlyStopping_f1_score(
         patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
@@ -145,7 +150,7 @@ def train_model(
         df = pd.DataFrame(logs)
         df.to_csv(augmentation_name + "/log_output.csv")
 
-        # early_stopping(epoch_val_loss, net)
+        # early_stopping(loss_val, net, epoch, optimizer, loss_train, f_score_val)
         early_stopping(f_score_val, net, epoch, optimizer, loss_train, loss_val)
         if early_stopping.early_stop:
             print_and_log(f_log, "Early_Stopping")
