@@ -125,7 +125,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
     nonring_num = train_Ring_num // len(NonRing_class)
     aug_num = np.delete(np.array(args.NonRing_aug_num) + 1, args.NonRing_remove_class_list)
     NonRing_rsample = np.clip([round(nonring_num / e / a, 5) * 10 for e, a in zip(each_nonring_num, aug_num)], None, 1)
-    mini_batch = np.clip(args.NonRing_mini_batch/aug_num/len(NonRing_class), 1, None).astype(int)
+    mini_batch = np.clip(args.NonRing_mini_batch / aug_num / len(NonRing_class), 1, None).astype(int)
     NonRing_web_list = [
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_nonring_class{cl}.tar")
         .rsample(float(rsample))
