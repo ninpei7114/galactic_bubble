@@ -64,7 +64,7 @@ def main(args):
 
         num_list = []
         for k in range(int(class_num)):
-            slice_ = int(np.sum(prediction == k) / 90)
+            slice_ = int(np.sum(prediction == k) / 80)
             data_view_rectangl(25, data[prediction == k][::slice_]).save(
                 savedir_name + f"/class{class_num}/clus_{k}.png"
             )
