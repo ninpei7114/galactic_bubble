@@ -35,7 +35,10 @@ def parse_args():
         "--spitzer_path", metavar="DIR", help="spitzer_path", default="/home/cygnus/jupyter/fits_data/spitzer_data"
     )
     parser.add_argument(
-        "--LMC_data_path", metavar="DIR", help="LMC data path", default="/home/cygnus/jupyter/fits_data/LMC_data"
+        "--LMC_data_path",
+        metavar="DIR",
+        help="LMC data path",
+        default="/home/cygnus/jupyter/fits_data/LMC_data/spitzer_lmc_rgb",
     )
     parser.add_argument(
         "--Cygnus_data_path", metavar="DIR", help="Cyg data path", default="/home/cygnus/jupyter/fits_data/cygnus_fits"
