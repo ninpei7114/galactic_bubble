@@ -54,7 +54,9 @@ def main(args):
     artifact = api.artifact(f"{args.model_ver}")
     artifact.download(f"{args.model_download_dir}" + "/artifacts/" + args.model_ver.split("/")[-1])
     net_w = SSD()
-    net_weights = torch.load(args.model_download_dir + "/artifacts/" + args.model_ver.split("/")[-1])
+    net_weights = torch.load(
+        args.model_download_dir + "/artifacts/" + args.model_ver.split("/")[-1] + "/earlystopping.pth"
+    )
     net_w.load_state_dict(net_weights["model_state_dict"])
     del net_weights
     net_w.to(device)
