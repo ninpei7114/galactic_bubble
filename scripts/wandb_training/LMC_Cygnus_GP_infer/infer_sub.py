@@ -10,6 +10,24 @@ sys.path.append("../")
 from processing import norm_res, conv
 
 
+def calc_ind(cut_shape, fragment, data_):
+    slide_pix = (int(round(cut_shape[0] / fragment)), int(round(cut_shape[1] / fragment)))
+
+    shape = data_.shape
+    x_num = int(shape[1] / slide_pix[1]) - 1
+    y_num = int(shape[0] / slide_pix[0]) - 1
+
+    x_idx = np.arange(cut_shape[1] / 5, slide_pix[1] * x_num, slide_pix[1])
+    y_idx = np.arange(cut_shape[0] / 5, slide_pix[0] * y_num, slide_pix[0])
+    x_ind, y_ind = np.meshgrid(x_idx, y_idx)
+
+    l = []
+    for x, y in zip(x_ind.ravel(), y_ind.ravel()):
+        l.append([y, x])
+    ind = np.array(l)
+    return ind
+
+
 def cut_data(data_, many_ind, cut_shape, sig1):
     data_list = []
     position_list_ = []
@@ -19,7 +37,7 @@ def cut_data(data_, many_ind, cut_shape, sig1):
         y_min = i[0] - cut_shape / 50
         y_max = i[0] + cut_shape + cut_shape / 50
         data_c = data_[int(y_min) : int(y_max), int(x_min) : int(x_max)].view()
-        if np.max(data_c) == np.max(data_c):
+        if np.isnan(data_c).any() == False:
             d = copy.deepcopy(data_c)
             d = conv(300, sig1, d)
             d = d[int(cut_shape / 52) : int(cut_shape * 51 / 52), int(cut_shape / 52) : int(cut_shape * 51 / 52)]
@@ -39,24 +57,6 @@ def cut_data(data_, many_ind, cut_shape, sig1):
             pass
 
     return data_list, position_list_
-
-
-def calc_ind(cut_shape, fragment, data_):
-    slide_pix = (int(round(cut_shape[0] / fragment)), int(round(cut_shape[1] / fragment)))
-
-    shape = data_.shape
-    x_num = int(shape[1] / slide_pix[1]) - 1
-    y_num = int(shape[0] / slide_pix[0]) - 1
-
-    x_idx = np.arange(cut_shape[1] / 5, slide_pix[1] * x_num, slide_pix[1])
-    y_idx = np.arange(cut_shape[0] / 5, slide_pix[0] * y_num, slide_pix[0])
-    x_ind, y_ind = np.meshgrid(x_idx, y_idx)
-
-    l = []
-    for x, y in zip(x_ind.ravel(), y_ind.ravel()):
-        l.append([y, x])
-    ind = np.array(l)
-    return ind
 
 
 def infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device):
