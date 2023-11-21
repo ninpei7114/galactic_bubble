@@ -66,6 +66,10 @@ def main(args):
     batch_list = [5000, 2000, 1000, 600, 300, 50, 30]
 
     detect = Detect(nms_thresh=0.3, top_k=2000)
+    model_ver = args.model_ver.split("/")[:-2]
+    f_log = open(f"{args.result_save_dir}/{model_ver}/" + "/log.txt", "w")
+    f_log.write(f"{args.model_ver}\n")
+    f_log.close
 
     for region in ["LMC", "Cygnus", "Spitzer"]:
         print(f"{region=}")
@@ -74,7 +78,7 @@ def main(args):
             g_fits_path = args.LMC_data_path + "/g.fits"
         elif region == "Cygnus":
             r_fits_path = args.Cygnus_data_path + "/M1_fits_file/M1_cygnus_2.4.fits"
-            g_fits_path = args.Cygnus_data_path + "I4_fits_file/I4_2.4_reg.fits"
+            g_fits_path = args.Cygnus_data_path + "/I4_fits_file/I4_2.4_reg.fits"
 
         if region == "LMC" or region == "Cygnus":
             data_ = np.concatenate(
@@ -104,8 +108,8 @@ def main(args):
                 "spitzer_05400+0000_rgb",
             ]
             for sp_r in spitzer_regions:
-                r_fits_path = args.spitzer_path + sp_r + "/r.fits"
-                g_fits_path = args.spitzer_path + sp_r + "/g.fits"
+                r_fits_path = args.spitzer_path + "/" + sp_r + "/" + "/r.fits"
+                g_fits_path = args.spitzer_path + "/" + sp_r + "/" + "/g.fits"
                 data_ = np.concatenate(
                     [
                         remove_nan(astropy.io.fits.open(f"{r_fits_path}/r.fits")[0].data[:, :, None]),
