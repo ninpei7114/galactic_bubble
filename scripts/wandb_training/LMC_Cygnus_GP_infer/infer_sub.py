@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import os
 
 import sys
 import torch
@@ -59,6 +60,7 @@ def calc_ind(cut_shape, fragment, data_):
 
 
 def infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device):
+    os.makedirs(f"{args.result_save_dir}/{args.model_ver}/{region}", exist_ok=True)
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     model_ver = args.model_ver.split("/")[-1]
     result_filename = f"{args.result_save_dir}/{model_ver}/{region}/result_ring_select_csize%s.npy" % cut_shape[0]
