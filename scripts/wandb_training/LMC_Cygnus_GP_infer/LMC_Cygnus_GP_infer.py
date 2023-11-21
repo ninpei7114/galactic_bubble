@@ -66,9 +66,9 @@ def main(args):
     batch_list = [5000, 2000, 1000, 600, 300, 50, 30]
 
     detect = Detect(nms_thresh=0.3, top_k=2000)
-    model_ver = args.model_ver.split("/")[:-2]
+    model_ver = "/".join(args.model_ver.split("/")[-2:])
     f_log = open(f"{args.result_save_dir}/{model_ver}/" + "/log.txt", "w")
-    f_log.write(f"{args.model_ver}\n")
+    f_log.write("使用モデル: " + args.model_ver + "\n")
     f_log.close
 
     for region in ["LMC", "Cygnus", "Spitzer"]:
