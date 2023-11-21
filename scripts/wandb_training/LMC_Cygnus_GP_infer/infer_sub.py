@@ -60,9 +60,9 @@ def cut_data(data_, many_ind, cut_shape, sig1):
 
 
 def infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device):
-    os.makedirs(f"{args.result_save_dir}/{args.model_ver}/{region}", exist_ok=True)
-    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     model_ver = args.model_ver.split("/")[-1]
+    os.makedirs(f"{args.result_save_dir}/{model_ver}/{region}", exist_ok=True)
+    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     result_filename = f"{args.result_save_dir}/{model_ver}/{region}/result_ring_select_csize%s.npy" % cut_shape[0]
     position = []
     batch = np.linspace(0, ind.shape[0], batch_size)
