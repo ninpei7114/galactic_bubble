@@ -247,7 +247,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     return target_catalogue.reset_index(), infer_catalogue
 
 
-def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout):
+def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args):
     """TP, FP, FNを計算する
 
     Args:
@@ -262,13 +262,21 @@ def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout):
     TP = []
     FP = []
     target_mask = [False] * len(target_catalogue)
+
+    if args.val_ring_catalogue == "MWP":
+        rout_num = 1.3
+    elif args.val_ring_catalogue == "CH":
+        rout_num = 1
+    elif args.val_ring_catalogue == "SUM":
+        rout_num = 1.3
+
     for _, infer_row in infer_catalogue.iterrows():
         judge = []
         for t_i, t_row in target_catalogue.iterrows():
-            GLON_min = t_row["GLON"] - t_row[Rout] / 60
-            GLON_max = t_row["GLON"] + t_row[Rout] / 60
-            GLAT_min = t_row["GLAT"] - t_row[Rout] / 60
-            GLAT_max = t_row["GLAT"] + t_row[Rout] / 60
+            GLON_min = t_row["GLON"] - rout_num * t_row[Rout] / 60
+            GLON_max = t_row["GLON"] + rout_num * t_row[Rout] / 60
+            GLAT_min = t_row["GLAT"] - rout_num * t_row[Rout] / 60
+            GLAT_max = t_row["GLAT"] + rout_num * t_row[Rout] / 60
             star_area = (GLON_max - GLON_min) * (GLAT_max - GLAT_min)
 
             clip_GLON = np.clip([infer_row["ra_min"], infer_row["ra_max"]], GLON_min, GLON_max)
@@ -334,7 +342,7 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
             l_center = row["GLON"]
             b_center = row["GLAT"]
             x_center, y_center = w.all_world2pix(l_center, b_center, 0)
-            w_rout = 1.25 * row[Rout] / 60 / spitzer_g.header["CD2_2"]
+            w_rout = 1.3 * row[Rout] / 60 / spitzer_g.header["CD2_2"]
             x_min = int(x_center) - w_rout
             x_max = int(x_center) + w_rout
             y_min = int(y_center) - w_rout
@@ -415,7 +423,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 region_dict[w][1].append(s)
 
             target_catalogue_, infer_catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
-            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout)
+            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout, args)
 
             TP = target_mask_.count(True)
             FN = target_mask_.count(False)
