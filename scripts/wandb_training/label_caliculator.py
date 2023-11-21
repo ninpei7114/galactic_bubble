@@ -20,11 +20,11 @@ class label_caliculator(object):
 
         self.star_dic = {}
         if self.choice == "MWP":
-            rout_num = 1.25
+            rout_num = 1.3
         elif self.choice == "CH":
             rout_num = 1
         elif self.choice == "SUM":
-            rout_num = 1.25
+            rout_num = 1.3
 
         for _, row in dataframe.iterrows():
             lmax = row["GLON"] + rout_num * row[self.Rout] / 60
