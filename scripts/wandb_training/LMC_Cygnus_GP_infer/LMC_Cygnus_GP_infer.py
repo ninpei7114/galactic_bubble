@@ -85,8 +85,8 @@ def main(args):
         if region == "LMC" or region == "Cygnus":
             data_ = np.concatenate(
                 [
-                    remove_nan(astropy.io.fits.open(f"{r_fits_path}")[0].data[:, :, None]),
-                    remove_nan(astropy.io.fits.open(f"{g_fits_path}")[0].data[:, :, None]),
+                    remove_nan(astropy.io.fits.open(r_fits_path)[0].data[:, :, None]),
+                    remove_nan(astropy.io.fits.open(g_fits_path)[0].data[:, :, None]),
                 ],
                 axis=2,
             )
@@ -114,8 +114,8 @@ def main(args):
                 g_fits_path = args.spitzer_path + "/" + sp_r + "/" + "/g.fits"
                 data_ = np.concatenate(
                     [
-                        remove_nan(astropy.io.fits.open(f"{r_fits_path}/r.fits")[0].data[:, :, None]),
-                        remove_nan(astropy.io.fits.open(f"{g_fits_path}/g.fits")[0].data[:, :, None]),
+                        remove_nan(astropy.io.fits.open(r_fits_path)[0].data[:, :, None]),
+                        remove_nan(astropy.io.fits.open(g_fits_path)[0].data[:, :, None]),
                     ],
                     axis=2,
                 )
