@@ -1,6 +1,7 @@
 import argparse
 import sys
 import time
+import os
 
 import astropy.io.fits
 import numpy as np
@@ -67,6 +68,7 @@ def main(args):
 
     detect = Detect(nms_thresh=0.3, top_k=2000)
     model_ver = "/".join(args.model_ver.split("/")[-2:])
+    os.makedirs(f"{args.result_save_dir}/{model_ver}", exist_ok=True)
     f_log = open(f"{args.result_save_dir}/{model_ver}/" + "/log.txt", "w")
     f_log.write("使用モデル: " + args.model_ver + "\n")
     f_log.close
@@ -97,7 +99,7 @@ def main(args):
                     fragment = 8
                 ind = calc_ind(cut_shape, fragment, data_)
                 ### infer ###
-                infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device)
+                infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device, model_ver)
 
         else:
             spitzer_regions = [
@@ -127,7 +129,7 @@ def main(args):
                         fragment = 8
                     ind = calc_ind(cut_shape, fragment, data_)
                     ### infer ###
-                    infer(ind, batch_size, cut_shape, data_, net_w, detect, args, sp_r, device)
+                    infer(ind, batch_size, cut_shape, data_, net_w, detect, args, sp_r, device, model_ver)
     print(f"elapsed_time:{time.time() - start}")
 
 
