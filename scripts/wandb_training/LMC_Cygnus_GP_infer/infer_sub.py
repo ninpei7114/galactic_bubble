@@ -1,13 +1,14 @@
 import copy
-import numpy as np
 import os
-
 import sys
+
+import numpy as np
 import torch
+import tqdm
 from npy_append_array import NpyAppendArray
 
 sys.path.append("../")
-from processing import norm_res, conv
+from processing import conv, norm_res
 
 
 def calc_ind(cut_shape, fragment, data_):
@@ -67,7 +68,7 @@ def infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device
     position = []
     batch = np.linspace(0, ind.shape[0], batch_size)
 
-    for i in range(len(batch) - 1):
+    for i in tqdm.tqdm(range(len(batch) - 1)):
         # indを等分して、データを切り取り、推論する
         cut_ind = ind[int(batch[i]) : int(batch[i + 1])]
         data_list, p_list = cut_data(data_, cut_ind, cut_shape[0], sig1)

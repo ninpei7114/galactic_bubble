@@ -5,9 +5,7 @@ import time
 import astropy.io.fits
 import numpy as np
 import torch
-import tqdm
 import wandb
-
 
 sys.path.append("/home/cygnus/jupyter/galactic_bubble/scripts/wandb_training")
 from processing import remove_nan
@@ -86,7 +84,7 @@ def main(args):
                 ],
                 axis=2,
             )
-            for size, batch_size in tqdm.tqdm(zip(size_list, batch_list)):
+            for size, batch_size in zip(size_list, batch_list):
                 ### indexの計算 ###
                 cut_shape = (size, size)
                 if size <= 300:
@@ -116,7 +114,7 @@ def main(args):
                     axis=2,
                 )
 
-                for size, batch_size in tqdm.tqdm(zip(size_list, batch_list)):
+                for size, batch_size in zip(size_list, batch_list):
                     ### indexの計算 ###
                     cut_shape = (size, size)
                     if size <= 300:
