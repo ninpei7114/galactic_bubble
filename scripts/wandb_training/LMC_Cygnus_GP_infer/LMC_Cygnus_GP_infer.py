@@ -65,6 +65,7 @@ def main(args):
     detect = Detect(nms_thresh=0.3, top_k=2000)
 
     for region in ["LMC", "Cygnus", "Spitzer"]:
+        print(f"{region=}")
         if region == "LMC":
             r_fits_path = args.LMC_data_path + "/r.fits"
             g_fits_path = args.LMC_data_path + "/g.fits"
@@ -120,6 +121,7 @@ def main(args):
                     ind = calc_ind(cut_shape, fragment, data_)
                     ### infer ###
                     infer(ind, batch_size, cut_shape, data_, net_w, detect, args, sp_r, device)
+    print(f"elapsed_time:{time.time() - start}")
 
 
 if __name__ == "__main__":
