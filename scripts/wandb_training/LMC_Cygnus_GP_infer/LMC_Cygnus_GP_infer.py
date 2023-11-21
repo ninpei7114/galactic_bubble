@@ -54,10 +54,10 @@ def main(args):
 
     api = wandb.Api()
     artifact = api.artifact(f"{args.model_ver}")
-    artifact.download(f"{args.model_download_dir}" + "/artifacts/" + args.model_ver.split("/")[-1])
+    artifact.download(f"{args.model_download_dir}" + "/artifacts/" + args.model_ver.split("/")[-2:])
     net_w = SSD()
     net_weights = torch.load(
-        args.model_download_dir + "/artifacts/" + args.model_ver.split("/")[-1] + "/earlystopping.pth"
+        args.model_download_dir + "/artifacts/" + args.model_ver.split("/")[-2:] + "/earlystopping.pth"
     )
     net_w.load_state_dict(net_weights["model_state_dict"])
     del net_weights
@@ -110,6 +110,7 @@ def main(args):
                 "spitzer_05400+0000_rgb",
             ]
             for sp_r in spitzer_regions:
+                print(f"{sp_r=}")
                 r_fits_path = args.spitzer_path + "/" + sp_r + "/" + "/r.fits"
                 g_fits_path = args.spitzer_path + "/" + sp_r + "/" + "/g.fits"
                 data_ = np.concatenate(
