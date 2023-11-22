@@ -20,11 +20,11 @@ class label_caliculator(object):
 
         self.star_dic = {}
         if self.choice == "MWP":
-            rout_num = 1.3
+            rout_num = 1.5
         elif self.choice == "CH":
             rout_num = 1
         elif self.choice == "SUM":
-            rout_num = 1.3
+            rout_num = 1.5
 
         for _, row in dataframe.iterrows():
             lmax = row["GLON"] + rout_num * row[self.Rout] / 60
@@ -122,12 +122,17 @@ class label_caliculator(object):
             clip_height = clip_yy[1] - clip_yy[0] + 1e-9
             clip_area = clip_width * clip_height
 
+            picture_area = (self.x_pix_max - self.x_pix_min - 2 * extra_width) * (
+                self.y_pix_max - self.y_pix_min - 2 * extra_height
+            )
+
             ## 場合分け、全体に対してringが1/3以上入っていないといけない
             ## width/height比が1/3以上でないとlabel付けしない
             if (
-                clip_area >= star_area * 1 / 3
+                clip_area >= star_area * 4 / 5
                 and clip_height / (clip_width + 1e-9) > 1 / 3
                 and clip_width / (clip_height + 1e-9) > 1 / 3
+                and clip_area / picture_area >= 1 / 16
             ):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
