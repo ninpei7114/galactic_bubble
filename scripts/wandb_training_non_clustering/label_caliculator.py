@@ -129,7 +129,7 @@ class label_caliculator(object):
             ## 場合分け、全体に対してringが1/3以上入っていないといけない
             ## width/height比が1/3以上でないとlabel付けしない
             if (
-                clip_area >= star_area * 4 / 5
+                clip_area >= star_area * 3 / 5
                 and clip_height / (clip_width + 1e-9) > 1 / 3
                 and clip_width / (clip_height + 1e-9) > 1 / 3
                 and clip_area / picture_area >= 1 / 16
