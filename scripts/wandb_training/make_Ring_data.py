@@ -70,7 +70,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
 
         for _, row in Ring_catalogue.iterrows():
             x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
-                row, GLON_min, GLON_max, GLAT_min, GLAT_max, 1.5
+                row, GLON_min, GLON_max, GLAT_min, GLAT_max, 1.7
             )
             if flag and x_pix_min >= 0 and y_pix_min >= 0:  # calc_pix時に100回試行してもできなかった場合の場合分け
                 label_cal.find_cover()
