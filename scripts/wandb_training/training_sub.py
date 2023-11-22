@@ -247,7 +247,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     return target_catalogue.reset_index(), infer_catalogue
 
 
-def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args=None, world="Galactic"):
+def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, val_ring_catalogue, world="Galactic"):
     """TP, FP, FNを計算する
 
     Args:
@@ -263,11 +263,11 @@ def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args=None, world="Gal
     FP = []
     target_mask = [False] * len(target_catalogue)
 
-    if args.val_ring_catalogue == "MWP":
+    if val_ring_catalogue == "MWP":
         rout_num = 1.3
-    elif args.val_ring_catalogue == "CH":
+    elif val_ring_catalogue == "CH":
         rout_num = 1
-    elif args.val_ring_catalogue == "SUM":
+    elif val_ring_catalogue == "SUM":
         rout_num = 1.3
 
     if world == "Galactic":
@@ -430,7 +430,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 region_dict[w][1].append(s)
 
             target_catalogue_, infer_catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
-            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout, args)
+            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout, args.val_ring_catalogue)
 
             TP = target_mask_.count(True)
             FN = target_mask_.count(False)
