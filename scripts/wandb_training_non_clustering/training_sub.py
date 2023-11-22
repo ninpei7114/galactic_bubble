@@ -247,7 +247,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     return target_catalogue.reset_index(), infer_catalogue
 
 
-def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args):
+def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, val_ring_catalogue, world="Galactic"):
     """TP, FP, FNを計算する
 
     Args:
@@ -263,20 +263,27 @@ def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args):
     FP = []
     target_mask = [False] * len(target_catalogue)
 
-    if args.val_ring_catalogue == "MWP":
+    if val_ring_catalogue == "MWP":
         rout_num = 1.3
-    elif args.val_ring_catalogue == "CH":
+    elif val_ring_catalogue == "CH":
         rout_num = 1
-    elif args.val_ring_catalogue == "SUM":
+    elif val_ring_catalogue == "SUM":
         rout_num = 1.3
+
+    if world == "Galactic":
+        x_axis = "GLON"
+        y_axis = "GLAT"
+    else:
+        x_axis = "_RA_icrs"
+        y_axis = "_DE.icrs"
 
     for _, infer_row in infer_catalogue.iterrows():
         judge = []
         for t_i, t_row in target_catalogue.iterrows():
-            GLON_min = t_row["GLON"] - rout_num * t_row[Rout] / 60
-            GLON_max = t_row["GLON"] + rout_num * t_row[Rout] / 60
-            GLAT_min = t_row["GLAT"] - rout_num * t_row[Rout] / 60
-            GLAT_max = t_row["GLAT"] + rout_num * t_row[Rout] / 60
+            GLON_min = t_row[x_axis] - rout_num * t_row[Rout] / 60
+            GLON_max = t_row[x_axis] + rout_num * t_row[Rout] / 60
+            GLAT_min = t_row[y_axis] - rout_num * t_row[Rout] / 60
+            GLAT_max = t_row[y_axis] + rout_num * t_row[Rout] / 60
             star_area = (GLON_max - GLON_min) * (GLAT_max - GLAT_min)
 
             clip_GLON = np.clip([infer_row["ra_min"], infer_row["ra_max"]], GLON_min, GLON_max)
@@ -423,7 +430,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
                 region_dict[w][1].append(s)
 
             target_catalogue_, infer_catalogue_ = make_catalogue(region_dict, Ring_CATALOGUE, args)
-            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout, args)
+            _, FP_c_, target_mask_ = calc_TP_FP_FN(target_catalogue_, infer_catalogue_, Rout, args.val_ring_catalogue)
 
             TP = target_mask_.count(True)
             FN = target_mask_.count(False)
@@ -531,7 +538,7 @@ def write_train_log(
     val_f_score,
     Precision,
     Recall,
-    val_conf_threshold,
+    conf_threshold,
     epoch_start_time,
     args,
 ):
@@ -566,7 +573,7 @@ def write_train_log(
                 each_loss_val["conf_loss_negative"],
             ),
             "val_{} : {:.4f}, Precision : {:.4f}, Recall : {:.4f}, threshold : {:.4f}".format(
-                args.fscore, val_f_score, Precision, Recall, val_conf_threshold
+                args.fscore, val_f_score, Precision, Recall, conf_threshold
             ),
             "time:  {:.4f} sec.".format(epoch_finish_time - epoch_start_time),
         ],
@@ -586,7 +593,7 @@ def write_train_log(
         "val_f2_score": 5 * Precision * Recall / (4 * Precision + Recall + 1e-9),
         "val_precision": Precision,
         "val_recall": Recall,
-        "val_conf_threshold": val_conf_threshold,
+        "val_conf_threshold": conf_threshold,
         "training_time": epoch_finish_time - epoch_start_time,
     }
 
