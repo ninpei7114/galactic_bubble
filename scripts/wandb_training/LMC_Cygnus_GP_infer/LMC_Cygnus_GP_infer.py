@@ -71,7 +71,7 @@ def main(args):
     os.makedirs(f"{args.result_save_dir}/{model_ver}", exist_ok=True)
     f_log = open(f"{args.result_save_dir}/{model_ver}/" + "/log.txt", "w")
     f_log.write("使用モデル: " + args.model_ver + "\n")
-    f_log.close
+    f_log.close()
 
     for region in ["LMC", "Cygnus", "Spitzer"]:
         print(f"{region=}")
