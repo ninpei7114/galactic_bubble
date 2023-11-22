@@ -33,7 +33,7 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
     ## pix情報に変換する必要がある。
     ## ↓ この状態では、Ringは画像の中心に位置したまま。
 
-    random_num = 1 / trans_rg.uniform(0.125, 0.7)
+    random_num = 1 / trans_rg.uniform(0.25, 0.58)
     x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
         row, GLON_min, GLON_max, GLAT_min, GLAT_max, random_num
     )
@@ -47,9 +47,9 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
     if flag:
         ## 画像処理のconvolutionをする際に耳ができるため、
         ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
-        half_width = (x_pix_max - x_pix_min) * 2 / 52
+        extra_width = (x_pix_max - x_pix_min) * 2 / 52
         ## rはRingの半径pixを求めている
-        r = int(((x_pix_max - half_width) - (x_pix_min + half_width)) / (2 * random_num))
+        r = int(((x_pix_max - extra_width) - (x_pix_min + extra_width)) / (2 * random_num))
 
         ## Ringが画像にはみ出さないように、切り出す位置をずらし、
         ## 画像内のRingの位置を変える。
