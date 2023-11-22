@@ -247,7 +247,7 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     return target_catalogue.reset_index(), infer_catalogue
 
 
-def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args):
+def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args=None, world="Galactic"):
     """TP, FP, FNを計算する
 
     Args:
@@ -270,13 +270,20 @@ def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, args):
     elif args.val_ring_catalogue == "SUM":
         rout_num = 1.3
 
+    if world == "Galactic":
+        x_axis = "GLON"
+        y_axis = "GLAT"
+    else:
+        x_axis = "_RA_icrs"
+        y_axis = "_DE.icrs"
+
     for _, infer_row in infer_catalogue.iterrows():
         judge = []
         for t_i, t_row in target_catalogue.iterrows():
-            GLON_min = t_row["GLON"] - rout_num * t_row[Rout] / 60
-            GLON_max = t_row["GLON"] + rout_num * t_row[Rout] / 60
-            GLAT_min = t_row["GLAT"] - rout_num * t_row[Rout] / 60
-            GLAT_max = t_row["GLAT"] + rout_num * t_row[Rout] / 60
+            GLON_min = t_row[x_axis] - rout_num * t_row[Rout] / 60
+            GLON_max = t_row[x_axis] + rout_num * t_row[Rout] / 60
+            GLAT_min = t_row[y_axis] - rout_num * t_row[Rout] / 60
+            GLAT_max = t_row[y_axis] + rout_num * t_row[Rout] / 60
             star_area = (GLON_max - GLON_min) * (GLAT_max - GLAT_min)
 
             clip_GLON = np.clip([infer_row["ra_min"], infer_row["ra_max"]], GLON_min, GLON_max)
