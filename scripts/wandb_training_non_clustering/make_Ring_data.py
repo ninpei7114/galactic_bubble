@@ -74,11 +74,11 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
             )
             if flag and x_pix_min >= 0 and y_pix_min >= 0:  # calc_pix時に100回試行してもできなかった場合の場合分け
                 label_cal.find_cover()
+                label_cal.make_label(Ring_catalogue)
 
                 c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
                 cut_data = copy.deepcopy(c_data)
                 pi = processing.conv(300, sig1, cut_data)
-                label_cal.make_label(Ring_catalogue)
                 r_shape_y = pi.shape[0]
                 r_shape_x = pi.shape[1]
                 res_data = pi[
