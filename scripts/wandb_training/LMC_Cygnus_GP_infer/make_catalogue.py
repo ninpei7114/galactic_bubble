@@ -1,34 +1,31 @@
-import numpy as np
-import os
-
 import argparse
-
-
+import os
 import sys
+
+import numpy as np
 
 sys.path.append("../")
 
 from processing import data_view_rectangl
+from training_sub import calc_TP_FP_FN
 from make_catalogue_sub import (
     calc_bbox,
+    make_cut_ring,
+    make_data,
     make_infer_catalogue,
     make_map,
-    make_cut_ring,
-    make_TP_FN,
     make_MWP_catalogue,
-    make_data,
+    make_TP_FN,
 )
-from training_sub import calc_TP_FP_FN
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("result_path", type=str, help="model's path to infer")
-
     parser.add_argument(
         "save_dir",
         metavar="DIR",
-        help="Infer Resuly Save Directory",
+        help="Infer Result Save Directory",
         default="/home/cygnus/jupyter/research/each_model_region_infer",
     )
     parser.add_argument(
@@ -43,7 +40,6 @@ def parse_args():
     parser.add_argument(
         "--Cygnus_data_path", metavar="DIR", help="Cyg data path", default="/home/cygnus/jupyter/fits_data/cygnus_fits"
     )
-    parser.add_argument("--savedir_path", metavar="DIR", default="/workspace/weights/search/", help="savedire path")
     parser.add_argument("--val_ring_catalogue", type=str, default="MWP")
 
     return parser.parse_args()
@@ -54,6 +50,7 @@ def main(args):
     MWP = make_MWP_catalogue()
 
     for region in ["LMC", "Cygnus", "Spitzer"]:
+        print(region)
         os.makedirs(f"{args.save_dir}/{region}", exist_ok=True)
         if region == "LMC":
             r_fits_path = args.LMC_data_path + "/r.fits"
@@ -82,7 +79,7 @@ def main(args):
 
         for fp in fits_path:
             data_, hdu_r, a, b, w, region_ = make_data(fp)
-            bbox = calc_bbox(args, region)
+            bbox = calc_bbox(args, region, fp[2])
             catalogue = make_infer_catalogue(bbox, w)
 
             if region == "Spitzer":

@@ -1,18 +1,19 @@
-import torch
+import copy
+import sys
+
+import aplpy
+import astropy
+import astroquery.vizier
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import aplpy
-import sys
-from PIL import Image
-import copy
+import torch
 import tqdm
-import astroquery.vizier
-import astropy
+from PIL import Image
 
 sys.path.append("../")
+from processing import conv, data_view_rectangl, norm_res, remove_nan
 from utils.ssd_model import nm_suppression
-from processing import norm_res, conv, data_view_rectangl, remove_nan
 
 
 def make_MWP_catalogue():
@@ -48,14 +49,18 @@ def make_data(fp):
     return data_, hdu_r, a, b, w, region_
 
 
-def calc_bbox(args, region):
+def calc_bbox(args, region, sp_r=None):
     detection_list = []
     position_list = []
     size_list = [150, 300, 600, 1200, 1800, 2400, 3000]
     conf_list = [0.8] * len(size_list)
     for size in size_list:
-        detection_list.append(np.load(f"{args.result_path}/{region}/result_ring_select_csize{size}.npy"))
-        position_list.append(np.load(f"{args.result_path}/{region}/position_ring_select_csize{size}.npy"))
+        if region == "Spitzer":
+            detection_list.append(np.load(f"{args.result_path}/{region}/{sp_r}/result_ring_select_csize{size}.npy"))
+            position_list.append(np.load(f"{args.result_path}/{region}/{sp_r}/position_ring_select_csize{size}.npy"))
+        else:
+            detection_list.append(np.load(f"{args.result_path}/{region}/result_ring_select_csize{size}.npy"))
+            position_list.append(np.load(f"{args.result_path}/{region}/position_ring_select_csize{size}.npy"))
 
     predict_bbox = []
     scores = []
