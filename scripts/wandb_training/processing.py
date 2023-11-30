@@ -7,31 +7,46 @@ from scipy import signal
 from torch.nn import functional as F
 
 
-def norm(data):
-    min_ = np.min(data)
-    b = np.std(data)
-    mean = np.mean(data)
-    data -= min_
-    max_ = b * 3 + mean
-    data[data > max_] = max_
+def norm(data, info=None):
+    ring_min = np.min(data)
+    data -= ring_min
 
-    data /= np.max(data)
+    if info is not None:
+        xmin = int(float(info["xmin"][0]) * data.shape[1])
+        xmax = int(float(info["xmax"][0]) * data.shape[1])
+        ymin = int(float(info["ymin"][0]) * data.shape[1])
+        ymax = int(float(info["ymax"][0]) * data.shape[1])
+        ring_data_k = data[ymin:ymax, xmin:xmax]
+
+        ring_mean = np.mean(ring_data_k)
+        ring_std = np.std(ring_data_k)
+        max_ = ring_std * 3 + ring_mean
+    else:
+        std = np.std(data)
+        mean = np.mean(data)
+        max_ = std * 3 + mean
+
+    data[data > max_] = max_
+    data /= max_
     return data
 
 
-def normalize(array):
+def normalize(array, info=None):
     """
     入力: (y, x, 2 or 3)
     出力: (y ,x, 2 or 3)
     """
     gauss_list = []
-    s = array.shape[2]
-    for k in range(s):
+    dim = array.shape[2]
+    for k in range(dim):
         cut_data_k = array[:, :, k]
-        cut_data_k = norm(cut_data_k)
+        if info is not None:
+            cut_data_k = norm(cut_data_k, info)
+        else:
+            cut_data_k = norm(cut_data_k)
         gauss_list.append(cut_data_k[:, :, None])
-
     cut_data = np.concatenate(gauss_list, axis=2)
+
     return cut_data
 
 
@@ -54,7 +69,7 @@ def resize(data, size):
     return resize_data_
 
 
-def norm_res(data):
+def norm_res(data, info=None):
     """データを切り取り、normalizeとresizeをする。
 
     Args:
@@ -64,7 +79,10 @@ def norm_res(data):
         _type_: _description_
     """
     data_ = copy.deepcopy(data)
-    data_ = normalize(data_)
+    if info is not None:
+        data_ = normalize(data_, info)
+    else:
+        data_ = normalize(data_)
     data_ = resize(data_, 300)
 
     return data_
