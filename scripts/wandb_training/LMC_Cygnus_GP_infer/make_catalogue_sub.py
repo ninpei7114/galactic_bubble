@@ -58,8 +58,8 @@ def calc_bbox(args, region, sp_r=None):
     conf_list = [0.8] * len(size_list)
     for size in size_list:
         if region == "Spitzer":
-            detection_list.append(np.load(f"{args.result_path}/{region}/{sp_r}/result_ring_select_csize{size}.npy"))
-            position_list.append(np.load(f"{args.result_path}/{region}/{sp_r}/position_ring_select_csize{size}.npy"))
+            detection_list.append(np.load(f"{args.result_path}/{sp_r}/result_ring_select_csize{size}.npy"))
+            position_list.append(np.load(f"{args.result_path}/{sp_r}/position_ring_select_csize{size}.npy"))
         else:
             detection_list.append(np.load(f"{args.result_path}/{region}/result_ring_select_csize{size}.npy"))
             position_list.append(np.load(f"{args.result_path}/{region}/position_ring_select_csize{size}.npy"))
