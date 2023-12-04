@@ -47,7 +47,6 @@ def parse_args():
 
 def main(args):
     os.makedirs(args.save_dir, exist_ok=True)
-    MWP = make_MWP_catalogue()
 
     for region in ["LMC", "Cygnus", "Spitzer"]:
         print(region)
@@ -97,9 +96,11 @@ def main(args):
                 GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
                 GLON_max, GLAT_max = w.all_pix2world(0, a, 0)
                 if region == "Cygnus":
+                    MWP = make_MWP_catalogue(region)
                     MWP_catalogue = MWP.query("@GLON_min <= _RA_icrs <= @GLON_max")
                     MWP_catalogue.to_csv(f"{args.save_dir}/{region}/MWP_catalogue.csv")
                 else:
+                    MWP = make_MWP_catalogue(region)
                     MWP_catalogue = MWP.query("@GLON_min <= GLON <= @GLON_max")
                     MWP_catalogue.to_csv(f"{args.save_dir}/{region}/{region_}/MWP_catalogue.csv")
                 make_map(save_png_name, region, catalogue, hdu_r, args, g_fits_path, MWP_catalogue, region_)

@@ -16,15 +16,17 @@ from processing import conv, data_view_rectangl, norm_res, remove_nan
 from utils.ssd_model import nm_suppression
 
 
-def make_MWP_catalogue():
+def make_MWP_catalogue(region):
     viz = astroquery.vizier.Vizier(columns=["*"])
     viz.ROW_LIMIT = -1
     MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
     MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
     MWP.index = MWP["MWP"].tolist()
-    rank_3 = np.load("../MWP_rank3_name.npy")
-    MWP = MWP.loc[rank_3]
-    MWP = MWP.rename({"_RA.icrs": "_RA_icrs"}, axis="columns")
+    if region == "Cygnus":
+        MWP = MWP.rename({"_RA.icrs": "_RA_icrs"}, axis="columns")
+    elif region == "Spitzer":
+        rank_3 = np.load("../MWP_rank3_name.npy")
+        MWP = MWP.loc[rank_3]
 
     return MWP
 
