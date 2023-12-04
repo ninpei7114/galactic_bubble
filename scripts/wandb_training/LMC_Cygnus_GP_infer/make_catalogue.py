@@ -56,12 +56,12 @@ def main(args):
             r_fits_path = args.LMC_data_path + "/r.fits"
             g_fits_path = args.LMC_data_path + "/g.fits"
             save_png_name = "/home/cygnus/jupyter/fits_data/cygnus_fits/RG_30.0_100.0_10.0_150.0_30.0_100.0.png"
-            fits_path = [[r_fits_path, g_fits_path, region]]
+            fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         elif region == "Cygnus":
             r_fits_path = args.Cygnus_data_path + "/M1_fits_file/M1_cygnus_2.4.fits"
             g_fits_path = args.Cygnus_data_path + "/I4_fits_file/I4_2.4_reg.fits"
             save_png_name = "/home/cygnus/jupyter/fits_data/LMC_data/lmc_RG_-1.0_10.0_-1.0_8.0_0.0_1.0.png"
-            fits_path = [[r_fits_path, g_fits_path, region]]
+            fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         elif region == "Spitzer":
             spitzer_regions = [
                 "spitzer_01800+0000_rgb",
@@ -75,9 +75,11 @@ def main(args):
                 os.makedirs(f"{args.save_dir}/{region}/{sp_r}", exist_ok=True)
                 r_fits_path = args.spitzer_path + f"/{sp_r}/r.fits"
                 g_fits_path = args.spitzer_path + f"/{sp_r}/g.fits"
-                fits_path.append([r_fits_path, g_fits_path, sp_r])
+                save_png_name = f"RG_10.0_100.0_10.0_130.0_30.0_100.0_{sp_r}.png"
+                fits_path.append([r_fits_path, g_fits_path, sp_r, save_png_name])
 
         for fp in fits_path:
+            save_png_name = fp[3]
             data_, hdu_r, a, b, w, region_ = make_data(fp)
             bbox = calc_bbox(args, region, fp[2])
             catalogue = make_infer_catalogue(bbox, w)
