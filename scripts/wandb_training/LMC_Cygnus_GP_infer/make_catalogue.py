@@ -126,8 +126,8 @@ def main(args):
             print(f"TP: {TP}/{len(target_mask)}, FN: {FN}/{len(target_mask)}, FP: {FP}")
             print(f"Precision: {Precision_}, Recall: {Recall_}, F1_score: {F1_score_}")
 
-            target_TP = make_TP_FN(MWP_catalogue, target_mask, data_, w, hdu_r)
-            target_FN = make_TP_FN(MWP_catalogue, ~np.array(target_mask), data_, w, hdu_r)
+            target_TP = make_TP_FN(MWP_catalogue, target_mask, data_, w, hdu_r, region)
+            target_FN = make_TP_FN(MWP_catalogue, ~np.array(target_mask), data_, w, hdu_r, region)
             if region == "Cygnus":
                 data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{args.save_dir}/{region}/TP.jpg")
                 data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{args.save_dir}/{region}/FN.jpg")

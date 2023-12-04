@@ -212,20 +212,28 @@ def make_cut_ring(bbox, data, args, region, region_=None):
         data_view_rectangl(20, d_cut_).save(f"{args.save_dir}/{region}/{region}_predict_ring.png")
 
 
-def make_TP_FN(target_catalogue, target_mask, data, w, hdu):
+def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     target_ring_list = []
+    if region == "Cygnus":
+        coordinate_x = "_RA_icrs"
+        coordinate_y = "_DE.icrs"
+        CDELT = hdu.header["CDELT2"]
+    elif region == "Spitzer":
+        coordinate_x = "GLON"
+        coordinate_y = "GLAT"
+        CDELT = hdu.header["CD2_2"]
 
     for _, row in tqdm.tqdm(target_catalogue[target_mask].iterrows()):
-        lmax = row["_RA_icrs"] + row["MajAxis"] / 60
-        bmin = row["_DE.icrs"] - row["MajAxis"] / 60
-        lmin = row["_RA_icrs"] - row["MajAxis"] / 60
-        bmax = row["_DE.icrs"] + row["MajAxis"] / 60
+        lmax = row[coordinate_x] + row["MajAxis"] / 60
+        bmin = row[coordinate_y] - row["MajAxis"] / 60
+        lmin = row[coordinate_x] - row["MajAxis"] / 60
+        bmax = row[coordinate_y] + row["MajAxis"] / 60
         l_center = (lmax + lmin) / 2
         b_center = (bmax + bmin) / 2
 
         x_center, y_center = w.all_world2pix(l_center, b_center, 0)
-        r = (lmax - lmin) / hdu.header["CDELT2"]
+        r = (lmax - lmin) / CDELT
 
         x_pix_min = x_center - r - r / 50
         y_pix_min = y_center - r - r / 50
