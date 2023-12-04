@@ -15,6 +15,12 @@ from utils.ssd_model import SSD, Detect
 from infer_sub import calc_ind, infer
 
 
+"""Example command line:
+
+python LMC_Cygnus_GP_infer.py galactic_bubble/clustering_NewNorm/training_log:v0
+"""
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("model_ver", type=str, help="model's path to infer")
