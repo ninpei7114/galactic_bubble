@@ -75,7 +75,9 @@ def main(args):
                 os.makedirs(f"{args.save_dir}/{region}/{sp_r}", exist_ok=True)
                 r_fits_path = args.spitzer_path + f"/{sp_r}/r.fits"
                 g_fits_path = args.spitzer_path + f"/{sp_r}/g.fits"
-                save_png_name = f"RG_10.0_100.0_10.0_130.0_30.0_100.0_{sp_r}.png"
+                save_png_name = (
+                    f"/home/cygnus/jupyter/fits_data/spitzer_aplpy/RG_10.0_100.0_10.0_130.0_30.0_100.0_{sp_r}.png"
+                )
                 fits_path.append([r_fits_path, g_fits_path, sp_r, save_png_name])
 
         for fp in fits_path:
@@ -110,9 +112,7 @@ def main(args):
                 world = "RA"
             elif region == "Spitzer":
                 world = "Galactic"
-            TP_c, FP_c, target_mask, cross_match = calc_TP_FP_FN(
-                MWP_catalogue.reset_index(), catalogue, "Reff", args, world=world
-            )
+            TP_c, FP_c, target_mask = calc_TP_FP_FN(MWP_catalogue.reset_index(), catalogue, "Reff", args, world=world)
             TP = target_mask.count(True)
             FN = target_mask.count(False)
             FP = len(FP_c)
