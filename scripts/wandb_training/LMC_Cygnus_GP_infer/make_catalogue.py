@@ -113,7 +113,9 @@ def main(args):
                 world = "RA"
             elif region == "Spitzer":
                 world = "Galactic"
-            TP_c, FP_c, target_mask = calc_TP_FP_FN(MWP_catalogue.reset_index(), catalogue, "Reff", args, world=world)
+            TP_c, FP_c, target_mask = calc_TP_FP_FN(
+                MWP_catalogue.reset_index(), catalogue, "Reff", args.val_ring_catalogue, world=world
+            )
             TP = target_mask.count(True)
             FN = target_mask.count(False)
             FP = len(FP_c)
