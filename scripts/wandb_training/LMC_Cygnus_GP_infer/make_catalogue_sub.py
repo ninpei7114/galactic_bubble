@@ -137,11 +137,11 @@ def make_map(save_png_name, region, catalogue, hdu, args, g_fits_path, MWP_catal
     f.tick_labels.set_font(size=40, family="serif")
     f.axis_labels.set_font(size=40, family="serif")
 
-    if region == "Cygnus" or region == "Spitzer":
+    if region == "Cygnus":
         header_d1 = hdu.header["CDELT1"]
         header_d2 = hdu.header["CDELT2"]
     else:
-        header_d1 = hdu.header["CD2_1"]
+        header_d1 = hdu.header["CD1_1"]
         header_d2 = hdu.header["CD2_2"]
 
     f.show_rectangles(
