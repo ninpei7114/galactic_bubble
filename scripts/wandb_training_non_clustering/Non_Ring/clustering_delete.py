@@ -1,7 +1,6 @@
 import argparse
 import glob
 import os
-import shutil
 import sys
 
 import japanize_matplotlib
@@ -15,7 +14,6 @@ from PIL import Image
 from sklearn.cluster import KMeans
 
 sys.path.append("../")
-from processing import data_view_rectangl
 from utils.ssd_model import SSD
 
 """
@@ -104,12 +102,9 @@ def main(args):
         f"Class 0 : {sum(prediction == 0)}\nClass 1 : {sum(prediction == 1)}\nClass 2 : {sum(prediction == 2)}\nClass 3 : {sum(prediction == 3)}\nClass 4 : {sum(prediction == 4)}\nClass 5 : {sum(prediction == 5)}\nClass 6 : {sum(prediction == 6)}\nClass 7 : {sum(prediction == 7)}\nClass 8 : {sum(prediction == 8)}"
     )
 
-    #################################
-    ## Non-Ringデータをクラスごとに移動##
-    #################################
-    for i in glob.glob("%s/*" % args.NonRing_dir):
-        for k in range(int(args.class_num)):
-            os.makedirs("%s/class%s" % (i, k), exist_ok=True)
+    ######################################
+    ## Non-Ringデータのうち特定クラスを削除 ##
+    ######################################
 
     print("Delete photo")
     for path, pred in zip(path_list, prediction):
