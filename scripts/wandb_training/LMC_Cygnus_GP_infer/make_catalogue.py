@@ -132,12 +132,14 @@ def main(args):
                 data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{args.save_dir}/{region}/TP.jpg")
                 data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{args.save_dir}/{region}/FN.jpg")
             elif region == "Spitzer":
-                data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(
-                    f"{args.save_dir}/{region}/{region_}/TP.jpg"
-                )
-                data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(
-                    f"{args.save_dir}/{region}/{region_}/FN.jpg"
-                )
+                if len(target_TP) >= 1:
+                    data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(
+                        f"{args.save_dir}/{region}/{region_}/TP.jpg"
+                    )
+                if len(target_FN) >= 1:
+                    data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(
+                        f"{args.save_dir}/{region}/{region_}/FN.jpg"
+                    )
 
 
 if __name__ == "__main__":
