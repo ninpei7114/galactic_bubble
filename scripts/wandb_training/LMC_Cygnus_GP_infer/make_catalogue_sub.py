@@ -256,3 +256,35 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
             target_ring_list.append(res_data)
 
     return np.array(target_ring_list)
+
+
+def make_FP(FP_catalogue, data, w):
+    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
+    target_ring_list = []
+
+    for _, row in tqdm.tqdm(FP_catalogue.iterrows()):
+        x_min, y_min = w.all_world2pix(row["ra_max"], row["dec_min"], 0)
+        x_max, y_max = w.all_world2pix(row["ra_min"], row["dec_max"], 0)
+        r = x_max - x_min
+
+        x_pix_min = x_min - r / 50
+        y_pix_min = y_min - r / 50
+        x_pix_max = x_max + r / 50
+        y_pix_max = y_max + r / 50
+
+        if x_pix_min <= 0 or y_pix_min <= 0:
+            pass
+
+        else:
+            c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
+            cut_data = copy.deepcopy(c_data)
+            pi = conv(300, sig1, cut_data)
+            r_shape_y = pi.shape[0]
+            r_shape_x = pi.shape[1]
+            res_data = pi[
+                int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
+            ]
+            res_data = norm_res(res_data)
+            target_ring_list.append(res_data)
+
+    return np.array(target_ring_list)

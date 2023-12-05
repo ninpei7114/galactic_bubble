@@ -3,6 +3,7 @@ import os
 import sys
 
 import numpy as np
+import pandas as pd
 
 sys.path.append("../")
 
@@ -16,6 +17,7 @@ from make_catalogue_sub import (
     make_map,
     make_MWP_catalogue,
     make_TP_FN,
+    make_FP,
 )
 
 
@@ -128,9 +130,11 @@ def main(args):
 
             target_TP = make_TP_FN(MWP_catalogue, target_mask, data_, w, hdu_r, region)
             target_FN = make_TP_FN(MWP_catalogue, ~np.array(target_mask), data_, w, hdu_r, region)
+            target_FP = make_FP(pd.DataFrame(FP_c), data_, w)
             if region == "Cygnus":
                 data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{args.save_dir}/{region}/TP.jpg")
                 data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{args.save_dir}/{region}/FN.jpg")
+                data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(f"{args.save_dir}/{region}/FP.jpg")
             elif region == "Spitzer":
                 if len(target_TP) >= 1:
                     data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(
@@ -139,6 +143,10 @@ def main(args):
                 if len(target_FN) >= 1:
                     data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(
                         f"{args.save_dir}/{region}/{region_}/FN.jpg"
+                    )
+                if len(target_FP) >= 1:
+                    data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(
+                        f"{args.save_dir}/{region}/{region_}/FP.jpg"
                     )
 
 
