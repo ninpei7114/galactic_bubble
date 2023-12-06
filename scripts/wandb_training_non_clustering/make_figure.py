@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def make_figure(name, loss_l_list_train, loss_c_list_train, loss_l_list_val, loss_c_list_val, val_f1_score):
+def make_figure(name, loss_l_list_val, loss_c_list_val, loss_l_list_train, loss_c_list_train, val_f1_score):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(loss_l_list_train, label="loss_l_train")
