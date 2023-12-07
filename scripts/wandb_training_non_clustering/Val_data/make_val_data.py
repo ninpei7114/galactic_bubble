@@ -65,7 +65,7 @@ def main(args):
     os.makedirs(f"{args.savedir_name}/cut_val_png/region_val_png", exist_ok=True)
 
     ## choice catalogue from 'CH' or 'MWP'
-    choice = "CH"
+    choice = "MWP"
     Ring_CATALOGUE = select_catalogue.catalogue(choice, ring_select=True)
     obj_sig = 1 / (2 * (np.log(2)) ** (1 / 2))
 
