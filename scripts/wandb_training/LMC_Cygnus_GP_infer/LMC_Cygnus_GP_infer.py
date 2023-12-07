@@ -100,9 +100,9 @@ def main(args):
                 ### indexの計算 ###
                 cut_shape = (size, size)
                 if size <= 300:
-                    fragment = 8
+                    fragment = 3
                 else:
-                    fragment = 8
+                    fragment = 3
                 ind = calc_ind(cut_shape, fragment, data_)
                 ### infer ###
                 infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device, model_ver)
