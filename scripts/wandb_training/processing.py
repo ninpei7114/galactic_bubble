@@ -8,22 +8,22 @@ from torch.nn import functional as F
 
 
 def norm(data, info=None):
-    ring_min = np.min(data)
-    data -= ring_min
-
     if info is not None:
+        ring_min = np.min(data)
+        data -= ring_min
         xmin = int(float(info["xmin"][0]) * data.shape[1])
         xmax = int(float(info["xmax"][0]) * data.shape[1])
         ymin = int(float(info["ymin"][0]) * data.shape[1])
         ymax = int(float(info["ymax"][0]) * data.shape[1])
         ring_data_k = data[ymin:ymax, xmin:xmax]
-
         ring_mean = np.mean(ring_data_k)
         ring_std = np.std(ring_data_k)
         max_ = ring_std * 3 + ring_mean
     else:
+        data_min = np.min(data)
         std = np.std(data)
         mean = np.mean(data)
+        data -= data_min
         max_ = std * 3 + mean
 
     data[data > max_] = max_
