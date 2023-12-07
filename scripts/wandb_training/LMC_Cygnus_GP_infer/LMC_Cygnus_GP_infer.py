@@ -48,7 +48,6 @@ def parse_args():
     parser.add_argument(
         "--Cygnus_data_path", metavar="DIR", help="Cyg data path", default="/home/cygnus/jupyter/fits_data/cygnus_fits"
     )
-    parser.add_argument("--savedir_path", metavar="DIR", default="/workspace/weights/search/", help="savedire path")
 
     return parser.parse_args()
 
