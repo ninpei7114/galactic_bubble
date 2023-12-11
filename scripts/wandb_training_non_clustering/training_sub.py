@@ -402,7 +402,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
         F_score (float): f1score
         Precision (float): Precision
         Recall (float): Recall
-        threthre (float): 0.3~0.8の数字
+        conf_thre (float): 0.3~0.8の数字
     """
     if threshold is None:
         thresholds = [i / 20 for i in range(6, 17, 1)]
