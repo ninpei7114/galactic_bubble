@@ -71,7 +71,7 @@ class make_training_val_data:
         ## 必要なフォルダの作成
         self.save_data_path = args.savedir_path + "/" + "".join("dataset") + "/" + augmentation_name.split("/")[-1]
         os.makedirs(self.save_data_path, exist_ok=True)
-        os.makedirs(self.args.savedir_path + "".join("dataset"), exist_ok=True)
+        os.makedirs(self.args.savedir_path + "/" + "".join("dataset"), exist_ok=True)
 
     def make_training_ring_data(self, train_cfg, epoch):
         """Trainingデータを作成する関数。
