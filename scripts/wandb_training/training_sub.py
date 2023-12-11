@@ -457,9 +457,9 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
     if save:
         infer_catalogue.to_csv(save_path + "/infer_catalogue_test.csv")
         target_catalogue.to_csv(save_path + "/target_catalogue_test.csv")
-        imaging_infer_result(args, target_catalogue[target_mask], save_path + "/test_TP.png", Rout)
-        imaging_infer_result(args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.png", Rout)
-        imaging_infer_result(args, pd.DataFrame(FP_c), save_path + "/test_FP.png", Rout, infer_result=True)
+        imaging_infer_result(args, target_catalogue[target_mask], save_path + "/test_TP.jpeg", Rout)
+        imaging_infer_result(args, target_catalogue[~np.array(target_mask)], save_path + "/test_FN.jpeg", Rout)
+        imaging_infer_result(args, pd.DataFrame(FP_c), save_path + "/test_FP.jpeg", Rout, infer_result=True)
     return F_score, Precision, Recall, conf_thre
 
 
