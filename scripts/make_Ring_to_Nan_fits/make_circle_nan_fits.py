@@ -30,11 +30,11 @@ def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_cata
         b = series_i["GLAT"]
         lpix, bpix = w.all_world2pix(l, b, 0)
         # 左端
-        lmax = l + series_i["Rout"] / 60
-        bmin = b - series_i["Rout"] / 60
+        lmax = l + series_i["Reff"] / 60
+        bmin = b - series_i["Reff"] / 60
         # 右端
-        lmin = l - series_i["Rout"] / 60
-        bmax = b + series_i["Rout"] / 60
+        lmin = l - series_i["Reff"] / 60
+        bmax = b + series_i["Reff"] / 60
         x_pix_min, y_pix_min = w.all_world2pix(lmax, bmin, 0)
         x_pix_max, y_pix_max = w.all_world2pix(lmin, bmax, 0)
 
@@ -76,14 +76,11 @@ def main(args):
 
     viz = astroquery.vizier.Vizier(columns=["*"])
     viz.ROW_LIMIT = -1
-    bub_2006 = viz.query_constraints(catalog="J/ApJ/649/759/bubbles")[0].to_pandas()
-    bub_2007 = viz.query_constraints(catalog="J/ApJ/670/428/bubble")[0].to_pandas()
-    bub_2006_change = bub_2006.set_index("__CPA2006_")
-    bub_2007_change = bub_2007.set_index("__CWP2007_")
-    CH = pd.concat([bub_2006_change, bub_2007_change])
-    CH["CH"] = CH.index
-    rank_2_3 = np.load("../wandb_training/rank_3.npy")
-    CH = CH.loc[rank_2_3]
+    MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
+    MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
+    MWP.index = MWP["MWP"].tolist()
+    rank_3 = np.load("../MWP_rank3_name.npy")
+    MWP = MWP.loc[rank_3]
 
     for i in pbar:
         pbar.set_description(l[i])
@@ -106,12 +103,12 @@ def main(args):
             else:
                 pass
 
-            cut_CH = CH.query("@GLON_min < GLON < @GLON_max")
-            if len(cut_CH) == 0:
+            cut_catalogue = MWP.query("@GLON_min < GLON < @GLON_max")
+            if len(cut_catalogue) == 0:
                 data = fits
             else:
                 c = np.zeros_like(fits)
-                data = circle_nan(fits, c, cut_CH, w)
+                data = circle_nan(fits, c, cut_catalogue, w)
 
             new_hdu = astropy.io.fits.PrimaryHDU(data, header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
