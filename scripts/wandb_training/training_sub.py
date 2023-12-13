@@ -405,7 +405,7 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
         conf_thre (float): 0.3~0.8の数字
     """
     if threshold is None:
-        thresholds = [i / 20 for i in range(6, 17, 1)]
+        thresholds = np.arange(0.5, 0.96, 0.01)
     else:
         thresholds = [threshold]
 
