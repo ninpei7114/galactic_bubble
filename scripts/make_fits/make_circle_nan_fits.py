@@ -38,7 +38,7 @@ def circle_nan(fits_data, same_shape_zero, pandas_catalog1, w):  # , pandas_cata
         x_pix_min, y_pix_min = w.all_world2pix(lmax, bmin, 0)
         x_pix_max, y_pix_max = w.all_world2pix(lmin, bmax, 0)
 
-        rout = (x_pix_max - x_pix_min) / 2
+        rout = (x_pix_max - x_pix_min) / 8
         same_shape_zero = cv2.circle(
             same_shape_zero, (int(np.round(lpix)), int(np.round(bpix))), int(rout), (255, 255, 255), -1
         )
