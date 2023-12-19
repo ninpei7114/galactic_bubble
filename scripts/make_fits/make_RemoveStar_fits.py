@@ -51,8 +51,8 @@ def main(args):
 
     for i in pbar:
         pbar.set_description(l[i])
-        data_fits_G = f"{args.fits_path}/{i}/g.fits"
-        os.makedirs(f"{args.save_dir}/remove_star_fits/{i}")
+        data_fits_G = f"{args.fits_path}/{l[i]}/g.fits"
+        os.makedirs(f"{args.save_dir}/remove_star_fits/{l[i]}")
 
         hdu = astropy.io.fits.open(data_fits_G)[0]
         data = hdu.data.copy()
@@ -66,7 +66,7 @@ def main(args):
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
 
         for fits_type in ["r.fits", "g.fits", "b.fits"]:
-            hdu_type = astropy.io.fits.open(f"{args.fits_path}/{i}/{fits_type}")[0]
+            hdu_type = astropy.io.fits.open(f"{args.fits_path}/{l[i]}/{fits_type}")[0]
             data = hdu_type.data.copy()
             data[data != data] = 0
             same_shape_zero = np.zeros_like(data)
@@ -87,7 +87,7 @@ def main(args):
 
             new_hdu = astropy.io.fits.PrimaryHDU(inp_near_data, hdu_type.header)
             new_hdu_list = astropy.io.fits.HDUList([new_hdu])
-            new_hdu_list.writeto(f"{args.save_dir}/remove_star_fits/{i}/{fits_type}", overwrite=True)
+            new_hdu_list.writeto(f"{args.save_dir}/remove_star_fits/{l[i]}/{fits_type}", overwrite=True)
 
 
 if __name__ == "__main__":
