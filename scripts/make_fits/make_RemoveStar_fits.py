@@ -52,7 +52,7 @@ def main(args):
     for i in pbar:
         pbar.set_description(l[i])
         data_fits_G = f"{args.fits_path}/{l[i]}/g.fits"
-        os.makedirs(f"{args.save_dir}/remove_star_fits/{l[i]}")
+        os.makedirs(f"{args.save_dir}/remove_star_fits/{l[i]}", exist_ok=True)
 
         hdu = astropy.io.fits.open(data_fits_G)[0]
         data = hdu.data.copy()
