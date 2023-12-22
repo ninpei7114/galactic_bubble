@@ -121,7 +121,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                         if fl:
                             trans_data_ = trans_data.copy()
                             count = make_png_and_json(
-                                save_data_path, count, processing.norm_res(trans_data_, trans_info), trans_info
+                                save_data_path, count, processing.norm_res(trans_data_), trans_info
                             )
                             frame_mwp_train.append(trans_info)
                     ###### 回転 ######
@@ -131,7 +131,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 for deg in [90, 180, 270]:
                                     rot_data, rotate_info = ring_augmentation.rotate_data(deg, trans_data, trans_info)
                                     count = make_png_and_json(
-                                        save_data_path, count, processing.norm_res(rot_data, rotate_info), rotate_info
+                                        save_data_path, count, processing.norm_res(rot_data), rotate_info
                                     )
                                     frame_mwp_train.append(rotate_info)
                             else:
@@ -140,7 +140,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                             for deg in [90, 180, 270]:
                                 rot_data, rotate_info = ring_augmentation.rotate_data(deg, res_data, info)
                                 count = make_png_and_json(
-                                    save_data_path, count, processing.norm_res(rot_data, rotate_info), rotate_info
+                                    save_data_path, count, processing.norm_res(rot_data), rotate_info
                                 )
                                 frame_mwp_train.append(rotate_info)
                     ###### 上下反転 ######
@@ -151,10 +151,10 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                     trans_data, trans_info
                                 )
                                 count = make_png_and_json(
-                                    save_data_path, count, processing.norm_res(ud_res_data, ud_info), ud_info
+                                    save_data_path, count, processing.norm_res(ud_res_data), ud_info
                                 )
                                 count = make_png_and_json(
-                                    save_data_path, count, processing.norm_res(lr_res_data, lr_info), lr_info
+                                    save_data_path, count, processing.norm_res(lr_res_data), lr_info
                                 )
                                 frame_mwp_train.append(ud_info)
                                 frame_mwp_train.append(lr_info)
@@ -162,12 +162,8 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 pass
                         else:
                             ud_res_data, lr_res_data, ud_info, lr_info = ring_augmentation.flip_data(res_data, info)
-                            count = make_png_and_json(
-                                save_data_path, count, processing.norm_res(ud_res_data, ud_info), ud_info
-                            )
-                            count = make_png_and_json(
-                                save_data_path, count, processing.norm_res(lr_res_data, lr_info), lr_info
-                            )
+                            count = make_png_and_json(save_data_path, count, processing.norm_res(ud_res_data), ud_info)
+                            count = make_png_and_json(save_data_path, count, processing.norm_res(lr_res_data), lr_info)
                             frame_mwp_train.append(lr_info)
                             frame_mwp_train.append(ud_info)
 
