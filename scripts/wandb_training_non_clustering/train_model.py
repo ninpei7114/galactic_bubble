@@ -47,7 +47,7 @@ def train_model(
     early_stopping = EarlyStopping_f1_score(
         patience=15, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
-    detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.3)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
+    detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.5)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
     save_training_val_loss = management_loss()
     logs, f_score_val_l = [], []
 
