@@ -92,7 +92,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                     ########################
                     info = label_cal.check_list()
                     info["fits"] = fits_path
-                    count = make_png_and_json(save_data_path, count, processing.norm_res(res_data, info), info)
+                    count = make_png_and_json(save_data_path, count, processing.norm_res(res_data), info)
                     frame_mwp_train.append(info)
                     #######################
                     ## Ring augmentation ##
