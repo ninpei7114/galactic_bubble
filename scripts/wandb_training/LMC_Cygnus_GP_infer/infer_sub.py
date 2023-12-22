@@ -88,7 +88,7 @@ def infer(ind, batch_size, cut_shape, data_, net_w, detect, args, region, device
 
                 position.append(p_list)
                 with NpyAppendArray(result_filename) as npaa:
-                    npaa.append(detections.to("cpu").detach().numpy().copy())
+                    npaa.append(detections.to("cpu").detach().numpy().copy().astype(np.float16))
 
     position = np.concatenate(position)
     np.save(f"{args.result_save_dir}/{model_ver}/{region}/position_ring_select_csize%s.npy" % cut_shape[0], position)
