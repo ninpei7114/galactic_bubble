@@ -42,10 +42,10 @@ def train_model(
     NonRing_class = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
     NonRing_rg = default_rng(args.fits_random_state)
     # early_stopping = EarlyStopping_loss(
-    #     patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
+    #     patience=15, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     # )
     early_stopping = EarlyStopping_f1_score(
-        patience=10, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
+        patience=15, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
     detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.3)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
     save_training_val_loss = management_loss()
