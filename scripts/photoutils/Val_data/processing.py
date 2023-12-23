@@ -48,9 +48,7 @@ def remove_peak(array):
     mean, median, std = sigma_clipped_stats(data_8micron, sigma=3)
     daofind = DAOStarFinder(fwhm=1.98, threshold=5 * mean)
     sources = daofind(data_8micron)
-    if len(sources) == 0:
-        return data
-    else:
+    try:
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
 
         same_shape_zero = np.zeros_like(data)
@@ -58,6 +56,8 @@ def remove_peak(array):
             same_shape_zero = cv2.circle(same_shape_zero, (int(y), int(x)), int(5), (255, 255, 255), -1)
 
         data[same_shape_zero == same_shape_zero.max()] = np.nan
+        return data
+    except:
         return data
 
 
