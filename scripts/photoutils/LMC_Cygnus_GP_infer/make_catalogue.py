@@ -7,9 +7,16 @@ import pandas as pd
 
 sys.path.append("../")
 
-from make_catalogue_sub import (calc_bbox, make_cut_ring, make_data, make_FP,
-                                make_infer_catalogue, make_map,
-                                make_MWP_catalogue, make_TP_FN)
+from make_catalogue_sub import (
+    calc_bbox,
+    make_cut_ring,
+    make_data,
+    make_FP,
+    make_infer_catalogue,
+    make_map,
+    make_MWP_catalogue,
+    make_TP_FN,
+)
 
 from processing import data_view_rectangl
 from training_sub import calc_TP_FP_FN
@@ -83,10 +90,10 @@ def main(args):
 
             if region == "Spitzer":
                 np.save(f"{args.save_dir}/{region}/{region_}/bbox.npy", bbox)
-                catalogue.to_csv(f"{args.save_dir}/{region}/{region_}/cygnus_infer_catalogue.csv")
+                catalogue.to_csv(f"{args.save_dir}/{region}/{region_}/infer_catalogue.csv")
             else:
                 np.save(f"{args.save_dir}/{region}/bbox.npy", bbox)
-                catalogue.to_csv(f"{args.save_dir}/{region}/cygnus_infer_catalogue.csv")
+                catalogue.to_csv(f"{args.save_dir}/{region}/infer_catalogue.csv")
 
             if region == "Cygnus" or region == "Spitzer":
                 GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
@@ -126,28 +133,18 @@ def main(args):
                 target_FN = make_TP_FN(MWP_catalogue, ~np.array(target_mask), data_, w, hdu_r, region)
                 target_FP = make_FP(pd.DataFrame(FP_c), data_, w)
                 if region == "Cygnus":
-                    data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(
-                        f"{args.save_dir}/{region}/TP.jpg"
-                    )
-                    data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(
-                        f"{args.save_dir}/{region}/FN.jpg"
-                    )
-                    data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(
-                        f"{args.save_dir}/{region}/FP.jpg"
-                    )
+                    save_path = f"{args.save_dir}/{region}"
+                    data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{save_path}/TP.jpg")
+                    data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{save_path}/FN.jpg")
+                    data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(f"{save_path}/FP.jpg")
                 elif region == "Spitzer":
+                    save_path = f"{args.save_dir}/{region}/{region_}"
                     if len(target_TP) >= 1:
-                        data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(
-                            f"{args.save_dir}/{region}/{region_}/TP.jpg"
-                        )
+                        data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{save_path}/TP.jpg")
                     if len(target_FN) >= 1:
-                        data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(
-                            f"{args.save_dir}/{region}/{region_}/FN.jpg"
-                        )
+                        data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{save_path}/FN.jpg")
                     if len(target_FP) >= 1:
-                        data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(
-                            f"{args.save_dir}/{region}/{region_}/FP.jpg"
-                        )
+                        data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(f"{save_path}/FP.jpg")
 
 
 if __name__ == "__main__":

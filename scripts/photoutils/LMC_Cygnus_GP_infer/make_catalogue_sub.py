@@ -52,27 +52,19 @@ def make_data(fp):
 
 
 def calc_bbox(args, region, sp_r=None):
-    detection_list = []
-    position_list = []
+    predict_bbox, scores = [], []
     size_list = [150, 300, 600, 1200, 1800, 2400, 3000]
-    conf_list = [0.8] * len(size_list)
+    conf = 0.95
     for size in size_list:
         if region == "Spitzer":
-            detection_list.append(np.load(f"{args.result_path}/{sp_r}/result_ring_select_csize{size}.npy"))
-            position_list.append(np.load(f"{args.result_path}/{sp_r}/position_ring_select_csize{size}.npy"))
+            detection = np.load(f"{args.result_path}/{sp_r}/result_ring_select_csize{size}.npy")
+            position = np.load(f"{args.result_path}/{sp_r}/position_ring_select_csize{size}.npy")
         else:
-            detection_list.append(np.load(f"{args.result_path}/{region}/result_ring_select_csize{size}.npy"))
-            position_list.append(np.load(f"{args.result_path}/{region}/position_ring_select_csize{size}.npy"))
-
-    predict_bbox = []
-    scores = []
-    for s in range(len(size_list)):
-        for d, p in zip(detection_list[s], position_list[s]):
-            # dのshapeは[2, 200, 5]
-            find_index = np.where(
-                d[1, :, 0] >= conf_list[s]
-            )  # d[1, :, 0]ringのconf、最初の１は、[ring:1, no_ring:0]の１、最後の０はconfを指定
-
+            detection = np.load(f"{args.result_path}/{region}/result_ring_select_csize{size}.npy")
+            position = np.load(f"{args.result_path}/{region}/position_ring_select_csize{size}.npy")
+        for d, p in tqdm.tqdm(zip(detection, position)):
+            # d[1, :, 0]ringのconf、最初の１は、[ring:1, no_ring:0]の１、最後の０はconfを指定
+            find_index = np.where(d[1, :, 0] >= conf)
             # fing_indexは、ringのconfが0.99以上のindex
             # dのshapeは、いろいろ、[0, 5]だったり、[ringの数, 5]
             d = d[1][find_index]
@@ -81,14 +73,14 @@ def calc_bbox(args, region, sp_r=None):
             else:
                 for i in range(len(find_index)):  # 抽出した物体数分ループを回す
                     sc = d[i][0]  # 確信度
-                    bbox = d[i][1:] * [size_list[s], size_list[s], size_list[s], size_list[s]]
+                    bbox = d[i][1:] * [size, size, size, size]
                     # 返り値のリストに追加
                     bbox = bbox + np.array([p[1], p[0], p[1], p[0]])
                     predict_bbox.append(bbox)
                     scores.append(sc)
+
     bbox = torch.Tensor(np.array(predict_bbox))
     scores = torch.Tensor(scores)
-    del detection_list
     keep, count = nm_suppression(bbox, scores, overlap=0.3, top_k=5000)
     keep = keep[:count]
     bbox = bbox[keep]
