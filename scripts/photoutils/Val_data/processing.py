@@ -1,5 +1,6 @@
 import copy
 import json
+import warnings
 
 import cv2
 import numpy as np
@@ -11,6 +12,10 @@ from photutils.detection import DAOStarFinder
 from PIL import Image, ImageDraw
 from scipy import signal
 from torch.nn import functional as F
+
+
+warnings.resetwarnings()
+warnings.simplefilter("ignore")
 
 
 def norm_rp(data, nan_data_dim):
@@ -50,7 +55,6 @@ def remove_peak(array):
     sources = daofind(data_8micron)
     try:
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
-
         same_shape_zero = np.zeros_like(data)
         for y, x in positions:
             same_shape_zero = cv2.circle(same_shape_zero, (int(y), int(x)), int(5), (255, 255, 255), -1)
