@@ -104,7 +104,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
         return self.true_size + self.sample_negative_size
 
 
-def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonring_num, NonRing_class):
+def make_training_dataloader(Training_data_path, train_Ring_num, args, nonring_num, NonRing_class):
     ## Training Ring の Dataloader を作成
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
@@ -122,27 +122,22 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
     )
 
     ## Training NonRing の Dataloader を作成
-    nonring_num = train_Ring_num // len(NonRing_class)
-    aug_num = np.delete(np.array(args.NonRing_aug_num) + 1, args.NonRing_remove_class_list)
-    NonRing_rsample = np.clip([round(nonring_num / e / a, 5) * 10 for e, a in zip(each_nonring_num, aug_num)], None, 1)
-    mini_batch = np.clip(args.NonRing_mini_batch / aug_num / len(NonRing_class), 1, None).astype(int)
-    NonRing_web_list = [
-        webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_nonring_class{cl}.tar")
-        .rsample(float(rsample))
+    # aug_num = np.array(args.NonRing_aug_num) + 1
+    NonRing_rsample = train_Ring_num / nonring_num
+    NonRing_web_list = (
+        webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_nonring.tar")
+        .rsample(NonRing_rsample)
         .shuffle(10000000000)
         .decode("pil")
         .to_tuple("png", "json")
         .map(preprocess)
-        for rsample, cl in zip(NonRing_rsample, NonRing_class)
-    ]
-    NonRing_dl_l = [
-        torch.utils.data.DataLoader(
-            nr_w_l, collate_fn=od_collate_fn, batch_size=int(m_batch), num_workers=2, pin_memory=True
-        )
-        for nr_w_l, m_batch in zip(NonRing_web_list, mini_batch)
-    ]
+    )
 
-    return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
+    NonRing_dl_l = torch.utils.data.DataLoader(
+        NonRing_web_list, collate_fn=od_collate_fn, batch_size=args.NonRing_mini_batch, num_workers=2, pin_memory=True
+    )
+
+    return dl_ring_train, NonRing_dl_l  # NonRingを無限にループするイテレータへ
 
 
 def make_validatoin_dataloader(Validation_data_path, args):
