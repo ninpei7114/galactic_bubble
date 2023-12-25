@@ -18,10 +18,15 @@ warnings.resetwarnings()
 warnings.simplefilter("ignore")
 
 
-def norm_rp(data, nan_data_dim):
-    data_min = np.nanmin(nan_data_dim)
-    std = np.nanstd(nan_data_dim)
-    mean = np.nanmean(nan_data_dim)
+def norm_rp(data, nan_data_dim=None):
+    if nan_data_dim is not None:
+        data_min = np.nanmin(nan_data_dim)
+        std = np.nanstd(nan_data_dim)
+        mean = np.nanmean(nan_data_dim)
+    else:
+        data_min = np.nanmin(data)
+        std = np.nanstd(data)
+        mean = np.nanmean(data)
     data -= data_min
     max_ = std * 3 + mean
 
@@ -37,22 +42,31 @@ def normalize_rp(array):
     """
     gauss_list = []
     dim = array.shape[2]
-    nan_data = remove_peak(array)
     for k in range(dim):
         cut_data_k = array[:, :, k]
-        cut_data_k = norm_rp(cut_data_k, nan_data[:, :, k])
-        gauss_list.append(cut_data_k[:, :, None])
+        if k == 2:
+            cut_data_k_ = norm_rp(cut_data_k)
+            gauss_list.append(cut_data_k_[:, :, None])
+        else:
+            nan_data = remove_peak(cut_data_k, k)
+            cut_data_k_ = norm_rp(cut_data_k, nan_data)
+            gauss_list.append(cut_data_k_[:, :, None])
     cut_data = np.concatenate(gauss_list, axis=2)
 
     return cut_data
 
 
-def remove_peak(array):
+def remove_peak(array, dim):
     data = array.copy()
-    data_8micron = data[:, :, 1].copy()
-    mean, median, std = sigma_clipped_stats(data_8micron, sigma=3)
-    daofind = DAOStarFinder(fwhm=1.98, threshold=5 * mean)
-    sources = daofind(data_8micron)
+    mean, median, std = sigma_clipped_stats(data, sigma=3)
+    if dim == 0:
+        fwhm = 1.98
+    elif dim == 1:
+        fwhm = 6.25
+    elif dim == 2:
+        fwhm = 1.66
+    daofind = DAOStarFinder(fwhm=fwhm, threshold=5 * mean)
+    sources = daofind(data)
     try:
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
         same_shape_zero = np.zeros_like(data)
