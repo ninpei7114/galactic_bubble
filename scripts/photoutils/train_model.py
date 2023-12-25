@@ -12,10 +12,14 @@ from numpy.random import default_rng
 from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
 from make_figure import make_figure
-from nonring_augmentation import nonring_augmentation
-from training_sub import (EarlyStopping_f1_score, EarlyStopping_loss,
-                          calc_fscore_val, management_loss, print_and_log,
-                          write_train_log)
+from training_sub import (
+    EarlyStopping_f1_score,
+    EarlyStopping_loss,
+    calc_fscore_val,
+    management_loss,
+    print_and_log,
+    write_train_log,
+)
 from utils.ssd_model import Detect
 
 
@@ -81,6 +85,7 @@ def train_model(
         for phase in ["train", "val"]:
             if phase == "train":
                 print_and_log(f_log, f" ({phase}) ")
+                iter_noring = dl_nonring.__iter__()
                 net.train()
             else:
                 print_and_log(f_log, f" \n ({phase})")
@@ -93,9 +98,13 @@ def train_model(
             for _ in dataloaders_dict[phase]:
                 if phase == "train":
                     images, targets = _[0], _[1]
-                    noring_image, noring_target = nonring_augmentation(dl_nonring, NonRing_class, NonRing_rg, args)
-                    images = np.concatenate((images, noring_image))
-                    targets = targets + noring_target
+                    # noring_image, noring_target = nonring_augmentation(dl_nonring, NonRing_class, NonRing_rg, args)
+                    noring = next(iter_noring, None)
+                    if noring is None:
+                        iter_noring = dl_nonring.__iter__()
+                        noring = next(iter_noring)
+                    images = np.concatenate((images, noring[0]))
+                    targets = targets + noring[1]
                 else:
                     images, targets, offset, region_info = _[0], _[1], _[2], _[3]
 
@@ -136,14 +145,13 @@ def train_model(
         ##############################
         ## Validation F1 scoreの計算 ##
         ##############################
-        f_score_val, precision, recall, conf_threshold = calc_fscore_val(
+        f_score_val, precision, recall, conf_threshold_val = calc_fscore_val(
             np.concatenate(result), np.array(position), regions, args
         )
-
         f_score_val_l.append(f_score_val)
 
         log_epoch = write_train_log(
-            f_log, epoch, loss_train, loss_val, f_score_val, precision, recall, conf_threshold, start_time, args
+            f_log, epoch, loss_train, loss_val, f_score_val, precision, recall, conf_threshold_val, start_time, args
         )
         run.log(log_epoch)
         logs.append(log_epoch)
