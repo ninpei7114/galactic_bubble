@@ -36,6 +36,12 @@ def catalogue(choice, ring_select):
         MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
         MWP = MWP.set_index("MWP")
         MWP["MWP"] = MWP.index
+        if ring_select:
+            print("\n#######################")
+            print("   Ring selection")
+            print("#######################")
+            rank_3 = np.load("../MWP_rank3_name.npy")
+            MWP = MWP.loc[rank_3]
         return MWP
 
     else:
