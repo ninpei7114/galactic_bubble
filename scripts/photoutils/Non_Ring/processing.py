@@ -10,7 +10,6 @@ from photutils.detection import DAOStarFinder
 from scipy import signal
 from torch.nn import functional as F
 
-
 warnings.resetwarnings()
 warnings.simplefilter("ignore")
 

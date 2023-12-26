@@ -5,10 +5,9 @@ import shutil
 import tarfile
 
 import numpy as np
+from make_Ring_data import make_ring
 from numpy.random import default_rng
 from sklearn.model_selection import ShuffleSplit
-
-from make_Ring_data import make_ring
 from training_sub import print_and_log
 
 

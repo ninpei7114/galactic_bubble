@@ -3,9 +3,8 @@ import copy
 import astroquery.vizier
 import numpy as np
 import pandas as pd
-from skimage import transform
-
 import processing
+from skimage import transform
 
 """
 リングのaugmentationパターンを作成するスクリプト

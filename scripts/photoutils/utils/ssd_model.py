@@ -14,7 +14,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 from torch.autograd import Function
-
 # フォルダ「utils」にある関数matchを記述したmatch.pyからimport
 from utils.match import match
 

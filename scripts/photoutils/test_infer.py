@@ -6,7 +6,6 @@ import tarfile
 import numpy as np
 import torch
 import webdataset
-
 from data import od_collate_fn_validation, preprocess_validation
 from training_sub import calc_fscore_val
 from utils.ssd_model import SSD, Detect

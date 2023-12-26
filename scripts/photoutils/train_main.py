@@ -6,12 +6,11 @@ from itertools import product as product
 from math import sqrt as sqrt
 
 import numpy as np
+import test_infer
 import torch
 import torch.optim as optim
 import wandb
 from PIL import ImageFile
-
-import test_infer
 from train_model import train_model
 from training_sub import print_and_log, weights_init
 from utils.ssd_model import SSD, MultiBoxLoss

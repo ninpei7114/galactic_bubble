@@ -9,10 +9,9 @@ import pandas as pd
 from tqdm import tqdm
 
 sys.path.append("../")
-import select_catalogue
-
 import label_caliculator
 import processing
+import select_catalogue
 
 """
 example command:

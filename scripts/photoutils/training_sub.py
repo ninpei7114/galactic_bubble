@@ -8,11 +8,10 @@ import astropy.io.fits
 import astropy.wcs
 import numpy as np
 import pandas as pd
+import ring_augmentation
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-
-import ring_augmentation
 from processing import conv, data_view_rectangl, norm_res, remove_nan
 from utils.ssd_model import nm_suppression
 

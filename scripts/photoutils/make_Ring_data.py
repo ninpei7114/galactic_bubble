@@ -5,14 +5,13 @@ import os
 
 import astropy.io.fits
 import astropy.wcs
+import label_caliculator
 import numpy as np
 import pandas as pd
-import tqdm
-from PIL import Image
-
-import label_caliculator
 import processing
 import ring_augmentation
+import tqdm
+from PIL import Image
 
 
 def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_data_path):

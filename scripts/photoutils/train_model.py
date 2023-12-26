@@ -7,19 +7,13 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from numpy.random import default_rng
-
 from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
 from make_figure import make_figure
-from training_sub import (
-    EarlyStopping_f1_score,
-    EarlyStopping_loss,
-    calc_fscore_val,
-    management_loss,
-    print_and_log,
-    write_train_log,
-)
+from numpy.random import default_rng
+from training_sub import (EarlyStopping_f1_score, EarlyStopping_loss,
+                          calc_fscore_val, management_loss, print_and_log,
+                          write_train_log)
 from utils.ssd_model import Detect
 
 

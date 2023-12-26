@@ -7,11 +7,10 @@ import time
 import astropy.io.fits
 import NonRing_sub
 import numpy as np
+import processing
 from numpy.random import default_rng
 from PIL import Image
 from tqdm import tqdm
-
-import processing
 
 """
 webdatasetを使用するための、Non-Ringのpng画像を作成する

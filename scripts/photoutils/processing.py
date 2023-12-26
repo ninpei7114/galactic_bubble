@@ -1,4 +1,5 @@
 import copy
+import warnings
 
 import cv2
 import numpy as np
@@ -8,6 +9,9 @@ from astropy.stats import sigma_clipped_stats
 from photutils.detection import DAOStarFinder
 from scipy import signal
 from torch.nn import functional as F
+
+warnings.resetwarnings()
+warnings.simplefilter("ignore")
 
 
 def norm_rp(data, nan_data_dim=None):
