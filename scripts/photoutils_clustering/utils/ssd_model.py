@@ -650,7 +650,7 @@ class MultiBoxLoss(nn.Module):
         # 各DBoxの損失の大きさloss_cの順位であるidx_rankを求める
         _, loss_idx = loss_c.sort(1, descending=True)
         _, idx_rank = loss_idx.sort(1)
-        num_neg = torch.clamp(num_pos * self.negpos_ratio, max=num_dbox, min=10)
+        num_neg = torch.clamp(num_pos * self.negpos_ratio, max=num_dbox, min=20)
 
         # idx_rankは各DBoxの損失の大きさが上から何番目なのかが入っている
         # 背景のDBoxの数num_negよりも、順位が低い（すなわち損失が大きい）DBoxを取るマスク作成
