@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import wandb
 
-sys.path.append("/home/cygnus/jupyter/galactic_bubble/scripts/wandb_training")
+sys.path.append("/home/cygnus/jupyter/galactic_bubble/scripts/photutils_clustering")
 from processing import remove_nan
 from utils.ssd_model import SSD, Detect
 
