@@ -58,9 +58,9 @@ def parse_args():
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
     parser.add_argument("--fscore", type=str, default="f2_score")
     # NonRing
-    parser.add_argument("--NonRing_class_num", type=int, default=8)
-    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 4])
-    parser.add_argument("--NonRing_aug_num", nargs="*", type=int, default=[5, 0, 0, 0, 0, 0, 2, 3])
+    parser.add_argument("--NonRing_class_num", type=int, default=9)
+    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 5])
+    parser.add_argument("--NonRing_aug_num", nargs="*", type=int, default=[1, 1, 1, 0, 1, 0, 1, 1, 1])
     # Valiation
     parser.add_argument("--Val_remove_size_list", nargs="*", type=int, default=[])
 
@@ -183,7 +183,12 @@ def main(args):
             f_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
-                [f"test {args.fscore}: {f_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
+                [
+                    f"test {args.fscore}: {f_score}",
+                    f"precision: {pre}",
+                    f"recall: {re}",
+                    f"conf_threshold: {conf_thre}",
+                ],
             )
             wandb.run.summary[f"test_{args.fscore}"] = f_score
             wandb.run.summary["test_precision"] = pre
