@@ -1,7 +1,7 @@
 program: ./train_main.py
 method: bayes
 metric:
-  name: val_f1_score
+  name: val_f2_score
   goal: maximize
 parameters:
   lr:
