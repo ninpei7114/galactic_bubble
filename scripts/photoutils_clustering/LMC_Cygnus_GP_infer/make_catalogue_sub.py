@@ -76,8 +76,11 @@ def calc_bbox(args, region, sp_r=None):
                     bbox = d[i][1:] * [size, size, size, size]
                     # 返り値のリストに追加
                     bbox = bbox + np.array([p[1], p[0], p[1], p[0]])
-                    predict_bbox.append(bbox)
-                    scores.append(sc)
+                    if np.max(bbox) == np.inf:
+                        pass
+                    else:
+                        predict_bbox.append(bbox)
+                        scores.append(sc)
 
     bbox = torch.Tensor(np.array(predict_bbox))
     scores = torch.Tensor(scores)
