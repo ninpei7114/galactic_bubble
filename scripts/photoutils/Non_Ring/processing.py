@@ -31,20 +31,20 @@ def norm_rp(data, nan_data_dim=None):
     return data
 
 
-def normalize_rp(array):
+def normalize_rp(array, r_header, g_header):
     """
     入力: (y, x, 2 or 3)
     出力: (y ,x, 2 or 3)
     """
     gauss_list = []
-    dim = array.shape[2]
-    for k in range(dim):
-        cut_data_k = array[:, :, k]
-        if k == 2:
+    dims = array.shape[2]
+    for dim in range(dims):
+        cut_data_k = array[:, :, dim]
+        if dim == 2:
             cut_data_k_ = norm_rp(cut_data_k)
             gauss_list.append(cut_data_k_[:, :, None])
         else:
-            nan_data = remove_peak(cut_data_k, k)
+            nan_data = remove_peak(cut_data_k, dim, r_header, g_header)
             cut_data_k_ = norm_rp(cut_data_k, nan_data)
             gauss_list.append(cut_data_k_[:, :, None])
     cut_data = np.concatenate(gauss_list, axis=2)
@@ -52,16 +52,17 @@ def normalize_rp(array):
     return cut_data
 
 
-def remove_peak(array, dim):
+def remove_peak(array, dim, r_header, g_header):
     data = array.copy()
     mean, median, std = sigma_clipped_stats(data, sigma=3)
     if dim == 0:
-        fwhm = 1.98
+        fwhm_arcsec = 6
+        fwhm_pixel = fwhm_arcsec / r_header["PIXSCAL1"]
     elif dim == 1:
-        fwhm = 6.25
-    elif dim == 2:
-        fwhm = 1.66
-    daofind = DAOStarFinder(fwhm=fwhm, threshold=5 * mean)
+        fwhm_arcsec = 1.98
+        fwhm_pixel = fwhm_arcsec / g_header["PIXSCAL1"]
+
+    daofind = DAOStarFinder(fwhm=fwhm_pixel, threshold=mean + 3 * std)
     sources = daofind(data)
     try:
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
@@ -94,7 +95,7 @@ def resize(data, size):
     return resize_data_
 
 
-def norm_res(data):
+def norm_res(data, r_header, g_header):
     """
     データを切り取り、
     normalizeとresizeをする。
@@ -103,7 +104,7 @@ def norm_res(data):
     # shape_x = data.shape[1]
     # data = data[int(shape_y / 4) : int(shape_y * 3 / 4), int(shape_x / 4) : int(shape_x * 3 / 4)]
     data_ = copy.deepcopy(data)
-    data_ = normalize_rp(data_)
+    data_ = normalize_rp(data_, r_header, g_header)
     data_ = resize(data_, 300)
 
     return data_

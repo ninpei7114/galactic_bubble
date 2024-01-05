@@ -96,7 +96,7 @@ def main(args):
             res_data = pi[
                 int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
             ]
-            res_data = processing.norm_res(res_data)
+            res_data = processing.norm_res(res_data, spitzer_rfits.header, spitzer_gfits.header)
             pil_image = Image.fromarray(np.uint8(res_data * 255))
 
             #########################
