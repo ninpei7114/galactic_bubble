@@ -103,7 +103,15 @@ def main(args):
         label_cal.all_star(Ring_catalogue)
 
         imaging_validation = processing.imaging_validation(
-            data, ring_count, non_ring_count, obj_sig, fits_path, savedir_name, label_cal
+            data,
+            ring_count,
+            non_ring_count,
+            obj_sig,
+            fits_path,
+            savedir_name,
+            label_cal,
+            spitzer_rfits.header,
+            spitzer_gfits.header,
         )
 
         size_list = [150, 300, 600, 900, 1200, 1800, 2400, 3000]

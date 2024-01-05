@@ -34,20 +34,20 @@ def norm_rp(data, nan_data_dim=None):
     return data
 
 
-def normalize_rp(array):
+def normalize_rp(array, r_header, g_header):
     """
     入力: (y, x, 2 or 3)
     出力: (y ,x, 2 or 3)
     """
     gauss_list = []
-    dim = array.shape[2]
-    for k in range(dim):
-        cut_data_k = array[:, :, k]
-        if k == 2:
+    dims = array.shape[2]
+    for dim in range(dims):
+        cut_data_k = array[:, :, dim]
+        if dim == 2:
             cut_data_k_ = norm_rp(cut_data_k)
             gauss_list.append(cut_data_k_[:, :, None])
         else:
-            nan_data = remove_peak(cut_data_k, k)
+            nan_data = remove_peak(cut_data_k, dim, r_header, g_header)
             cut_data_k_ = norm_rp(cut_data_k, nan_data)
             gauss_list.append(cut_data_k_[:, :, None])
     cut_data = np.concatenate(gauss_list, axis=2)
@@ -55,16 +55,17 @@ def normalize_rp(array):
     return cut_data
 
 
-def remove_peak(array, dim):
+def remove_peak(array, dim, r_header, g_header):
     data = array.copy()
     mean, median, std = sigma_clipped_stats(data, sigma=3)
     if dim == 0:
-        fwhm = 1.98
+        fwhm_arcsec = 6
+        fwhm_pixel = fwhm_arcsec / r_header["PIXSCAL1"]
     elif dim == 1:
-        fwhm = 6.25
-    elif dim == 2:
-        fwhm = 1.66
-    daofind = DAOStarFinder(fwhm=fwhm, threshold=5 * mean)
+        fwhm_arcsec = 1.98
+        fwhm_pixel = fwhm_arcsec / g_header["PIXSCAL1"]
+
+    daofind = DAOStarFinder(fwhm=fwhm_pixel, threshold=mean + 3 * std)
     sources = daofind(data)
     try:
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
@@ -97,7 +98,7 @@ def resize(data, size):
     return resize_data_
 
 
-def norm_res(data):
+def norm_res(data, r_header, g_header):
     """
     データを切り取り、
     normalizeとresizeをする。
@@ -106,7 +107,7 @@ def norm_res(data):
     # shape_x = data.shape[1]
     # data = data[int(shape_y / 4) : int(shape_y * 3 / 4), int(shape_x / 4) : int(shape_x * 3 / 4)]
     data_ = copy.deepcopy(data)
-    data_ = normalize_rp(data_)
+    data_ = normalize_rp(data_, r_header, g_header)
     data_ = resize(data_, 300)
 
     return data_
@@ -156,7 +157,9 @@ def remove_nan(data1):
 
 
 class imaging_validation:
-    def __init__(self, data, ring_count, non_ring_count, obj_sig, fits_path, savedir_name, label_cal):
+    def __init__(
+        self, data, ring_count, non_ring_count, obj_sig, fits_path, savedir_name, label_cal, r_header, g_header
+    ):
         self.data = data
         self.ring_count = ring_count
         self.non_ring_count = non_ring_count
@@ -164,6 +167,8 @@ class imaging_validation:
         self.fits_path = fits_path
         self.savedir_name = savedir_name
         self.label_cal = label_cal
+        self.r_header = r_header
+        self.g_header = g_header
 
     def cut_data(self, many_ind, cut_shape):
         self.cut_shape = int(cut_shape)
@@ -188,7 +193,7 @@ class imaging_validation:
             if np.isnan(d.sum()) or np.std(d[:, :, 0]) < 1e-9:
                 pass
             else:
-                self.cut_region = norm_res(d).astype(np.float32)
+                self.cut_region = norm_res(d, self.r_header, self.g_header).astype(np.float32)
 
                 self.label_cal.make_label(self.offset_xmin, self.offset_ymin, self.cut_shape)
                 xmin_list, ymin_list, xmax_list, ymax_list, name_list = self.label_cal.check_list()
