@@ -182,18 +182,23 @@ def main(args):
             f_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
             print_and_log(
                 f_log,
-                [f"test {args.fscore}: {f_score}", f"precision: {pre}", f"recall: {re}", f"conf_threshold: {conf_thre}"],
+                [
+                    f"test {args.fscore}: {f_score}",
+                    f"precision: {pre}",
+                    f"recall: {re}",
+                    f"conf_threshold: {conf_thre}",
+                ],
             )
             wandb.run.summary[f"test_{args.fscore}"] = f_score
             wandb.run.summary["test_precision"] = pre
             wandb.run.summary["test_recall"] = re
             wandb.run.summary["test_conf_threshold"] = conf_thre
 
+        f_log.close()
         artifact = wandb.Artifact("training_log", type="dir")
         artifact.add_dir(name)
         run.log_artifact(artifact, aliases=["latest", "best"])
 
-        f_log.close()
         run.alert(title="学習が終了しました", text="学習が終了しました")
         run.finish()
 

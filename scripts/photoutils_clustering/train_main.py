@@ -195,11 +195,11 @@ def main(args):
             wandb.run.summary["test_recall"] = re
             wandb.run.summary["test_conf_threshold"] = conf_thre
 
+        f_log.close()
         artifact = wandb.Artifact("training_log", type="dir")
         artifact.add_dir(name)
         run.log_artifact(artifact, aliases=["latest", "best"])
 
-        f_log.close()
         run.alert(title="学習が終了しました", text="学習が終了しました")
         run.finish()
 
