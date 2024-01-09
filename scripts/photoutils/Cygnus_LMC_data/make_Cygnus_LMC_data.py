@@ -27,7 +27,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, savedir_name):
+def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, savedir_name, region):
     data_list = []
     position_list_ = []
     for i in many_ind:
@@ -53,7 +53,7 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, sav
             if flag:
                 cut_data = processing.norm_res(d, r_fits_header, g_fits_header)
                 pil_image = Image.fromarray(np.uint8(cut_data * 255))
-                pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}.png")
+                pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}_{region}.png")
         else:
             pass
 
@@ -77,21 +77,21 @@ def main(args):
     ##############################
     pbar = tqdm(range(len(Cygnus_LMC_l)))
     for i in pbar:
-        fits_path = Cygnus_LMC_l[i]
-        pbar.set_description(fits_path)
+        region = Cygnus_LMC_l[i]
+        pbar.set_description(region)
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/", exist_ok=True)
-        os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{fits_path}", exist_ok=True)
+        os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{region}", exist_ok=True)
 
-        if fits_path == "Cygnus":
+        if region == "Cygnus":
             hdu_r = astropy.io.fits.open(args.Cygnus_path + "/" + "M1_fits_file/M1_cygnus_2.4.fits")[0]
             hdu_g = astropy.io.fits.open(args.Cygnus_path + "/" + "I4_fits_file/I4_2.4_reg.fits")[0]
             hdu_b = astropy.io.fits.open(args.Cygnus_path + "/" + "I1_fits_file/I1_2.4_reg.fits")[0].data
-            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{fits_path}"
-        elif fits_path == "LMC":
+            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+        elif region == "LMC":
             hdu_r = astropy.io.fits.open(args.LMC_path + "/" + "r.fits")[0]
             hdu_g = astropy.io.fits.open(args.LMC_path + "/" + "g.fits")[0]
             hdu_b = np.zeros(hdu_g.data.shape)
-            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{fits_path}"
+            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
 
         data = np.concatenate(
             [
@@ -124,13 +124,27 @@ def main(args):
             for x, y in zip(x_ind.ravel(), y_ind.ravel()):
                 ind_array.append([y, x])
             ind_array = np.array(ind_array)
-            if fits_path == "Cygnus":
+            if region == "Cygnus":
                 cut_data(
-                    data, ind_array, cut_shape[0], hdu_r.header["CDELT2"], hdu_g.header["CDELT2"], sig1, savedir_name
+                    data,
+                    ind_array,
+                    cut_shape[0],
+                    hdu_r.header["CDELT2"],
+                    hdu_g.header["CDELT2"],
+                    sig1,
+                    savedir_name,
+                    region,
                 )
-            elif fits_path == "LMC":
+            elif region == "LMC":
                 cut_data(
-                    data, ind_array, cut_shape[0], hdu_r.header["CD2_2"], hdu_g.header["CD2_2"], sig1, savedir_name
+                    data,
+                    ind_array,
+                    cut_shape[0],
+                    hdu_r.header["CD2_2"],
+                    hdu_g.header["CD2_2"],
+                    sig1,
+                    savedir_name,
+                    region,
                 )
 
 
