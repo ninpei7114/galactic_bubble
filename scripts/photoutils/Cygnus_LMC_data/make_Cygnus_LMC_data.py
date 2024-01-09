@@ -79,8 +79,8 @@ def main(args):
     for i in pbar:
         fits_path = Cygnus_LMC_l[i]
         pbar.set_description(fits_path)
-        os.makedirs(f"{args.savedir_name}/Cygnus_LMC_png/", exist_ok=True)
-        os.makedirs(f"{args.savedir_name}/Cygnus_LMC_png/{fits_path}", exist_ok=True)
+        os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/", exist_ok=True)
+        os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{fits_path}", exist_ok=True)
 
         if fits_path == "Cygnus":
             hdu_r = astropy.io.fits.open(args.Cygnus_path + "/" + "M1_fits_file/M1_cygnus_2.4.fits")[0]
