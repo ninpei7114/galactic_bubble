@@ -116,8 +116,8 @@ def main(args):
             shape = data.shape
             x_num = int(shape[1] / slide_pix[1])
             y_num = int(shape[0] / slide_pix[0])
-            x_idx = np.arange(0, slide_pix[1] * x_num, slide_pix[1])
-            y_idx = np.arange(0, slide_pix[0] * y_num, slide_pix[0])
+            x_idx = np.arange(cut_shape[1] / 5, slide_pix[1] * x_num, slide_pix[1])
+            y_idx = np.arange(cut_shape[0] / 5, slide_pix[0] * y_num, slide_pix[0])
             x_ind, y_ind = np.meshgrid(x_idx, y_idx)
 
             ind_array = []
