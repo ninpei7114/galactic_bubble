@@ -20,9 +20,9 @@ python make_val_data.py /dataset/spitzer_data/
 
 def parse_args():
     parser = argparse.ArgumentParser(description="make validataion data for SSD")
-    parser.add_argument("Cygnus_path", metavar="DIR", help="Cygnus_path")
-    parser.add_argument("LMC_path", metavar="DIR", help="LMC_path")
-    parser.add_argument("save_dir", metavar="DIR", help="save_dir")
+    parser.add_argument("Cygnus_path", type=str, metavar="DIR", help="Cygnus_path")
+    parser.add_argument("LMC_path", type=str, metavar="DIR", help="LMC_path")
+    parser.add_argument("save_dir", type=str, metavar="DIR", help="save_dir")
 
     return parser.parse_args()
 
