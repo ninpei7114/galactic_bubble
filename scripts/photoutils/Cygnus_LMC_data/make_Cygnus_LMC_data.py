@@ -73,10 +73,8 @@ def main(args):
     ##############################
     ## Cygnus LMC Data 作成開始 ##
     ##############################
-    pbar = tqdm(range(len(Cygnus_LMC_l)))
-    for i in pbar:
-        region = Cygnus_LMC_l[i]
-        pbar.set_description(region)
+    for region in Cygnus_LMC_l:
+        print(f"{region=}")
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/", exist_ok=True)
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{region}", exist_ok=True)
 
@@ -96,8 +94,9 @@ def main(args):
             axis=2,
         )
 
-        for kk in range(len(size_list)):
-            size = size_list[kk]
+        pbar = tqdm(range(len(size_list)))
+        for i in pbar:
+            size = size_list[i]
 
             ################
             ## indexの計算 ##
