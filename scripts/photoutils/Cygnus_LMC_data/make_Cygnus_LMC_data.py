@@ -75,7 +75,7 @@ def main(args):
     ##############################
     for region in Cygnus_LMC_l:
         print(f"{region=}")
-        print("MAKE DATA")
+        print("MAKING DATA ...")
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/", exist_ok=True)
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{region}", exist_ok=True)
 
