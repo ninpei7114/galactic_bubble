@@ -98,7 +98,7 @@ def main(args):
         pbar = tqdm(range(len(size_list)))
         for i in pbar:
             size = size_list[i]
-            pbar.set_description(size)
+            pbar.set_description(str(size))
             ################
             ## indexの計算 ##
             ################
