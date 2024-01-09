@@ -53,7 +53,7 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, sav
             if flag:
                 cut_data = processing.norm_res(d, r_fits_header, g_fits_header)
                 pil_image = Image.fromarray(np.uint8(cut_data * 255))
-                pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}_.png")
+                pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}.png")
         else:
             pass
 
