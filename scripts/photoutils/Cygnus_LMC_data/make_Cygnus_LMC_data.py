@@ -31,8 +31,8 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, sav
     data_list = []
     position_list_ = []
     for i in many_ind:
-        xmin = i[1]
-        ymin = i[0]
+        xmin = int(i[1])
+        ymin = int(i[0])
         extra_xmin = xmin - cut_shape / 50
         extra_xmax = xmin + cut_shape + cut_shape / 50
         extra_ymin = ymin - cut_shape / 50
