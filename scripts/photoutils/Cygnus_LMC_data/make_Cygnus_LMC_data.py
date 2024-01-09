@@ -8,7 +8,7 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 
-import processing
+from processing import remove_nan, norm_res, conv
 
 
 """
@@ -27,9 +27,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, savedir_name, region):
-    data_list = []
-    position_list_ = []
+def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, savedir_name, region):
+    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     for i in many_ind:
         xmin = int(i[1])
         ymin = int(i[0])
@@ -40,7 +39,7 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, sav
         data_c = data_[int(extra_ymin) : int(extra_ymax), int(extra_xmin) : int(extra_xmax)].view()
         if np.max(data_c) == np.max(data_c):
             d = copy.deepcopy(data_c)
-            d = processing.conv(300, sig1, d)
+            d = conv(300, sig1, d)
             d = d[int(cut_shape / 52) : int(cut_shape * 51 / 52), int(cut_shape / 52) : int(cut_shape * 51 / 52)]
 
             flag = True
@@ -51,13 +50,11 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, sig1, sav
                 else:
                     flag = False
             if flag:
-                cut_data = processing.norm_res(d, r_fits_header, g_fits_header)
+                cut_data = norm_res(d, r_fits_header, g_fits_header)
                 pil_image = Image.fromarray(np.uint8(cut_data * 255))
                 pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}_{region}.png")
         else:
             pass
-
-    return data_list, position_list_
 
 
 def main(args):
@@ -69,8 +66,9 @@ def main(args):
     example command:
     >>> python make_Cygnus_LMC_data.py /dataset/spitzer_data/
     """
-    sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     Cygnus_LMC_l = ["Cygnus", "LMC"]
+    size_list = [150, 300, 600, 900, 1200, 1800, 2400, 3000]
+    fragment = 3
 
     ##############################
     ## Cygnus LMC Data 作成開始 ##
@@ -94,16 +92,9 @@ def main(args):
             savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
 
         data = np.concatenate(
-            [
-                processing.remove_nan(hdu_r.data[:, :, None]),
-                processing.remove_nan(hdu_g.data[:, :, None]),
-                processing.remove_nan(hdu_b[:, :, None]),
-            ],
+            [remove_nan(hdu_r.data[:, :, None]), remove_nan(hdu_g.data[:, :, None]), remove_nan(hdu_b[:, :, None])],
             axis=2,
         )
-
-        size_list = [150, 300, 600, 900, 1200, 1800, 2400, 3000]
-        fragment = 3
 
         for kk in range(len(size_list)):
             size = size_list[kk]
@@ -126,25 +117,11 @@ def main(args):
             ind_array = np.array(ind_array)
             if region == "Cygnus":
                 cut_data(
-                    data,
-                    ind_array,
-                    cut_shape[0],
-                    hdu_r.header["CDELT2"],
-                    hdu_g.header["CDELT2"],
-                    sig1,
-                    savedir_name,
-                    region,
+                    data, ind_array, cut_shape[0], hdu_r.header["CDELT2"], hdu_g.header["CDELT2"], savedir_name, region
                 )
             elif region == "LMC":
                 cut_data(
-                    data,
-                    ind_array,
-                    cut_shape[0],
-                    hdu_r.header["CD2_2"],
-                    hdu_g.header["CD2_2"],
-                    sig1,
-                    savedir_name,
-                    region,
+                    data, ind_array, cut_shape[0], hdu_r.header["CD2_2"], hdu_g.header["CD2_2"], savedir_name, region
                 )
 
 
