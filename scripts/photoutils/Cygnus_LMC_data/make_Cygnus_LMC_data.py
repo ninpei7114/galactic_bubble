@@ -124,7 +124,14 @@ def main(args):
             for x, y in zip(x_ind.ravel(), y_ind.ravel()):
                 ind_array.append([y, x])
             ind_array = np.array(ind_array)
-            cut_data(data, ind_array, cut_shape[0], hdu_r.header, hdu_g.header, sig1, savedir_name)
+            if fits_path == "Cygnus":
+                cut_data(
+                    data, ind_array, cut_shape[0], hdu_r.header["CDELT2"], hdu_g.header["CDELT2"], sig1, savedir_name
+                )
+            elif fits_path == "LMC":
+                cut_data(
+                    data, ind_array, cut_shape[0], hdu_r.header["CD2_2"], hdu_g.header["CD2_2"], sig1, savedir_name
+                )
 
 
 if __name__ == "__main__":

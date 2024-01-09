@@ -60,10 +60,10 @@ def remove_peak(array, dim, r_header, g_header):
     mean, median, std = sigma_clipped_stats(data, sigma=3)
     if dim == 0:
         fwhm_arcsec = 6
-        fwhm_pixel = fwhm_arcsec / r_header["PIXSCAL1"]
+        fwhm_pixel = fwhm_arcsec / r_header / 3600
     elif dim == 1:
         fwhm_arcsec = 1.98
-        fwhm_pixel = fwhm_arcsec / g_header["PIXSCAL1"]
+        fwhm_pixel = fwhm_arcsec / g_header / 3600
 
     daofind = DAOStarFinder(fwhm=fwhm_pixel, threshold=mean + 3 * std)
     sources = daofind(data)
