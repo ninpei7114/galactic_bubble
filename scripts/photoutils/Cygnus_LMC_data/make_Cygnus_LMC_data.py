@@ -37,13 +37,13 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, savedir_n
         extra_ymin = ymin - cut_shape / 50
         extra_ymax = ymin + cut_shape + cut_shape / 50
         data_c = data_[int(extra_ymin) : int(extra_ymax), int(extra_xmin) : int(extra_xmax)].view()
-        if np.max(data_c) == np.max(data_c):
+        if not np.isnan(data_c.sum()):
             d = copy.deepcopy(data_c)
             d = conv(300, sig1, d)
             d = d[int(cut_shape / 52) : int(cut_shape * 51 / 52), int(cut_shape / 52) : int(cut_shape * 51 / 52)]
 
             flag = True
-            for dim in range(d.shape[2]):
+            for dim in range(d.shape[2] - 1):
                 non_zero_count = np.count_nonzero(d[:, :, dim])
                 if non_zero_count >= d.shape[0] * d.shape[1] * 3 / 4:
                     pass
@@ -75,6 +75,7 @@ def main(args):
     ##############################
     for region in Cygnus_LMC_l:
         print(f"{region=}")
+        print("MAKE DATA")
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/", exist_ok=True)
         os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{region}", exist_ok=True)
 
@@ -97,7 +98,7 @@ def main(args):
         pbar = tqdm(range(len(size_list)))
         for i in pbar:
             size = size_list[i]
-
+            pbar.set_description(size)
             ################
             ## indexの計算 ##
             ################
