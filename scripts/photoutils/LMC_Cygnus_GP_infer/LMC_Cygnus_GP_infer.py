@@ -1,8 +1,8 @@
 import argparse
-import sys
-import time
 import os
+import sys
 import tarfile
+import time
 
 import numpy as np
 import torch
@@ -10,8 +10,8 @@ import wandb
 import webdataset
 
 sys.path.append("/home/cygnus/jupyter/galactic_bubble/scripts/photoutils")
-from utils.ssd_model import SSD, Detect
 from infer_sub import od_collate_fn_validation, preprocess_validation
+from utils.ssd_model import SSD, Detect
 
 """Example command line:
 
@@ -62,13 +62,13 @@ def main(args):
         dl_region = torch.utils.data.DataLoader(
             Dataset_test,
             collate_fn=od_collate_fn_validation,
-            batch_size=args.Val_mini_batch,
+            batch_size=128,
             num_workers=2,
             pin_memory=True,
         )
 
         position, result, regions = [], []
-
+        print("START INFER")
         for _ in dl_region:
             images, targets, offset, region_info = _[0], _[1], _[2], _[3]
             images = torch.from_numpy(images).permute(0, 3, 1, 2)[:, :2, :, :].astype(np.float32)
