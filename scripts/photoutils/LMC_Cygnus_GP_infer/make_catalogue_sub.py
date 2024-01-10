@@ -67,7 +67,7 @@ def calc_bbox(args, region, conf_thre):
 
     bbox = torch.Tensor(np.concatenate(predict_bbox))
     scores = torch.Tensor(np.concatenate(scores))
-    keep, count = nm_suppression(bbox, scores, overlap=0.45, top_k=5000)
+    keep, count = nm_suppression(bbox, scores, overlap=0.3, top_k=5000)
     keep = keep[:count]
     bbox = bbox[keep]
 
