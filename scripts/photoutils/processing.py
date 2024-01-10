@@ -40,7 +40,7 @@ def normalize_rp(array, r_header, g_header):
     dims = array.shape[2]
     for dim in range(dims):
         cut_data_k = array[:, :, dim]
-        if dim == 2:
+        if dim == 0 or dim == 2:
             cut_data_k_ = norm_rp(cut_data_k)
             gauss_list.append(cut_data_k_[:, :, None])
         else:
