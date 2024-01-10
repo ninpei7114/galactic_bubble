@@ -22,9 +22,8 @@ python LMC_Cygnus_GP_infer.py galactic_bubble/clustering_NewNorm/training_log:v0
 def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("model_ver", type=str, help="model's path to infer")
-    parser.add_argument("model_download_dir", type=str, help="model Download Directory")
-    parser.add_argument("Cygnus_LMC_png", type=str, help="Cygnus_LMC_png")
     parser.add_argument("result_save_dir", type=str, help="Infer Result Save Directory")
+    parser.add_argument("Cygnus_LMC_png", type=str, help="Cygnus_LMC_png")
 
     return parser.parse_args()
 
@@ -41,13 +40,12 @@ def main(args):
     f_log.write("使用モデル: " + args.model_ver + "\n")
     f_log.close()
 
+    model_download_dir = f"{args.result_save_dir}/artifacts/"
     api = wandb.Api()
     artifact = api.artifact(f"{args.model_ver}")
-    artifact.download(f"{args.model_download_dir}" + "/artifacts/" + "/".join(args.model_ver.split("/")[-2:]))
+    artifact.download(model_download_dir + "/".join(args.model_ver.split("/")[-2:]))
     net_w = SSD()
-    net_weights = torch.load(
-        args.model_download_dir + "/artifacts/" + "/".join(args.model_ver.split("/")[-2:]) + "/earlystopping.pth"
-    )
+    net_weights = torch.load(model_download_dir + "/".join(args.model_ver.split("/")[-2:]) + "/earlystopping.pth")
     net_w.load_state_dict(net_weights["model_state_dict"])
     net_w.to(device)
 
