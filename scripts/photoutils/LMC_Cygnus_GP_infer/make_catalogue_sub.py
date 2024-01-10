@@ -206,14 +206,14 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
         coordinate_x = "_RA_icrs"
         coordinate_y = "_DE.icrs"
         CDELT = hdu.header["CDELT2"]
-        r_resolution = hdu.header["PIXSCAL1"]
-        g_resolution = hdu.header["PIXSCAL1"]
+        r_resolution = hdu.header["CDELT2"] * 3600
+        g_resolution = hdu.header["CDELT2"] * 3600
     elif region == "Spitzer":
         coordinate_x = "GLON"
         coordinate_y = "GLAT"
         CDELT = hdu.header["CD2_2"]
-        r_resolution = hdu.header["CD2_2"] * 3600
-        g_resolution = hdu.header["CD2_2"] * 3600
+        r_resolution = hdu.header["PIXSCAL1"]
+        g_resolution = hdu.header["PIXSCAL1"]
 
     for _, row in tqdm.tqdm(target_catalogue[target_mask].iterrows()):
         lmax = row[coordinate_x] + row["MajAxis"] / 60
@@ -249,11 +249,15 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
     return np.array(target_ring_list)
 
 
-def make_FP(FP_catalogue, data, w, hdu):
+def make_FP(FP_catalogue, data, w, hdu, region):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     target_ring_list = []
-    r_resolution = hdu.header["CDELT2"] * 3600
-    g_resolution = hdu.header["CDELT2"] * 3600
+    if region == "Cygnus":
+        r_resolution = hdu.header["CDELT2"] * 3600
+        g_resolution = hdu.header["CDELT2"] * 3600
+    elif region == "Spitzer":
+        r_resolution = hdu.header["PIXSCAL1"]
+        g_resolution = hdu.header["PIXSCAL1"]
 
     for _, row in tqdm.tqdm(FP_catalogue.iterrows()):
         x_min, y_min = w.all_world2pix(row["ra_max"], row["dec_min"], 0)
