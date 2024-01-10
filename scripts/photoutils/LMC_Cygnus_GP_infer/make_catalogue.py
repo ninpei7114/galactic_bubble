@@ -32,7 +32,6 @@ def parse_args():
 
 
 def main(args):
-    os.makedirs(args.save_dir, exist_ok=True)
     conf_thre = 0.95
 
     for region in ["LMC", "Cygnus"]:
