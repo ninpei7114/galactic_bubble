@@ -177,7 +177,7 @@ def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None
             int(cut_.shape[0] / 52) : int(cut_.shape[0] * 51 / 52),
             int(cut_.shape[1] / 52) : int(cut_.shape[1] * 51 / 52),
         ]
-        cut_ = norm_res(cut_, r_header, g_header)
+        cut_ = norm_res(cut_, r_header["CDLET1"], g_header["CDLET1"])
         d_cut.append(cut_)
 
     d_cut_ = np.array(d_cut)

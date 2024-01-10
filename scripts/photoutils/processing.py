@@ -52,15 +52,15 @@ def normalize_rp(array, r_header, g_header):
     return cut_data
 
 
-def remove_peak(array, dim, r_header, g_header):
+def remove_peak(array, dim, r_resolution, g_resolution):
     data = array.copy()
     mean, median, std = sigma_clipped_stats(data, sigma=3)
     if dim == 0:
         fwhm_arcsec = 6
-        fwhm_pixel = fwhm_arcsec / r_header["PIXSCAL1"]
+        fwhm_pixel = fwhm_arcsec / r_resolution
     elif dim == 1:
         fwhm_arcsec = 1.98
-        fwhm_pixel = fwhm_arcsec / g_header["PIXSCAL1"]
+        fwhm_pixel = fwhm_arcsec / g_resolution
 
     daofind = DAOStarFinder(fwhm=fwhm_pixel, threshold=mean + 3 * std)
     sources = daofind(data)

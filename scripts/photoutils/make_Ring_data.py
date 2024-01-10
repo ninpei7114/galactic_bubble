@@ -44,6 +44,8 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
         spitzer_rfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "r.fits")[0]
         spitzer_gfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "g.fits")[0]
         spitzer_bfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "b.fits")[0]
+        r_resolution = spitzer_rfits.header["CDELT2"]
+        g_resolution = spitzer_gfits.header["CDELT2"]
 
         data = np.concatenate(
             [
@@ -94,7 +96,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                     count = make_png_and_json(
                         save_data_path,
                         count,
-                        processing.norm_res(res_data, spitzer_rfits.header, spitzer_gfits.header),
+                        processing.norm_res(res_data, r_resolution, g_resolution),
                         info,
                     )
                     frame_mwp_train.append(info)
@@ -127,7 +129,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                             count = make_png_and_json(
                                 save_data_path,
                                 count,
-                                processing.norm_res(trans_data_, spitzer_rfits.header, spitzer_gfits.header),
+                                processing.norm_res(trans_data_, r_resolution, g_resolution),
                                 trans_info,
                             )
                             frame_mwp_train.append(trans_info)
@@ -140,7 +142,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                     count = make_png_and_json(
                                         save_data_path,
                                         count,
-                                        processing.norm_res(rot_data, spitzer_rfits.header, spitzer_gfits.header),
+                                        processing.norm_res(rot_data, r_resolution, g_resolution),
                                         rotate_info,
                                     )
                                     frame_mwp_train.append(rotate_info)
@@ -152,7 +154,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 count = make_png_and_json(
                                     save_data_path,
                                     count,
-                                    processing.norm_res(rot_data, spitzer_rfits.header, spitzer_gfits.header),
+                                    processing.norm_res(rot_data, r_resolution, g_resolution),
                                     rotate_info,
                                 )
                                 frame_mwp_train.append(rotate_info)
@@ -166,13 +168,13 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 count = make_png_and_json(
                                     save_data_path,
                                     count,
-                                    processing.norm_res(ud_res_data, spitzer_rfits.header, spitzer_gfits.header),
+                                    processing.norm_res(ud_res_data, r_resolution, g_resolution),
                                     ud_info,
                                 )
                                 count = make_png_and_json(
                                     save_data_path,
                                     count,
-                                    processing.norm_res(lr_res_data, spitzer_rfits.header, spitzer_gfits.header),
+                                    processing.norm_res(lr_res_data, r_resolution, g_resolution),
                                     lr_info,
                                 )
                                 frame_mwp_train.append(ud_info)
@@ -184,13 +186,13 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                             count = make_png_and_json(
                                 save_data_path,
                                 count,
-                                processing.norm_res(ud_res_data, spitzer_rfits.header, spitzer_gfits.header),
+                                processing.norm_res(ud_res_data, r_resolution, g_resolution),
                                 ud_info,
                             )
                             count = make_png_and_json(
                                 save_data_path,
                                 count,
-                                processing.norm_res(lr_res_data, spitzer_rfits.header, spitzer_gfits.header),
+                                processing.norm_res(lr_res_data, r_resolution, g_resolution),
                                 lr_info,
                             )
                             frame_mwp_train.append(lr_info)
