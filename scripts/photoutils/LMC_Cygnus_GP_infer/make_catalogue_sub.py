@@ -157,7 +157,7 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
         f.save(f"{save_dir}/{region}_predict.png", dpi=300)
 
 
-def make_cut_ring(bbox, data, args, region, r_header, g_header, region_=None):
+def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     d_cut = []
     width_list = []
@@ -185,9 +185,9 @@ def make_cut_ring(bbox, data, args, region, r_header, g_header, region_=None):
     d_cut_ = np.uint8(d_cut_)
     d_cut_[:, :, :, 2] = 0
     if region == "Spitzer":
-        data_view_rectangl(20, d_cut_).save(f"{args.save_dir}/{region}/{region_}/{region}_predict_ring.png")
+        data_view_rectangl(20, d_cut_).save(f"{save_dir}/{region_}/{region}_predict_ring.png")
     else:
-        data_view_rectangl(20, d_cut_).save(f"{args.save_dir}/{region}/{region}_predict_ring.png")
+        data_view_rectangl(20, d_cut_).save(f"{save_dir}/{region}_predict_ring.png")
 
 
 def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):

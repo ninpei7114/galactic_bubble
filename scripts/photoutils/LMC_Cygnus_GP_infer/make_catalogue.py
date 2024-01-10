@@ -71,7 +71,7 @@ def main(args):
             else:
                 make_map(save_png_name, region, catalogue, hdu_r, g_fits_path, save_dir)
             make_cut_ring(
-                bbox, data_, args, region, hdu_r.header, astropy.io.fits.open(g_fits_path)[0].header, region_
+                bbox, data_, save_dir, region, hdu_r.header, astropy.io.fits.open(g_fits_path)[0].header, region_
             )
 
             ######################
