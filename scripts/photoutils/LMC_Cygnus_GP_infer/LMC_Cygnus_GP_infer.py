@@ -52,14 +52,12 @@ def main(args):
     for region in ["LMC", "Cygnus"]:
         print(f"{region=}")
         tarfile_name = f"{args.Cygnus_LMC_png}/{region}_dataset.tar"
-        with tarfile.open(tarfile_name, "w:gz") as tar:
-            tar.add(f"{args.Cygnus_LMC_png}/{region}")
+        if not os.path.exists(tarfile_name):
+            with tarfile.open(tarfile_name, "w:gz") as tar:
+                tar.add(f"{args.Cygnus_LMC_png}/{region}")
 
         Dataset_test = (
-            webdataset.WebDataset(f"{args.Cygnus_LMC_png}/{region}_dataset.tar")
-            .decode("pil")
-            .to_tuple("png", "__key__")
-            .map(preprocess_validation)
+            webdataset.WebDataset(tarfile_name).decode("pil").to_tuple("png", "__key__").map(preprocess_validation)
         )
         dl_region = torch.utils.data.DataLoader(
             Dataset_test,
