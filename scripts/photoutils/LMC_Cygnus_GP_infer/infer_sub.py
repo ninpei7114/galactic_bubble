@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 
 
 def od_collate_fn_validation(batch):
@@ -8,12 +7,12 @@ def od_collate_fn_validation(batch):
         imgs.append(sample[0])
         offset.append(
             [
-                sample[2].split("/")[-1].split("_")[-4],
-                sample[2].split("/")[-1].split("_")[-3],
-                sample[2].split("/")[-1].split("_")[-2],
+                sample[1].split("/")[-1].split("_")[-4],
+                sample[1].split("/")[-1].split("_")[-3],
+                sample[1].split("/")[-1].split("_")[-2],
             ]
         )
-        region_info.append(sample[2].split("/")[-1].split("_")[-1])
+        region_info.append(sample[1].split("/")[-1].split("_")[-1])
     imgs = np.array(imgs)
     offset = np.array(offset)
 
