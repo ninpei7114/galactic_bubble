@@ -90,6 +90,7 @@ def main(args):
 
         position = np.array(position)
         result = np.concatenate(result)
+        os.makedirs(f"{args.result_save_dir}/{model_ver}/{region}", exist_ok=True)
         np.save(f"{args.result_save_dir}/{model_ver}/{region}/position.npy", position)
         np.save(f"{args.result_save_dir}/{model_ver}/{region}/result.npy", result)
 
