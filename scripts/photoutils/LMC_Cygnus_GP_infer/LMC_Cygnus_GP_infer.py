@@ -1,4 +1,5 @@
 import argparse
+import glob
 import os
 import sys
 import tarfile
@@ -48,6 +49,7 @@ def main(args):
     net_weights = torch.load(model_download_dir + "/".join(args.model_ver.split("/")[-2:]) + "/earlystopping.pth")
     net_w.load_state_dict(net_weights["model_state_dict"])
     net_w.to(device)
+    net_w.eval()
 
     for region in ["LMC", "Cygnus"]:
         print(f"{region=}")
@@ -66,19 +68,22 @@ def main(args):
             num_workers=2,
             pin_memory=True,
         )
-
+        all_iter = len(glob.glob(f"{args.Cygnus_LMC_png}/{region}")) / 128
+        iteration = 0
+        ################
+        ## INFER PART ##
+        ################
         position, result, regions = [], [], []
         print("START INFER")
         for _ in dl_region:
-            images, targets, offset, region_info = _[0], _[1], _[2], _[3]
+            images, offset, region_info = _[0], _[1], _[2]
             images = torch.from_numpy(images).permute(0, 3, 1, 2)[:, :2, :, :].astype(np.float32)
             images = images.to(device, dtype=torch.float)
-            targets = [ann.to(device, dtype=torch.float) for ann in targets]
 
             with torch.no_grad():
-                net_w.eval()
-                pp_data = pp_data.to(device)
-                outputs, _ = net_w(pp_data)
+                outputs, _ = net_w(images)
+                print("\r" + str(iteration) + "/" + str(all_iter) + " ", end="")
+                iteration += 1
                 result.append(detect(*outputs).to("cpu").detach().numpy().copy())
                 position.extend(offset)
                 regions.extend(region_info)
