@@ -157,7 +157,7 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
         f.save(f"{save_dir}/{region}_predict.png", dpi=300)
 
 
-def make_cut_ring(bbox, data, args, region, region_=None):
+def make_cut_ring(bbox, data, args, region, r_header, g_header, region_=None):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     d_cut = []
     width_list = []
@@ -177,7 +177,7 @@ def make_cut_ring(bbox, data, args, region, region_=None):
             int(cut_.shape[0] / 52) : int(cut_.shape[0] * 51 / 52),
             int(cut_.shape[1] / 52) : int(cut_.shape[1] * 51 / 52),
         ]
-        cut_ = norm_res(cut_)
+        cut_ = norm_res(cut_, r_header, g_header)
         d_cut.append(cut_)
 
     d_cut_ = np.array(d_cut)

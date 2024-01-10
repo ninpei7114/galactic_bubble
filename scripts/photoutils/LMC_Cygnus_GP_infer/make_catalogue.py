@@ -4,6 +4,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import astropy
 
 sys.path.append("../")
 
@@ -69,7 +70,9 @@ def main(args):
                 make_map(save_png_name, region, catalogue, hdu_r, g_fits_path, save_dir, MWP_catalogue, region_)
             else:
                 make_map(save_png_name, region, catalogue, hdu_r, g_fits_path, save_dir)
-            make_cut_ring(bbox, data_, args, region, region_)
+            make_cut_ring(
+                bbox, data_, args, region, hdu_r.header, astropy.io.fits.open(g_fits_path)[0].header, region_
+            )
 
             ######################
             ## TP, FP, FN の解析 ##
