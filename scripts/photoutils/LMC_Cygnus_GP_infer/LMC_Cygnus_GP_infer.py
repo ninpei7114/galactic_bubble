@@ -67,7 +67,7 @@ def main(args):
             pin_memory=True,
         )
 
-        position, result, regions = [], []
+        position, result, regions = [], [], []
         print("START INFER")
         for _ in dl_region:
             images, targets, offset, region_info = _[0], _[1], _[2], _[3]
