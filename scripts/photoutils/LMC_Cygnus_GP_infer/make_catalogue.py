@@ -98,7 +98,7 @@ def main(args):
 
                 target_TP = make_TP_FN(MWP_catalogue, target_mask, data_, w, hdu_r, region)
                 target_FN = make_TP_FN(MWP_catalogue, ~np.array(target_mask), data_, w, hdu_r, region)
-                target_FP = make_FP(pd.DataFrame(FP_c), data_, w)
+                target_FP = make_FP(pd.DataFrame(FP_c), data_, w, hdu_r)
                 if region == "Cygnus":
                     data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{save_dir}/TP.jpg")
                     data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{save_dir}/FN.jpg")
