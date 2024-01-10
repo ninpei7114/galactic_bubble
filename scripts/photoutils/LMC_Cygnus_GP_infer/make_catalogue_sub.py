@@ -65,8 +65,8 @@ def calc_bbox(args, region, conf_thre):
             predict_bbox.append(bbox)
             scores.append(detection_mask[:, 0])
 
-    bbox = torch.Tensor(np.array(predict_bbox))
-    scores = torch.Tensor(scores)
+    bbox = torch.Tensor(np.np.concatenate(predict_bbox))
+    scores = torch.Tensor(np.np.concatenate(scores))
     keep, count = nm_suppression(bbox, scores, overlap=0.45, top_k=5000)
     keep = keep[:count]
     bbox = bbox[keep]
@@ -101,7 +101,7 @@ def make_infer_catalogue(bbox, w):
     return catalogue
 
 
-def make_map(save_png_name, region, catalogue, hdu, args, g_fits_path, MWP_catalogue=None, region_=None):
+def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_catalogue=None, region_=None):
     Image.MAX_IMAGE_PIXELS = 1000000000
     fig = plt.figure(figsize=(16, 16))
     if region == "LMC" or region == "Spitzer":
@@ -152,9 +152,9 @@ def make_map(save_png_name, region, catalogue, hdu, args, g_fits_path, MWP_catal
     plt.title(region, fontsize=60)
     plt.tight_layout()
     if region == "Spitzer":
-        f.save(f"{args.save_dir}/{region}/{region_}/{region}_predict.png", dpi=300)
+        f.save(f"{save_dir}/{region_}/{region}_predict.png", dpi=300)
     else:
-        f.save(f"{args.save_dir}/{region}/{region}_predict.png", dpi=300)
+        f.save(f"{save_dir}/{region}_predict.png", dpi=300)
 
 
 def make_cut_ring(bbox, data, args, region, region_=None):

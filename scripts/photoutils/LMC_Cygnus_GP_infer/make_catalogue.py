@@ -66,7 +66,7 @@ def main(args):
                 MWP = make_MWP_catalogue(region)
                 MWP_catalogue = MWP.query("@GLON_min <= _RA_icrs <= @GLON_max")
                 MWP_catalogue.to_csv(f"{save_dir}/MWP_catalogue.csv")
-                make_map(save_png_name, region, catalogue, hdu_r, args, g_fits_path, MWP_catalogue, region_)
+                make_map(save_png_name, region, catalogue, hdu_r, args, g_fits_path, save_dir, MWP_catalogue, region_)
             else:
                 make_map(save_png_name, region, catalogue, hdu_r, args, g_fits_path)
             make_cut_ring(bbox, data_, args, region, region_)
