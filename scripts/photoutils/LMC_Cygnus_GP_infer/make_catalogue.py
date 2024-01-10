@@ -68,7 +68,7 @@ def main(args):
                 MWP_catalogue.to_csv(f"{save_dir}/MWP_catalogue.csv")
                 make_map(save_png_name, region, catalogue, hdu_r, g_fits_path, save_dir, MWP_catalogue, region_)
             else:
-                make_map(save_png_name, region, catalogue, hdu_r, g_fits_path)
+                make_map(save_png_name, region, catalogue, hdu_r, g_fits_path, save_dir)
             make_cut_ring(bbox, data_, args, region, region_)
 
             ######################
