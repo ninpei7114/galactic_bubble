@@ -65,8 +65,8 @@ def calc_bbox(args, region, conf_thre):
             predict_bbox.append(bbox)
             scores.append(detection_mask[:, 0])
 
-    bbox = torch.Tensor(np.np.concatenate(predict_bbox))
-    scores = torch.Tensor(np.np.concatenate(scores))
+    bbox = torch.Tensor(np.concatenate(predict_bbox))
+    scores = torch.Tensor(np.concatenate(scores))
     keep, count = nm_suppression(bbox, scores, overlap=0.45, top_k=5000)
     keep = keep[:count]
     bbox = bbox[keep]
