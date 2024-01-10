@@ -3,13 +3,9 @@ import torch
 
 
 def od_collate_fn_validation(batch):
-    targets = []
-    imgs = []
-    offset = []
-    region_info = []
+    imgs, offset, region_info = [], [], []
     for sample in batch:
         imgs.append(sample[0])
-        targets.append(torch.FloatTensor(sample[1]))
         offset.append(
             [
                 sample[2].split("/")[-1].split("_")[-4],
@@ -21,7 +17,7 @@ def od_collate_fn_validation(batch):
     imgs = np.array(imgs)
     offset = np.array(offset)
 
-    return imgs, targets, offset, region_info
+    return imgs, offset, region_info
 
 
 ## webdatasetのためのval_preprocess
