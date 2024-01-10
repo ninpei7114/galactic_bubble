@@ -68,7 +68,7 @@ def main(args):
             num_workers=2,
             pin_memory=True,
         )
-        all_iter = len(glob.glob(f"{args.Cygnus_LMC_png}/{region}")) / 128
+        all_iter = len(glob.glob(f"{args.Cygnus_LMC_png}/{region}/*.png")) / 128
         iteration = 0
         ################
         ## INFER PART ##
