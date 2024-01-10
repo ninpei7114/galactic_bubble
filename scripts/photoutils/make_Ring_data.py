@@ -44,8 +44,8 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
         spitzer_rfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "r.fits")[0]
         spitzer_gfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "g.fits")[0]
         spitzer_bfits = astropy.io.fits.open(args.spitzer_path + "/" + fits_path + "/" + "b.fits")[0]
-        r_resolution = spitzer_rfits.header["CDELT2"]
-        g_resolution = spitzer_gfits.header["CDELT2"]
+        r_resolution = spitzer_rfits.header["PIXSCAL1"]
+        g_resolution = spitzer_gfits.header["PIXSCAL1"]
 
         data = np.concatenate(
             [

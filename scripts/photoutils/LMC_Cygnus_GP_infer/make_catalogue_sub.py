@@ -161,6 +161,18 @@ def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     d_cut = []
     width_list = []
+    if region == "Spitzer":
+        save_png_name = f"{save_dir}/{region_}/{region}_predict_ring.png"
+        r_resolution = r_header["PIXSCAL1"]
+        g_resolution = g_header["PIXSCAL1"]
+    else:
+        save_png_name = f"{save_dir}/{region}_predict_ring.png"
+        if region == "LMC":
+            r_resolution = r_header["CD2_2"] * 3600
+            g_resolution = g_header["CD2_2"] * 3600
+        elif region == "Cygnus":
+            r_resolution = r_header["CDELT2"] * 3600
+            g_resolution = g_header["CDELT2"] * 3600
     for i in bbox:
         height = int(i[3]) - int(i[1])
         width = int(i[2]) - int(i[0])
@@ -177,17 +189,14 @@ def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None
             int(cut_.shape[0] / 52) : int(cut_.shape[0] * 51 / 52),
             int(cut_.shape[1] / 52) : int(cut_.shape[1] * 51 / 52),
         ]
-        cut_ = norm_res(cut_, r_header["CDELT2"], g_header["CDELT2"])
+        cut_ = norm_res(cut_, r_resolution, g_resolution)
         d_cut.append(cut_)
 
     d_cut_ = np.array(d_cut)
     d_cut_ = d_cut_ * 255
     d_cut_ = np.uint8(d_cut_)
     d_cut_[:, :, :, 2] = 0
-    if region == "Spitzer":
-        data_view_rectangl(20, d_cut_).save(f"{save_dir}/{region_}/{region}_predict_ring.png")
-    else:
-        data_view_rectangl(20, d_cut_).save(f"{save_dir}/{region}_predict_ring.png")
+    data_view_rectangl(20, d_cut_).save(save_png_name)
 
 
 def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
