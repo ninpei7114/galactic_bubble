@@ -52,11 +52,11 @@ def make_data(fp):
 
 
 def calc_bbox(args, region, conf_thre):
-    predict_bbox, scores, wcs_regions = [], [], []
+    predict_bbox, scores = [], []
     detections = np.load(f"{args.result_path}/{region}/result.npy")
     position = np.load(f"{args.result_path}/{region}/position.npy")
 
-    for d, pin zip(detections, position):
+    for d, p in zip(detections, position):
         conf_mask = d[1, :, 0] >= conf_thre
         detection_mask = d[1, :][conf_mask]
         if np.sum(conf_mask) >= 1:
@@ -64,7 +64,6 @@ def calc_bbox(args, region, conf_thre):
             bbox = bbox + np.array([int(p[1]), int(p[0]), int(p[1]), int(p[0])])
             predict_bbox.append(bbox)
             scores.append(detection_mask[:, 0])
-            wcs_regions.append(w)
 
     bbox = torch.Tensor(np.array(predict_bbox))
     scores = torch.Tensor(scores)
