@@ -56,7 +56,7 @@ def calc_bbox(args, region, conf_thre):
     detections = np.load(f"{args.result_path}/{region}/result.npy")
     position = np.load(f"{args.result_path}/{region}/position.npy")
 
-    for d, p, w in zip(detections, position):
+    for d, pin zip(detections, position):
         conf_mask = d[1, :, 0] >= conf_thre
         detection_mask = d[1, :][conf_mask]
         if np.sum(conf_mask) >= 1:
