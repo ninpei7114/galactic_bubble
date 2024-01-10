@@ -24,13 +24,8 @@ from make_catalogue_sub import (
 def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("result_path", type=str, help="model's path to infer")
-    parser.add_argument(
-        "save_dir", help="Infer Result Save Directory", default="/home/cygnus/jupyter/research/each_model_region_infer"
-    )
-    parser.add_argument(
-        "LMC_data_path", help="LMC data path", default="/home/cygnus/jupyter/fits_data/LMC_data/spitzer_lmc_rgb"
-    )
-    parser.add_argument("Cygnus_data_path", help="Cyg data path", default="/home/cygnus/jupyter/fits_data/cygnus_fits")
+    parser.add_argument("LMC_data_path", help="LMC data path")
+    parser.add_argument("Cygnus_data_path", help="Cyg data path")
     parser.add_argument("--val_ring_catalogue", type=str, default="MWP")
 
     return parser.parse_args()
@@ -42,7 +37,8 @@ def main(args):
 
     for region in ["LMC", "Cygnus"]:
         print(region)
-        os.makedirs(f"{args.save_dir}/{region}", exist_ok=True)
+        save_dir = f"{args.result_path}/analysis/{region}"
+        os.makedirs(save_dir, exist_ok=True)
         if region == "LMC":
             r_fits_path = args.LMC_data_path + "/r.fits"
             g_fits_path = args.LMC_data_path + "/g.fits"
@@ -62,15 +58,15 @@ def main(args):
             data_, hdu_r, a, b, w, region_ = make_data(fp)
             bbox = calc_bbox(args, region, conf_thre)
             catalogue = make_infer_catalogue(bbox, w)
-            np.save(f"{args.save_dir}/{region}/bbox.npy", bbox)
-            catalogue.to_csv(f"{args.save_dir}/{region}/cygnus_infer_catalogue.csv")
+            np.save(f"{save_dir}/bbox.npy", bbox)
+            catalogue.to_csv(f"{save_dir}/cygnus_infer_catalogue.csv")
 
             if region == "Cygnus":
                 GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
                 GLON_max, GLAT_max = w.all_pix2world(0, a, 0)
                 MWP = make_MWP_catalogue(region)
                 MWP_catalogue = MWP.query("@GLON_min <= _RA_icrs <= @GLON_max")
-                MWP_catalogue.to_csv(f"{args.save_dir}/{region}/MWP_catalogue.csv")
+                MWP_catalogue.to_csv(f"{save_dir}/MWP_catalogue.csv")
                 make_map(save_png_name, region, catalogue, hdu_r, args, g_fits_path, MWP_catalogue, region_)
             else:
                 make_map(save_png_name, region, catalogue, hdu_r, args, g_fits_path)
@@ -102,10 +98,9 @@ def main(args):
                 target_FN = make_TP_FN(MWP_catalogue, ~np.array(target_mask), data_, w, hdu_r, region)
                 target_FP = make_FP(pd.DataFrame(FP_c), data_, w)
                 if region == "Cygnus":
-                    save_png = f"{args.save_dir}/{region}"
-                    data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{save_png}/TP.jpg")
-                    data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{save_png}/FN.jpg")
-                    data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(f"{save_png}/FP.jpg")
+                    data_view_rectangl(10, np.uint8(np.array(target_TP) * 255)).save(f"{save_dir}/TP.jpg")
+                    data_view_rectangl(10, np.uint8(np.array(target_FN) * 255)).save(f"{save_dir}/FN.jpg")
+                    data_view_rectangl(10, np.uint8(np.array(target_FP) * 255)).save(f"{save_dir}/FP.jpg")
 
 
 if __name__ == "__main__":
