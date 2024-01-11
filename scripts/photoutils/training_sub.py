@@ -375,7 +375,9 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
             if np.isnan(res_data.sum()) or np.std(res_data[:, :, 0]) < 1e-9:
                 pass
             else:
-                res_data = norm_res(res_data, astropy.io.fits.open(data_fits_R)[0].header, spitzer_g.header)
+                res_data = norm_res(
+                    res_data, astropy.io.fits.open(data_fits_R)[0].header["PIXSCAL1"], spitzer_g.header["PIXSCAL1"]
+                )
                 data_list.append(res_data)
 
     if len(data_list) >= 1:
