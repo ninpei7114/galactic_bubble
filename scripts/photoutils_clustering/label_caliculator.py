@@ -132,7 +132,7 @@ class label_caliculator(object):
                 clip_area >= star_area * 3 / 5
                 and clip_height / (clip_width + 1e-9) > 1 / 3
                 and clip_width / (clip_height + 1e-9) > 1 / 3
-                and clip_area / picture_area >= 1 / 16
+                and clip_area / picture_area >= 1 / 36
             ):
                 self.overlapp_list.append(d)
                 self.overlapp_name.append(d[0])
