@@ -14,7 +14,7 @@ from processing import remove_nan, norm_res, conv
 """
 example command:
 
-python make_val_data.py /dataset/spitzer_data/
+python make_Cygnus_LMC_data.py /home/cygnus/jupyter/fits_data/cygnus_fits/ /home/cygnus/jupyter/fits_data/LMC_data/spitzer_lmc_rgb/ /home/cygnus/jupyter/fits_data/
 """
 
 
@@ -63,8 +63,6 @@ def main(args):
     Args:
         args (argparser): argparser
 
-    example command:
-    >>> python make_Cygnus_LMC_data.py /dataset/spitzer_data/
     """
     Cygnus_LMC_l = ["Cygnus", "LMC"]
     size_list = [150, 300, 600, 900, 1200, 1800, 2400, 3000]
