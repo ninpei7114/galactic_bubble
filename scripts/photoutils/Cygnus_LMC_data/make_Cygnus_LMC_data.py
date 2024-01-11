@@ -27,7 +27,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, savedir_name, region):
+def cut_data(data_, many_ind, cut_shape, r_resolution, g_resolution, savedir_name, region):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     for i in many_ind:
         xmin = int(i[1])
@@ -50,7 +50,7 @@ def cut_data(data_, many_ind, cut_shape, r_fits_header, g_fits_header, savedir_n
                 else:
                     flag = False
             if flag:
-                cut_data = norm_res(d, r_fits_header, g_fits_header)
+                cut_data = norm_res(d, r_resolution * 3600, g_resolution * 3600)
                 pil_image = Image.fromarray(np.uint8(cut_data * 255))
                 pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}_{region}.png")
         else:
