@@ -71,7 +71,7 @@ def remove_peak(array, dim, r_header, g_header):
         positions = np.transpose((sources["xcentroid"], sources["ycentroid"]))
         same_shape_zero = np.zeros_like(data)
         for y, x in positions:
-            same_shape_zero = cv2.circle(same_shape_zero, (int(y), int(x)), int(5), (255, 255, 255), -1)
+            same_shape_zero = cv2.circle(same_shape_zero, (int(y), int(x)), int(4), (255, 255, 255), -1)
 
         data[same_shape_zero == same_shape_zero.max()] = np.nan
         return data
