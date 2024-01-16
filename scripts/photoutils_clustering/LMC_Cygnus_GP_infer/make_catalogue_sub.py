@@ -51,39 +51,22 @@ def make_data(fp):
     return data_, hdu_r, a, b, w, region_
 
 
-def calc_bbox(args, region, sp_r=None):
+def calc_bbox(args, region, conf_thre):
     predict_bbox, scores = [], []
-    size_list = [150, 300, 600, 1200, 1800, 2400, 3000]
-    conf = 0.95
-    for size in size_list:
-        if region == "Spitzer":
-            detection = np.load(f"{args.result_path}/{sp_r}/result_ring_select_csize{size}.npy")
-            position = np.load(f"{args.result_path}/{sp_r}/position_ring_select_csize{size}.npy")
-        else:
-            detection = np.load(f"{args.result_path}/{region}/result_ring_select_csize{size}.npy")
-            position = np.load(f"{args.result_path}/{region}/position_ring_select_csize{size}.npy")
-        for d, p in tqdm.tqdm(zip(detection, position)):
-            # d[1, :, 0]ringのconf、最初の１は、[ring:1, no_ring:0]の１、最後の０はconfを指定
-            find_index = np.where(d[1, :, 0] >= conf)
-            # fing_indexは、ringのconfが0.99以上のindex
-            # dのshapeは、いろいろ、[0, 5]だったり、[ringの数, 5]
-            d = d[1][find_index]
-            if len(d) == 0:
-                pass
-            else:
-                for i in range(len(find_index)):  # 抽出した物体数分ループを回す
-                    sc = d[i][0]  # 確信度
-                    bbox = d[i][1:] * [size, size, size, size]
-                    # 返り値のリストに追加
-                    bbox = bbox + np.array([p[1], p[0], p[1], p[0]])
-                    if np.max(bbox) == np.inf:
-                        pass
-                    else:
-                        predict_bbox.append(bbox)
-                        scores.append(sc)
+    detections = np.load(f"{args.result_path}/{region}/result.npy")
+    position = np.load(f"{args.result_path}/{region}/position.npy")
 
-    bbox = torch.Tensor(np.array(predict_bbox))
-    scores = torch.Tensor(scores)
+    for d, p in zip(detections, position):
+        conf_mask = d[1, :, 0] >= conf_thre
+        detection_mask = d[1, :][conf_mask]
+        if np.sum(conf_mask) >= 1:
+            bbox = detection_mask[:, 1:] * np.array(int(p[2]))
+            bbox = bbox + np.array([int(p[1]), int(p[0]), int(p[1]), int(p[0])])
+            predict_bbox.append(bbox)
+            scores.append(detection_mask[:, 0])
+
+    bbox = torch.Tensor(np.concatenate(predict_bbox))
+    scores = torch.Tensor(np.concatenate(scores))
     keep, count = nm_suppression(bbox, scores, overlap=0.3, top_k=5000)
     keep = keep[:count]
     bbox = bbox[keep]
@@ -118,7 +101,7 @@ def make_infer_catalogue(bbox, w):
     return catalogue
 
 
-def make_map(save_png_name, region, catalogue, hdu, args, g_fits_path, MWP_catalogue=None, region_=None):
+def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_catalogue=None, region_=None):
     Image.MAX_IMAGE_PIXELS = 1000000000
     fig = plt.figure(figsize=(16, 16))
     if region == "LMC" or region == "Spitzer":
@@ -169,15 +152,27 @@ def make_map(save_png_name, region, catalogue, hdu, args, g_fits_path, MWP_catal
     plt.title(region, fontsize=60)
     plt.tight_layout()
     if region == "Spitzer":
-        f.save(f"{args.save_dir}/{region}/{region_}/{region}_predict.png", dpi=300)
+        f.save(f"{save_dir}/{region_}/{region}_predict.png", dpi=300)
     else:
-        f.save(f"{args.save_dir}/{region}/{region}_predict.png", dpi=300)
+        f.save(f"{save_dir}/{region}_predict.png", dpi=300)
 
 
-def make_cut_ring(bbox, data, args, region, region_=None):
+def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     d_cut = []
     width_list = []
+    if region == "Spitzer":
+        save_png_name = f"{save_dir}/{region_}/{region}_predict_ring.png"
+        r_resolution = r_header["PIXSCAL1"]
+        g_resolution = g_header["PIXSCAL1"]
+    else:
+        save_png_name = f"{save_dir}/{region}_predict_ring.png"
+        if region == "LMC":
+            r_resolution = r_header["CD2_2"] * 3600
+            g_resolution = g_header["CD2_2"] * 3600
+        elif region == "Cygnus":
+            r_resolution = r_header["CDELT2"] * 3600
+            g_resolution = g_header["CDELT2"] * 3600
     for i in bbox:
         height = int(i[3]) - int(i[1])
         width = int(i[2]) - int(i[0])
@@ -194,17 +189,14 @@ def make_cut_ring(bbox, data, args, region, region_=None):
             int(cut_.shape[0] / 52) : int(cut_.shape[0] * 51 / 52),
             int(cut_.shape[1] / 52) : int(cut_.shape[1] * 51 / 52),
         ]
-        cut_ = norm_res(cut_)
+        cut_ = norm_res(cut_, r_resolution, g_resolution)
         d_cut.append(cut_)
 
     d_cut_ = np.array(d_cut)
     d_cut_ = d_cut_ * 255
     d_cut_ = np.uint8(d_cut_)
     d_cut_[:, :, :, 2] = 0
-    if region == "Spitzer":
-        data_view_rectangl(20, d_cut_).save(f"{args.save_dir}/{region}/{region_}/{region}_predict_ring.png")
-    else:
-        data_view_rectangl(20, d_cut_).save(f"{args.save_dir}/{region}/{region}_predict_ring.png")
+    data_view_rectangl(20, d_cut_).save(save_png_name)
 
 
 def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
@@ -214,10 +206,14 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
         coordinate_x = "_RA_icrs"
         coordinate_y = "_DE.icrs"
         CDELT = hdu.header["CDELT2"]
+        r_resolution = hdu.header["CDELT2"] * 3600
+        g_resolution = hdu.header["CDELT2"] * 3600
     elif region == "Spitzer":
         coordinate_x = "GLON"
         coordinate_y = "GLAT"
         CDELT = hdu.header["CD2_2"]
+        r_resolution = hdu.header["PIXSCAL1"]
+        g_resolution = hdu.header["PIXSCAL1"]
 
     for _, row in tqdm.tqdm(target_catalogue[target_mask].iterrows()):
         lmax = row[coordinate_x] + row["MajAxis"] / 60
@@ -247,15 +243,21 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
             res_data = pi[
                 int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
             ]
-            res_data = norm_res(res_data)
+            res_data = norm_res(res_data, r_resolution, g_resolution)
             target_ring_list.append(res_data)
 
     return np.array(target_ring_list)
 
 
-def make_FP(FP_catalogue, data, w):
+def make_FP(FP_catalogue, data, w, hdu, region):
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
     target_ring_list = []
+    if region == "Cygnus":
+        r_resolution = hdu.header["CDELT2"] * 3600
+        g_resolution = hdu.header["CDELT2"] * 3600
+    elif region == "Spitzer":
+        r_resolution = hdu.header["PIXSCAL1"]
+        g_resolution = hdu.header["PIXSCAL1"]
 
     for _, row in tqdm.tqdm(FP_catalogue.iterrows()):
         x_min, y_min = w.all_world2pix(row["ra_max"], row["dec_min"], 0)
@@ -279,7 +281,7 @@ def make_FP(FP_catalogue, data, w):
             res_data = pi[
                 int(r_shape_y / 52) : int(r_shape_y * 51 / 52), int(r_shape_x / 52) : int(r_shape_x * 51 / 52)
             ]
-            res_data = norm_res(res_data)
+            res_data = norm_res(res_data, r_resolution, g_resolution)
             target_ring_list.append(res_data)
 
     return np.array(target_ring_list)

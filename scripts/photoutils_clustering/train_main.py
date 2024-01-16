@@ -58,9 +58,9 @@ def parse_args():
     parser.add_argument("--wandb_name", type=str, default="search_validation_size")
     parser.add_argument("--fscore", type=str, default="f2_score")
     # NonRing
-    parser.add_argument("--NonRing_class_num", type=int, default=9)
-    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 5])
-    parser.add_argument("--NonRing_aug_num", nargs="*", type=int, default=[1, 1, 1, 0, 1, 0, 1, 1, 1])
+    parser.add_argument("--NonRing_class_num", type=int, default=8)
+    parser.add_argument("--NonRing_remove_class_list", nargs="*", type=int, default=[3, 4])
+    parser.add_argument("--NonRing_aug_num", nargs="*", type=int, default=[5, 0, 0, 0, 0, 0, 2, 3])
     # Valiation
     parser.add_argument("--Val_remove_size_list", nargs="*", type=int, default=[])
 
