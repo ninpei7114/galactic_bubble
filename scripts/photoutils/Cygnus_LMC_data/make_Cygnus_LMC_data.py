@@ -1,6 +1,7 @@
 import argparse
 import os
 import copy
+import sys
 
 import astropy.io.fits
 import astropy.wcs
@@ -8,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 
+sys.path.append("../")
 from processing import remove_nan, norm_res, conv
 
 

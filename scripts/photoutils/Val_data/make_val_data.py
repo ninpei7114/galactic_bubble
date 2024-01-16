@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 sys.path.append("../")
 import label_caliculator
+import val_data_sub
 import processing
 import select_catalogue
 
@@ -102,7 +103,7 @@ def main(args):
         label_cal = label_caliculator.label_caliculator(choice, w)
         label_cal.all_star(Ring_catalogue)
 
-        imaging_validation = processing.imaging_validation(
+        imaging_validation = val_data_sub.imaging_validation(
             data,
             ring_count,
             non_ring_count,

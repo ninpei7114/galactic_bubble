@@ -3,14 +3,17 @@ import json
 import os
 import pathlib
 import time
+import sys
 
 import astropy.io.fits
 import NonRing_sub
 import numpy as np
-import processing
 from numpy.random import default_rng
 from PIL import Image
 from tqdm import tqdm
+
+sys.path.append("../")
+import processing
 
 """
 webdatasetを使用するための、Non-Ringのpng画像を作成する
@@ -38,7 +41,7 @@ def main(args):
         args (argparse): argparse
 
     example command:
-    >>> python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits /workspace/NonRing_png/region_NonRing_png
+    >>> python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits /workspace/
     """
     ################################################
     ## 領域ごとに作るのか、デフォルトの領域で作るのか選択 ##
