@@ -84,7 +84,7 @@ def main(args):
                 outputs, _ = net_w(images)
                 print("\r" + str(iteration) + "/" + str(all_iter) + " ", end="")
                 iteration += 1
-                result.append(detect(*outputs).to("cpu").detach().numpy().copy())
+                result.append(detect(*outputs).to("cpu").detach().numpy().copy().astype(np.float32))
                 position.extend(offset)
                 regions.extend(region_info)
 
