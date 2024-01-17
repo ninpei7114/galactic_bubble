@@ -32,8 +32,8 @@ class imaging_validation:
         self.fits_path = fits_path
         self.savedir_name = savedir_name
         self.label_cal = label_cal
-        self.r_header = r_header
-        self.g_header = g_header
+        self.r_resolution = r_header["PIXSCAL1"]
+        self.g_resolution = g_header["PIXSCAL1"]
 
     def cut_data(self, many_ind, cut_shape):
         self.cut_shape = int(cut_shape)
@@ -58,7 +58,7 @@ class imaging_validation:
             if np.isnan(d.sum()) or np.std(d[:, :, 0]) < 1e-9:
                 pass
             else:
-                self.cut_region = processing.norm_res(d, self.r_header, self.g_header).astype(np.float32)
+                self.cut_region = processing.norm_res(d, self.r_resolution, self.g_resolution).astype(np.float32)
 
                 self.label_cal.make_label(self.offset_xmin, self.offset_ymin, self.cut_shape)
                 xmin_list, ymin_list, xmax_list, ymax_list, name_list = self.label_cal.check_list()
