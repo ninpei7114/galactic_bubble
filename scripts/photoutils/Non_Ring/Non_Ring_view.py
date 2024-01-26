@@ -1,4 +1,5 @@
 import argparse
+import glob
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -48,16 +49,19 @@ def data_view_rectangl(col, imgs, infos=None, moji_size=100):
 
 
 def main(args):
-    Non_Ring = np.load(args.Non_Ring_path)
+    NonRing_file_path = glob.glob(f"args.Non_Ring_path/*/*.png")
+    NonRing_data_list = []
+    for i in NonRing_file_path:
+        NonRing_data_list.append(Image.open(i))
+    Non_Ring = np.array(NonRing_data_list)
 
     if Non_Ring.shape[0] >= 1000:
         Non_Ring = Non_Ring[::10]
     else:
         pass
-
-    Non_Ring = Non_Ring * 255
-    Non_Ring = np.uint8(Non_Ring)
-    data_view_rectangl(25, Non_Ring).save("/workspace/NonRing/%s.pdf" % args.save_name)
+    # Non_Ring = Non_Ring * 255
+    # Non_Ring = np.uint8(Non_Ring)
+    data_view_rectangl(25, Non_Ring).save(f"{args.save_name}")
 
 
 if __name__ == "__main__":
