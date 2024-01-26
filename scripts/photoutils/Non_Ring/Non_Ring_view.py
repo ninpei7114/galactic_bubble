@@ -49,10 +49,10 @@ def data_view_rectangl(col, imgs, infos=None, moji_size=100):
 
 
 def main(args):
-    NonRing_file_path = glob.glob(f"args.Non_Ring_path/*/*.png")
+    NonRing_file_path = glob.glob(f"{args.Non_Ring_path}/*/*.png")
     NonRing_data_list = []
     for i in NonRing_file_path:
-        NonRing_data_list.append(Image.open(i))
+        NonRing_data_list.append(np.array(Image.open(i)))
     Non_Ring = np.array(NonRing_data_list)
 
     if Non_Ring.shape[0] >= 1000:
