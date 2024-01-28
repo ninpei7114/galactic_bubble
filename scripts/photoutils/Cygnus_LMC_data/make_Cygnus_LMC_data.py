@@ -39,24 +39,36 @@ def cut_data(data_, many_ind, cut_shape, r_resolution, g_resolution, savedir_nam
         extra_ymin = ymin - cut_shape / 50
         extra_ymax = ymin + cut_shape + cut_shape / 50
         data_c = data_[int(extra_ymin) : int(extra_ymax), int(extra_xmin) : int(extra_xmax)].view()
-        if not np.isnan(data_c.sum()):
-            d = copy.deepcopy(data_c)
-            d = conv(300, sig1, d)
-            d = d[int(cut_shape / 52) : int(cut_shape * 51 / 52), int(cut_shape / 52) : int(cut_shape * 51 / 52)]
+        res_data = copy.deepcopy(data_c)
 
-            flag = True
-            for dim in range(d.shape[2] - 1):
-                non_zero_count = np.count_nonzero(d[:, :, dim])
-                if non_zero_count >= d.shape[0] * d.shape[1] * 3 / 4:
+        flag = True
+        if np.sum(res_data) == 0:
+            flag = False
+        else:
+            for res_data_dim in range(res_data.shape[2]):
+                if res_data_dim == 2:
                     pass
                 else:
-                    flag = False
-            if flag:
-                cut_data = norm_res(d, r_resolution * 3600, g_resolution * 3600)
-                pil_image = Image.fromarray(np.uint8(cut_data * 255))
-                pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}_{region}.png")
-        else:
-            pass
+                    dim_area = res_data.shape[0] * res_data.shape[1]
+                    zero_count = np.sum(res_data[:, :, res_data_dim] == 0)
+                    if zero_count == 0:
+                        pass
+                    elif zero_count >= dim_area * 1 / 4:
+                        flag = False
+                    else:
+                        percentile_under = np.percentile(res_data[:, :, res_data_dim], zero_count / dim_area * 100 + 5)
+                        res_data[:, :, res_data_dim][
+                            res_data[:, :, res_data_dim] <= percentile_under
+                        ] = percentile_under
+
+        if flag:
+            res_data = conv(300, sig1, res_data)
+            res_data = res_data[
+                int(cut_shape / 52) : int(cut_shape * 51 / 52), int(cut_shape / 52) : int(cut_shape * 51 / 52)
+            ]
+            cut_data = norm_res(res_data, r_resolution, g_resolution)
+            pil_image = Image.fromarray(np.uint8(cut_data * 255))
+            pil_image.save(f"{savedir_name}/{ymin}_{xmin}_{cut_shape}_{region}.png")
 
 
 def main(args):
@@ -84,16 +96,21 @@ def main(args):
             hdu_g = astropy.io.fits.open(args.Cygnus_path + "/" + "I4_fits_file/I4_2.4_reg.fits")[0]
             hdu_b = astropy.io.fits.open(args.Cygnus_path + "/" + "I1_fits_file/I1_2.4_reg.fits")[0].data
             savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+            r_resolution = hdu_r.header["CDELT2"] * 3600
+            g_resolution = hdu_g.header["CDELT2"] * 3600
         elif region == "LMC":
             hdu_r = astropy.io.fits.open(args.LMC_path + "/" + "r.fits")[0]
             hdu_g = astropy.io.fits.open(args.LMC_path + "/" + "g.fits")[0]
             hdu_b = np.zeros(hdu_g.data.shape)
             savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+            r_resolution = hdu_r.header["CD2_2"] * 3600
+            g_resolution = hdu_g.header["CD2_2"] * 3600
 
         data = np.concatenate(
             [remove_nan(hdu_r.data[:, :, None]), remove_nan(hdu_g.data[:, :, None]), remove_nan(hdu_b[:, :, None])],
             axis=2,
         )
+        data[data != data] = 0
 
         pbar = tqdm(range(len(size_list)))
         for i in pbar:
@@ -115,14 +132,7 @@ def main(args):
             for x, y in zip(x_ind.ravel(), y_ind.ravel()):
                 ind_array.append([y, x])
             ind_array = np.array(ind_array)
-            if region == "Cygnus":
-                cut_data(
-                    data, ind_array, cut_shape[0], hdu_r.header["CDELT2"], hdu_g.header["CDELT2"], savedir_name, region
-                )
-            elif region == "LMC":
-                cut_data(
-                    data, ind_array, cut_shape[0], hdu_r.header["CD2_2"], hdu_g.header["CD2_2"], savedir_name, region
-                )
+            cut_data(data, ind_array, cut_shape[0], r_resolution, g_resolution, savedir_name, region)
 
 
 if __name__ == "__main__":
