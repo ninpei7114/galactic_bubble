@@ -75,28 +75,18 @@ def calc_bbox(args, region, conf_thre):
 
 
 def make_infer_catalogue(bbox, w):
-    catalogue = pd.DataFrame(columns=["dec_min", "ra_min", "dec_max", "ra_max"])
+    catalogue = pd.DataFrame(columns=["dec_min", "ra_min", "dec_max", "ra_max", "width_pix", "height_pix"])
     for i in bbox:
-        #     print(i)GLONmin
+        width = int(i[2]) - int(i[0])
+        height = int(i[3]) - int(i[1])
         GLONmax, GLATmin = w.all_pix2world(i[0], i[1], 0)
         GLONmin, GLATmax = w.all_pix2world(i[2], i[3], 0)
         temp = pd.DataFrame(
-            columns=["dec_min", "ra_min", "dec_max", "ra_max"],
-            data=[[GLATmin, GLONmin, GLATmax, GLONmax]],
+            columns=["dec_min", "ra_min", "dec_max", "ra_max", "width_pix", "height_pix"],
+            data=[[GLATmin, GLONmin, GLATmax, GLONmax, width, height]],
             dtype="float64",
         )
         catalogue = pd.concat([catalogue, temp])
-
-    x_width = []
-    y_width = []
-    for i in bbox:
-        x_width.append(i[2] - i[0])
-        y_width.append(i[3] - i[1])
-    x_width = np.array(x_width, dtype=np.float64)
-    y_width = np.array(y_width, dtype=np.float64)
-
-    catalogue["width_pix"] = x_width
-    catalogue["height_pix"] = x_width
 
     return catalogue
 
@@ -215,7 +205,7 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
         r_resolution = hdu.header["PIXSCAL1"]
         g_resolution = hdu.header["PIXSCAL1"]
 
-    for _, row in tqdm.tqdm(target_catalogue[target_mask].iterrows()):
+    for _, row in tqdm.tqdm(target_catalogue[target_mask].sort_values("Reff").iterrows()):
         lmax = row[coordinate_x] + row["MajAxis"] / 60
         bmin = row[coordinate_y] - row["MajAxis"] / 60
         lmin = row[coordinate_x] - row["MajAxis"] / 60
@@ -259,7 +249,7 @@ def make_FP(FP_catalogue, data, w, hdu, region):
         r_resolution = hdu.header["PIXSCAL1"]
         g_resolution = hdu.header["PIXSCAL1"]
 
-    for _, row in tqdm.tqdm(FP_catalogue.iterrows()):
+    for _, row in tqdm.tqdm(FP_catalogue.sort_values("width_pix").iterrows()):
         x_min, y_min = w.all_world2pix(row["ra_max"], row["dec_min"], 0)
         x_max, y_max = w.all_world2pix(row["ra_min"], row["dec_max"], 0)
         r = x_max - x_min
