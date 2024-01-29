@@ -36,7 +36,7 @@ def parse_args():
 def main(args):
     conf_thre = 0.95
 
-    for region in ["LMC", "Cygnus"]:
+    for region in ["LMC", "SMC", "Cygnus"]:
         print(region)
         save_dir = f"{args.result_path}/analysis/{region}"
         os.makedirs(save_dir, exist_ok=True)

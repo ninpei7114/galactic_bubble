@@ -34,7 +34,7 @@ def main(args):
     torch.backends.cudnn.benchmark = True
     device = torch.device(torch.device("cuda:0") if torch.cuda.is_available() else "cpu")
 
-    detect = Detect(nms_thresh=0.3, top_k=5000)
+    detect = Detect(nms_thresh=0.3, top_k=1000)
     model_ver = "/".join(args.model_ver.split("/")[-2:])
     os.makedirs(f"{args.result_save_dir}/{model_ver}", exist_ok=True)
     f_log = open(f"{args.result_save_dir}/{model_ver}/" + "/log.txt", "w")
