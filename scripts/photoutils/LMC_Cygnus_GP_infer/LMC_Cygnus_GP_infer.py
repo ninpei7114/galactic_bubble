@@ -51,7 +51,7 @@ def main(args):
     net_w.to(device)
     net_w.eval()
 
-    for region in ["LMC", "Cygnus"]:
+    for region in ["LMC", "Cygnus", "SMC"]:
         print(f"{region=}")
         tarfile_name = f"{args.Cygnus_LMC_SMC_png}/{region}_dataset.tar"
         if not os.path.exists(tarfile_name):
