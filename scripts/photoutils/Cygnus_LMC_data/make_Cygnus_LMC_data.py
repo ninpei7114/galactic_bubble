@@ -24,6 +24,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="make validataion data for SSD")
     parser.add_argument("Cygnus_path", type=str, metavar="DIR", help="Cygnus_path")
     parser.add_argument("LMC_path", type=str, metavar="DIR", help="LMC_path")
+    parser.add_argument("SMC_path", type=str, metavar="DIR", help="SMC_path")
     parser.add_argument("save_dir", type=str, metavar="DIR", help="save_dir")
 
     return parser.parse_args()
@@ -78,7 +79,7 @@ def main(args):
         args (argparser): argparser
 
     """
-    Cygnus_LMC_l = ["Cygnus", "LMC"]
+    Cygnus_LMC_l = ["Cygnus", "LMC", "SMC"]
     size_list = [100, 150, 300, 600, 900, 1200, 1800, 2400, 3000]
     fragment = 3
 
@@ -105,6 +106,13 @@ def main(args):
             savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
             r_resolution = hdu_r.header["CD2_2"] * 3600
             g_resolution = hdu_g.header["CD2_2"] * 3600
+        elif region == "SMC":
+            hdu_r = astropy.io.fits.open(args.SMC_path + "/" + "SAGE_SMC_MIPS24_E012.fits")[0]
+            hdu_g = astropy.io.fits.open(args.SMC_path + "/" + "SAGE_SMC_IRAC8.0_1.2_mosaic_regrid_MIPS24.fits")[0]
+            hdu_b = np.zeros(hdu_g.data.shape)
+            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+            r_resolution = hdu_r.header["CD2_2"] * 3600
+            g_resolution = hdu_g.header["CDELT2"] * 3600
 
         data = np.concatenate(
             [remove_nan(hdu_r.data[:, :, None]), remove_nan(hdu_g.data[:, :, None]), remove_nan(hdu_b[:, :, None])],
