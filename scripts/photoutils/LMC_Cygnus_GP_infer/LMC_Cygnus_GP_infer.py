@@ -24,7 +24,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("model_ver", type=str, help="model's path to infer")
     parser.add_argument("result_save_dir", type=str, help="Infer Result Save Directory")
-    parser.add_argument("Cygnus_LMC_png", type=str, help="Cygnus_LMC_png")
+    parser.add_argument("Cygnus_LMC_SMC_png", type=str, help="Cygnus_LMC_SMC_png")
 
     return parser.parse_args()
 
@@ -53,10 +53,10 @@ def main(args):
 
     for region in ["LMC", "Cygnus"]:
         print(f"{region=}")
-        tarfile_name = f"{args.Cygnus_LMC_png}/{region}_dataset.tar"
+        tarfile_name = f"{args.Cygnus_LMC_SMC_png}/{region}_dataset.tar"
         if not os.path.exists(tarfile_name):
             with tarfile.open(tarfile_name, "w:gz") as tar:
-                tar.add(f"{args.Cygnus_LMC_png}/{region}")
+                tar.add(f"{args.Cygnus_LMC_SMC_png}/{region}")
 
         Dataset_test = (
             webdataset.WebDataset(tarfile_name).decode("pil").to_tuple("png", "__key__").map(preprocess_validation)
@@ -68,7 +68,7 @@ def main(args):
             num_workers=2,
             pin_memory=True,
         )
-        all_iter = int(len(glob.glob(f"{args.Cygnus_LMC_png}/{region}/*.png")) / 128)
+        all_iter = int(len(glob.glob(f"{args.Cygnus_LMC_SMC_png}/{region}/*.png")) / 128)
         iteration = 0
         ################
         ## INFER PART ##

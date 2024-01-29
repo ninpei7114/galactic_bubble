@@ -26,6 +26,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="PyTorch Implementation of SSD")
     parser.add_argument("result_path", type=str, help="model's path to infer")
     parser.add_argument("LMC_data_path", help="LMC data path")
+    parser.add_argument("SMC_data_path", help="SMC data path")
     parser.add_argument("Cygnus_data_path", help="Cyg data path")
     parser.add_argument("--val_ring_catalogue", type=str, default="MWP")
 
@@ -42,6 +43,11 @@ def main(args):
         if region == "LMC":
             r_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/r.fits"
             g_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/g.fits"
+            save_png_name = f"{args.LMC_data_path}/lmc_RG_-1.0_10.0_-1.0_8.0_0.0_1.0.png"
+            fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
+        if region == "SMC":
+            r_fits_path = args.SMC_data_path + "/SAGE_SMC_MIPS24_E012.fits"
+            g_fits_path = args.SMC_data_path + "/SAGE_SMC_IRAC8.0_1.2_mosaic_regrid_MIPS24"
             save_png_name = f"{args.LMC_data_path}/lmc_RG_-1.0_10.0_-1.0_8.0_0.0_1.0.png"
             fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         elif region == "Cygnus":
