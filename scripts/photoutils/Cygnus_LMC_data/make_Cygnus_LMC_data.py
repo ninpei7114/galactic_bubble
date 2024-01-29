@@ -89,28 +89,28 @@ def main(args):
     for region in Cygnus_LMC_l:
         print(f"{region=}")
         print("MAKING DATA ...")
-        os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/", exist_ok=True)
-        os.makedirs(f"{args.save_dir}/Cygnus_LMC_png/{region}", exist_ok=True)
+        os.makedirs(f"{args.save_dir}/Cygnus_LMC_SMC_png/", exist_ok=True)
+        os.makedirs(f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}", exist_ok=True)
 
         if region == "Cygnus":
             hdu_r = astropy.io.fits.open(args.Cygnus_path + "/" + "M1_fits_file/M1_cygnus_2.4.fits")[0]
             hdu_g = astropy.io.fits.open(args.Cygnus_path + "/" + "I4_fits_file/I4_2.4_reg.fits")[0]
             hdu_b = astropy.io.fits.open(args.Cygnus_path + "/" + "I1_fits_file/I1_2.4_reg.fits")[0].data
-            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+            savedir_name = f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}"
             r_resolution = hdu_r.header["CDELT2"] * 3600
             g_resolution = hdu_g.header["CDELT2"] * 3600
         elif region == "LMC":
             hdu_r = astropy.io.fits.open(args.LMC_path + "/" + "r.fits")[0]
             hdu_g = astropy.io.fits.open(args.LMC_path + "/" + "g.fits")[0]
             hdu_b = np.zeros(hdu_g.data.shape)
-            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+            savedir_name = f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}"
             r_resolution = hdu_r.header["CD2_2"] * 3600
             g_resolution = hdu_g.header["CD2_2"] * 3600
         elif region == "SMC":
             hdu_r = astropy.io.fits.open(args.SMC_path + "/" + "SAGE_SMC_MIPS24_E012.fits")[0]
             hdu_g = astropy.io.fits.open(args.SMC_path + "/" + "SAGE_SMC_IRAC8.0_1.2_mosaic_regrid_MIPS24.fits")[0]
             hdu_b = np.zeros(hdu_g.data.shape)
-            savedir_name = f"{args.save_dir}/Cygnus_LMC_png/{region}"
+            savedir_name = f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}"
             r_resolution = hdu_r.header["CD2_2"] * 3600
             g_resolution = hdu_g.header["CDELT2"] * 3600
 
