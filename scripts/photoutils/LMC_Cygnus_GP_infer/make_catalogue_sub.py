@@ -118,7 +118,7 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
         width=abs(header_d1) * catalogue["width_pix"],
         height=abs(header_d2) * catalogue["height_pix"],
         edgecolor=None,
-        color="c",
+        color="w",
         linewidth=1,
     )
 
@@ -128,7 +128,7 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
             yw=MWP_catalogue["_DE.icrs"],
             radius=MWP_catalogue["Reff"] / 60,
             linewidth=2,
-            edgecolor="#F5F5F5",
+            edgecolor="b",
         )
         f.recenter(307.7, 40.23, width=6.5, height=6.3)
     elif region == "Spitzer":
@@ -137,7 +137,7 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
             yw=MWP_catalogue["GLAT"],
             radius=MWP_catalogue["Reff"] / 60,
             linewidth=2,
-            edgecolor="#F5F5F5",
+            edgecolor="b",
         )
     plt.title(region, fontsize=60)
     plt.tight_layout()
