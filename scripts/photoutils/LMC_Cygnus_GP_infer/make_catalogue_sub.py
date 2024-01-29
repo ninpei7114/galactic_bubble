@@ -94,7 +94,7 @@ def make_infer_catalogue(bbox, w):
 def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_catalogue=None, region_=None):
     Image.MAX_IMAGE_PIXELS = 1000000000
     fig = plt.figure(figsize=(16, 16))
-    if region == "LMC" or region == "Spitzer":
+    if region == "LMC" or region == "SMC" or region == "Spitzer":
         f = aplpy.FITSFigure(g_fits_path, slices=[0], figure=fig, convention="wells")
     elif region == "Cygnus":
         f = aplpy.FITSFigure(g_fits_path, slices=[0], figure=fig, convention="wells", north=True)
