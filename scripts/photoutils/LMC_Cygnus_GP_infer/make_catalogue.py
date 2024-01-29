@@ -48,7 +48,7 @@ def main(args):
         if region == "SMC":
             r_fits_path = args.SMC_data_path + "/spitzer_smc_rgb/SAGE_SMC_MIPS24_E012.fits"
             g_fits_path = args.SMC_data_path + "/spitzer_smc_rgb/SAGE_SMC_IRAC8.0_1.2_mosaic_regrid_MIPS24.fits"
-            save_png_name = f"{args.LMC_data_path}/lmc_RG_-1.0_10.0_-1.0_8.0_0.0_1.0.png"
+            save_png_name = f"{args.SMC_data_path}/SMC_RG_0.03_3.0_0.2_1.2_100000.0_100000.0.jpeg"
             fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         elif region == "Cygnus":
             r_fits_path = args.Cygnus_data_path + "/M1_fits_file/M1_cygnus_2.4.fits"
