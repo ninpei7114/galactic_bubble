@@ -65,7 +65,7 @@ def main(args):
             bbox = calc_bbox(args, region, conf_thre)
             catalogue = make_infer_catalogue(bbox, w)
             np.save(f"{save_dir}/bbox.npy", bbox)
-            catalogue.to_csv(f"{save_dir}/cygnus_infer_catalogue.csv")
+            catalogue.to_csv(f"{save_dir}/infer_catalogue.csv")
 
             if region == "Cygnus":
                 GLON_min, GLAT_min = w.all_pix2world(b, 0, 0)
