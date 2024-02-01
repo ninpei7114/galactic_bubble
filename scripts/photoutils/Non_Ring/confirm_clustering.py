@@ -60,13 +60,13 @@ def main(args):
         ax.hist(prediction, bins=int(class_num))
         ax.set_xlabel("クラス数", size=15)
         ax.set_ylabel("個数", size=15)
-        fig.savefig(savedir_name + f"/class{class_num}/class_detail.png")
+        fig.savefig(savedir_name + f"/class{class_num}/class_detail.jpeg")
 
         num_list = []
         for k in range(int(class_num)):
             slice_ = int(np.sum(prediction == k) / 80)
             data_view_rectangl(25, data[prediction == k][::slice_]).save(
-                savedir_name + f"/class{class_num}/clus_{k}.png"
+                savedir_name + f"/class{class_num}/clus_{k}.jpeg"
             )
             num_list.append(np.sum(prediction == k))
         df = pd.DataFrame(num_list).T

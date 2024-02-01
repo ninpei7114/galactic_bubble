@@ -126,7 +126,7 @@ def main(args):
     ax.hist(prediction, bins=int(args.class_num))
     ax.set_xlabel("クラス数", size=15)
     ax.set_ylabel("個数", size=15)
-    fig.savefig(savedir_name + "/class_detail.png")
+    fig.savefig(savedir_name + "/class_detail.jpeg")
 
     num_list = []
     for k in range(int(args.class_num)):
@@ -135,7 +135,7 @@ def main(args):
         class_data_list = []
         for i in class_path[::slice_]:
             class_data_list.append(np.array(Image.open(i)))
-        data_view_rectangl(25, np.array(class_data_list)).save(savedir_name + f"/clus_{k}.png")
+        data_view_rectangl(25, np.array(class_data_list)).save(savedir_name + f"/clus_{k}.jpeg")
         num_list.append(len(class_path))
     df = pd.DataFrame(num_list).T
     df.to_csv(savedir_name + "/class_num.csv")
