@@ -23,7 +23,7 @@ class SSDPredictShow:
         self.net = net  # SSDネットワーク
         self.detect = Detect()
 
-    def show(self, img, data_confidence_level):
+    def show(self, img, data_confidence_level, save=False, img_file_path=None):
         """
         物体検出の予測結果を表示をする関数。
 
@@ -67,6 +67,8 @@ class SSDPredictShow:
                 scores=scores,
                 label_names=self.eval_categories,
             )
+            if save:
+                fig.savefig(f"/{img_file_path}/Cygnus_{bat}.png")
         #             plt.imshow(fig)
         return predict_bbox_list
 
@@ -145,7 +147,7 @@ class SSDPredictShow:
         colors = plt.cm.hsv(np.linspace(0, 1, num_classes)).tolist()
 
         # 画像の表示
-        fig = plt.figure(figsize=(10, 10))
+        fig = plt.figure(figsize=(10, 10), tight_layout=True)
         currentAxis = fig.add_subplot(111)
         currentAxis.imshow(rgb_img)
 
@@ -167,8 +169,9 @@ class SSDPredictShow:
             height = bb[3] - bb[1]
 
             # 長方形を描画する
-            currentAxis.add_patch(plt.Rectangle(xy, width, height, fill=False, edgecolor=color, linewidth=2))
+            currentAxis.add_patch(plt.Rectangle(xy, width, height, fill=False, edgecolor=color, linewidth=4))
             # 長方形の枠の左上にラベルを描画する
-            currentAxis.text(xy[0], xy[1], display_txt, bbox={"facecolor": color, "alpha": 0.5})
+            currentAxis.text(xy[0], xy[1], display_txt, bbox={"facecolor": color, "alpha": 0.5}, fontsize=15)
+        currentAxis.axis("off")
         plt.show()
         return fig
