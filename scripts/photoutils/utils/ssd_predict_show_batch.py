@@ -52,7 +52,7 @@ class SSDPredictShow:
         for bat in range(batch):
             img_ = copy.deepcopy(img[bat])
             predict_bbox, pre_dict_label_index, scores = self.ssd_predict(img_, width, height, data_confidence_level)
-            rgb_img = np.uint8(img_ * 255)
+            rgb_img = np.uint8(np.concatenate([img_, np.zeros([300, 300, 1])], axis=2) * 255)
 
             tempo_l = []
             for thre_s in np.where(np.array(scores) >= data_confidence_level)[0]:
