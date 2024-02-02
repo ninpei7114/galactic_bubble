@@ -1,0 +1,22 @@
+program: ./train_main.py
+method: bayes
+metric:
+  name: val_f2_score
+  goal: maximize
+parameters:
+  lr:
+    min: 0.000001
+    max: 0.001
+  weight_decay:
+    min: 0.000001
+    max: 0.001
+  data_random_state:
+    min: 0
+    max: 300
+  init_random_state:
+    min: 0
+    max: 300
+  Ring_mini_batch:
+    values: [2, 4, 8, 16, 32]
+  NonRing_mini_batch:
+    values: [1, 2, 3, 4, 5, 6]
