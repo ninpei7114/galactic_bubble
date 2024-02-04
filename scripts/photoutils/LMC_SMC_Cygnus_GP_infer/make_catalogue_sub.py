@@ -209,15 +209,8 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
         g_resolution = hdu.header["PIXSCAL1"]
 
     for _, row in tqdm.tqdm(target_catalogue[target_mask].sort_values("Reff").iterrows()):
-        lmax = row[coordinate_x] + row["MajAxis"] / 60
-        bmin = row[coordinate_y] - row["MajAxis"] / 60
-        lmin = row[coordinate_x] - row["MajAxis"] / 60
-        bmax = row[coordinate_y] + row["MajAxis"] / 60
-        l_center = (lmax + lmin) / 2
-        b_center = (bmax + bmin) / 2
-
-        x_center, y_center = w.all_world2pix(l_center, b_center, 0)
-        r = (lmax - lmin) / CDELT
+        x_center, y_center = w.all_world2pix(row[coordinate_x], row[coordinate_y], 0)
+        r = 2 * row["MajAxis"] / 60 / CDELT
 
         x_pix_min = x_center - r - r / 50
         y_pix_min = y_center - r - r / 50
@@ -226,7 +219,6 @@ def make_TP_FN(target_catalogue, target_mask, data, w, hdu, region):
 
         if x_pix_min <= 0 or y_pix_min <= 0:
             pass
-
         else:
             c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
             cut_data = copy.deepcopy(c_data)
