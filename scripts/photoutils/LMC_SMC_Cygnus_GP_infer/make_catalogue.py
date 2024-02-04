@@ -34,6 +34,14 @@ def parse_args():
 
 
 def main(args):
+    """_summary_
+
+    Args:
+        args (_type_): _description_
+
+    Example command:
+        python make_catalogue.py /home/filament/jupyter/research/each_model_region_infer/RemoveStar4pix/training_log\:v8/ /home/filament/jupyter/fits_data/lmc/ /home/filament/jupyter/fits_data/SMC_data/ /home/filament/jupyter/fits_data/cygnus_fits/
+    """
     conf_thre = 0.95
 
     for region in ["LMC", "SMC", "Cygnus"]:
@@ -43,7 +51,7 @@ def main(args):
         if region == "LMC":
             r_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/r_icrs.fits"
             g_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/g_icrs.fits"
-            save_png_name = f"{args.LMC_data_path}/lmc_RG_-1.0_10.0_-1.0_8.0_0.0_1.0.png"
+            save_png_name = f"{args.LMC_data_path}/lmc_RG_0.0_10.0_0.0_8.0_100000.0_100000.0.png"
             fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         if region == "SMC":
             r_fits_path = args.SMC_data_path + "/spitzer_smc_rgb/SAGE_SMC_MIPS24_E012.fits"
