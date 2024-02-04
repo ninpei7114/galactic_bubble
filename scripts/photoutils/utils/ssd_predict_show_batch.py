@@ -147,7 +147,7 @@ class SSDPredictShow:
         colors = plt.cm.hsv(np.linspace(0, 1, num_classes)).tolist()
 
         # 画像の表示
-        fig = plt.figure(figsize=(10, 10), tight_layout=True)
+        fig = plt.figure(figsize=(5, 5), tight_layout=True)
         currentAxis = fig.add_subplot(111)
         currentAxis.imshow(rgb_img)
 
