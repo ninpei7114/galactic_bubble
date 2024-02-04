@@ -41,8 +41,8 @@ def main(args):
         save_dir = f"{args.result_path}/analysis/{region}"
         os.makedirs(save_dir, exist_ok=True)
         if region == "LMC":
-            r_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/r.fits"
-            g_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/g.fits"
+            r_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/r_icrs.fits"
+            g_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/g_icrs.fits"
             save_png_name = f"{args.LMC_data_path}/lmc_RG_-1.0_10.0_-1.0_8.0_0.0_1.0.png"
             fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         if region == "SMC":
