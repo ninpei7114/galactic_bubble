@@ -100,8 +100,8 @@ def main(args):
             r_resolution = hdu_r.header["CDELT2"] * 3600
             g_resolution = hdu_g.header["CDELT2"] * 3600
         elif region == "LMC":
-            hdu_r = astropy.io.fits.open(args.LMC_path + "/" + "r.fits")[0]
-            hdu_g = astropy.io.fits.open(args.LMC_path + "/" + "g.fits")[0]
+            hdu_r = astropy.io.fits.open(args.LMC_path + "/" + "r_icrs.fits")[0]
+            hdu_g = astropy.io.fits.open(args.LMC_path + "/" + "g_icrs.fits")[0]
             hdu_b = np.zeros(hdu_g.data.shape)
             savedir_name = f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}"
             r_resolution = hdu_r.header["CD2_2"] * 3600
