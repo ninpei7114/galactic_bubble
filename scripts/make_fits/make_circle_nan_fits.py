@@ -79,7 +79,7 @@ def main(args):
     MWP = viz.query_constraints(catalog="2019yCat..74881141J ")[0].to_pandas()
     MWP.loc[MWP["GLON"] >= 358.446500015535, "GLON"] -= 360
     MWP.index = MWP["MWP"].tolist()
-    rank_3 = np.load("../wandb_training/MWP_rank3_name.npy")
+    rank_3 = np.load("../photoutils/MWP_rank3_name.npy")
     MWP = MWP.loc[rank_3]
 
     for i in pbar:
