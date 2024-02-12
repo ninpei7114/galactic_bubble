@@ -44,7 +44,7 @@ def main(args):
         data.append(np.array(Image.open(i)))
     data = np.array(data)
 
-    for class_num in range(2, 10):
+    for class_num in range(2, 11):
         features_list = np.load(args.features_list)
         os.makedirs(savedir_name + f"/class{class_num}", exist_ok=True)
         print("======================================")
@@ -54,7 +54,7 @@ def main(args):
         )
         print("Clustering is done")
         print(
-            f"Class 0 : {sum(prediction == 0)}\nClass 1 : {sum(prediction == 1)}\nClass 2 : {sum(prediction == 2)}\nClass 3 : {sum(prediction == 3)}\nClass 4 : {sum(prediction == 4)}\nClass 5 : {sum(prediction == 5)}\nClass 6 : {sum(prediction == 6)}\nClass 7 : {sum(prediction == 7)}\nClass 8 : {sum(prediction == 8)}"
+            f"Class 0 : {sum(prediction == 0)}\nClass 1 : {sum(prediction == 1)}\nClass 2 : {sum(prediction == 2)}\nClass 3 : {sum(prediction == 3)}\nClass 4 : {sum(prediction == 4)}\nClass 5 : {sum(prediction == 5)}\nClass 6 : {sum(prediction == 6)}\nClass 7 : {sum(prediction == 7)}\nClass 8 : {sum(prediction == 8)}\nClass 9 : {sum(prediction == 9)}"
         )
         fig, ax = plt.subplots()
         ax.hist(prediction, bins=int(class_num))
