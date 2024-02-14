@@ -20,7 +20,7 @@ class label_caliculator(object):
 
         self.star_dic = {}
         if self.choice == "MWP":
-            rout_num = 1.3
+            rout_num = 1
         elif self.choice == "CH":
             rout_num = 1
         elif self.choice == "SUM":
