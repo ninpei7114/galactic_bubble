@@ -32,7 +32,7 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
     ## pix情報に変換する必要がある。
     ## ↓ この状態では、Ringは画像の中心に位置したまま。
 
-    random_num = 1 / trans_rg.uniform(0.165, 0.66)
+    random_num = 1 / trans_rg.uniform(0.165, 0.58)
     x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
         row, GLON_min, GLON_max, GLAT_min, GLAT_max, random_num
     )
