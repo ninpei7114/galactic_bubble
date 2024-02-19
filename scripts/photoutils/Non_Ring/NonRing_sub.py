@@ -73,7 +73,13 @@ class NonRing_sub(object):
 
         while True:
             cut_data_random = self.cut_no_ring()
-            if not np.isnan(np.sum(cut_data_random)):
+            if (
+                np.isnan(cut_data_random.sum())
+                or np.std(cut_data_random[:, :, 0]) < 1e-9
+                or np.std(cut_data_random[:, :, 1]) < 1e-9
+            ):
+                pass
+            else:
                 break
 
         return cut_data_random
