@@ -54,7 +54,7 @@ def cut_data(data_, many_ind, cut_shape, r_resolution, g_resolution, savedir_nam
                     zero_count = np.sum(res_data[:, :, res_data_dim] == 0)
                     if zero_count == 0:
                         pass
-                    elif zero_count >= dim_area * 9 / 10:
+                    elif zero_count >= dim_area * 7 / 10:
                         flag = False
                     else:
                         percentile_under = np.percentile(res_data[:, :, res_data_dim], zero_count / dim_area * 100 + 5)
