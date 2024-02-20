@@ -142,9 +142,9 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
     plt.title(region, fontsize=60)
     plt.tight_layout()
     if region == "Spitzer":
-        f.save(f"{save_dir}/{region_}/{region}_predict.png", dpi=300)
+        f.save(f"{save_dir}/{region_}/{region}_predict.jpeg", dpi=300)
     else:
-        f.save(f"{save_dir}/{region}_predict.png", dpi=300)
+        f.save(f"{save_dir}/{region}_predict.jpeg", dpi=300)
 
 
 def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None):
@@ -152,11 +152,11 @@ def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None
     d_cut = []
     width_list = []
     if region == "Spitzer":
-        save_png_name = f"{save_dir}/{region_}/{region}_predict_ring.png"
+        save_png_name = f"{save_dir}/{region_}/{region}_predict_ring.jpeg"
         r_resolution = r_header["PIXSCAL1"]
         g_resolution = g_header["PIXSCAL1"]
     else:
-        save_png_name = f"{save_dir}/{region}_predict_ring.png"
+        save_png_name = f"{save_dir}/{region}_predict_ring.jpeg"
         if region == "LMC":
             r_resolution = r_header["CD2_2"] * 3600
             g_resolution = g_header["CD2_2"] * 3600
