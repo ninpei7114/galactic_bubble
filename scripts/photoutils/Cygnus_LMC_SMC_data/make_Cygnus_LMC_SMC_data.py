@@ -107,10 +107,8 @@ def main(args):
             r_resolution = hdu_r.header["CD2_2"] * 3600
             g_resolution = hdu_g.header["CD2_2"] * 3600
         elif region == "SMC":
-            hdu_r = astropy.io.fits.open(args.SMC_path + "/" + "spitzer_smc_rgb/SAGE_SMC_MIPS24_E012.fits")[0]
-            hdu_g = astropy.io.fits.open(
-                args.SMC_path + "/" + "spitzer_smc_rgb/SAGE_SMC_IRAC8.0_1.2_mosaic_regrid_MIPS24.fits"
-            )[0]
+            hdu_r = astropy.io.fits.open(args.SMC_path + "/" + "SAGE_SMC_MIPS24_E012.fits")[0]
+            hdu_g = astropy.io.fits.open(args.SMC_path + "/" + "SAGE_SMC_IRAC8.0_1.2_mosaic_regrid_MIPS24.fits")[0]
             hdu_b = np.zeros(hdu_g.data.shape)
             savedir_name = f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}"
             r_resolution = hdu_r.header["CD2_2"] * 3600
