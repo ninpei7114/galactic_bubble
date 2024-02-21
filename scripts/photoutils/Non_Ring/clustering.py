@@ -11,6 +11,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import tqdm
+import wandb
 from PIL import Image
 from sklearn.cluster import KMeans
 
@@ -30,7 +31,7 @@ def parse_args():
     ## クラス数、モデルのcheckpoint、Non-Ring画像の場所
     parser = argparse.ArgumentParser(description="make data for SSD")
     parser.add_argument("class_num", help="clusteringの個数 (default: 8)", default=8)
-    parser.add_argument("model_checkpoint", help="特徴量を生成するためのモデルのcheckpointの場所")
+    parser.add_argument("model_ver", help="特徴量を生成するためのモデルのcheckpointの場所")
     parser.add_argument("NonRing_dir", help="NonRing画像の場所")
 
     return parser.parse_args()
@@ -49,12 +50,19 @@ def main(args):
 
     if len(args.NonRing_dir.split("/")[-1]) == 0:
         savedir_name = "/".join(args.NonRing_dir.split("/")[:-2]) + "/clustering_result"
+        model_download_dir = "/".join(args.NonRing_dir.split("/")[:-2]) + "/model"
     else:
         savedir_name = "/".join(args.NonRing_dir.split("/")[:-1]) + "/clustering_result"
+        model_download_dir = "/".join(args.NonRing_dir.split("/")[:-1]) + "/model"
     os.makedirs(savedir_name, exist_ok=True)
+    os.makedirs(model_download_dir, exist_ok=True)
+
+    api = wandb.Api()
+    artifact = api.artifact(f"{args.model_ver}")
+    artifact.download(model_download_dir)
 
     print("Loading Model....")
-    net_weights = torch.load(args.model_checkpoint)
+    net_weights = torch.load(model_download_dir + "/earlystopping.pth")
     net_w = SSD()
     net_w.load_state_dict(net_weights["model_state_dict"])
     ## vggとextraで構成されるモデルを構築
