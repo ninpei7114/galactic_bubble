@@ -108,9 +108,8 @@ def main(args):
         features_list.reshape(features_list.shape[0], -1)
     )
     print("Clustering is done")
-    print(
-        f"Class 0 : {sum(prediction == 0)}\nClass 1 : {sum(prediction == 1)}\nClass 2 : {sum(prediction == 2)}\nClass 3 : {sum(prediction == 3)}\nClass 4 : {sum(prediction == 4)}\nClass 5 : {sum(prediction == 5)}\nClass 6 : {sum(prediction == 6)}\nClass 7 : {sum(prediction == 7)}\nClass 8 : {sum(prediction == 8)}"
-    )
+    for i in range(int(args.class_num)):
+        print(f"Class {i} : {sum(prediction == i)}")
 
     #################################
     ## Non-Ringデータをクラスごとに移動##
