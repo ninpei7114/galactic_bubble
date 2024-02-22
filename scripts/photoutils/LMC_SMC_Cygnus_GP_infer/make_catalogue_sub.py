@@ -108,9 +108,12 @@ def make_map(save_png_name, region, catalogue, hdu, g_fits_path, save_dir, MWP_c
     if region == "Cygnus":
         header_d1 = hdu.header["CDELT1"]
         header_d2 = hdu.header["CDELT2"]
-    else:
+    elif region == "LMC":
         header_d1 = hdu.header["CDELT1"]
         header_d2 = hdu.header["CDELT2"]
+    elif region == "SMC":
+        header_d1 = hdu.header["CD2_1"]
+        header_d2 = hdu.header["CD2_2"]
 
     f.show_rectangles(
         xw=(catalogue["ra_min"] + catalogue["ra_max"]) / 2,
