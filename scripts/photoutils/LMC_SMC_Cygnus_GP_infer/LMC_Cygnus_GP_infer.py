@@ -10,8 +10,9 @@ import torch
 import wandb
 import webdataset
 
-sys.path.append("/home/cygnus/jupyter/galactic_bubble/scripts/photoutils")
 from infer_sub import od_collate_fn_validation, preprocess_validation
+
+sys.path.append("../")
 from utils.ssd_model import SSD, Detect
 
 """Example command line:
