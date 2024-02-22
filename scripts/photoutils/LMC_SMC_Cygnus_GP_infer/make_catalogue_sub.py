@@ -158,8 +158,8 @@ def make_cut_ring(bbox, data, save_dir, region, r_header, g_header, region_=None
     else:
         save_png_name = f"{save_dir}/{region}_predict_ring.jpeg"
         if region == "LMC":
-            r_resolution = r_header["CD2_2"] * 3600
-            g_resolution = g_header["CD2_2"] * 3600
+            r_resolution = r_header["CDELT2"] * 3600
+            g_resolution = g_header["CDELT2"] * 3600
         elif region == "SMC":
             r_resolution = r_header["CD2_2"] * 3600
             g_resolution = g_header["CDELT2"] * 3600
