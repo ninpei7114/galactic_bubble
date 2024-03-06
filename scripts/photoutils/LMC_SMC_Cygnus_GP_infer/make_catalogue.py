@@ -61,7 +61,7 @@ def main(args):
         elif region == "Cygnus":
             r_fits_path = args.Cygnus_data_path + "/M1_fits_file/M1_cygnus_2.4.fits"
             g_fits_path = args.Cygnus_data_path + "/I4_fits_file/I4_2.4_reg.fits"
-            save_png_name = f"{args.Cygnus_data_path}/RG_30.0_100.0_10.0_150.0_30.0_100.0.png"
+            save_png_name = f"{args.Cygnus_data_path}/RG_30.0_80.0_30.0_100.0_100000.0_100000.0.png"
             fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
 
         for fp in fits_path:
