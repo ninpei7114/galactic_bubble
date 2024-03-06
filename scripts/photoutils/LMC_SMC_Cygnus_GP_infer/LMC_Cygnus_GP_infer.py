@@ -31,7 +31,6 @@ def parse_args():
 
 
 def main(args):
-    start = time.time()
     torch.backends.cudnn.benchmark = True
     device = torch.device(torch.device("cuda:0") if torch.cuda.is_available() else "cpu")
 
@@ -53,6 +52,7 @@ def main(args):
     net_w.eval()
 
     for region in ["LMC", "Cygnus", "SMC"]:
+        start = time.time()
         print(f"\n{region=}")
         tarfile_name = f"{args.Cygnus_LMC_SMC_png}/{region}_dataset.tar"
         if not os.path.exists(tarfile_name):
@@ -95,7 +95,7 @@ def main(args):
         np.save(f"{args.result_save_dir}/{model_ver}/{region}/position.npy", position)
         np.save(f"{args.result_save_dir}/{model_ver}/{region}/result.npy", result)
 
-    print(f"elapsed_time:{time.time() - start}")
+        print(f"elapsed_time:{time.time() - start}")
 
 
 if __name__ == "__main__":
