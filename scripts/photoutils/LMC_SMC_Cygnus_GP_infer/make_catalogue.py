@@ -51,7 +51,7 @@ def main(args):
         if region == "LMC":
             r_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/r_J2000.fits"
             g_fits_path = args.LMC_data_path + "/spitzer_lmc_rgb/g_J2000.fits"
-            save_png_name = f"{args.LMC_data_path}/lmc_RG_1.0_10.0_0.5_5.0_100000.0_100000.0.png"
+            save_png_name = f"{args.LMC_data_path}/lmc_RG_0.0_10.0_0.5_5.0_100000.0_100000.0.png"
             fits_path = [[r_fits_path, g_fits_path, region, save_png_name]]
         if region == "SMC":
             r_fits_path = args.SMC_data_path + "/spitzer_smc_rgb/SAGE_SMC_MIPS24_E012.fits"
