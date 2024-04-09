@@ -32,7 +32,8 @@ class NonRing_sub(object):
         # popt, pocv = curve_fit(gauss_func, np.array(bin), num, p0=[100, 150, 10, 0])
         popt, pocv = curve_fit(log_normal_distribution, np.array(bin), num, p0=[40, 1, 10])
         x_ = np.arange(100, 2500)
-        y_ = gauss_func(x_, popt[0], popt[1], popt[2], popt[3])
+        # y_ = gauss_func(x_, popt[0], popt[1], popt[2], popt[3])
+        y_ = gauss_func(x_, popt[0], popt[1], popt[2])
         self.distiribution = y_ / np.sum(y_)
 
     def calc_cut_pix(self):
