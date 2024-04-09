@@ -30,7 +30,7 @@ class NonRing_sub(object):
                 break
             bin.append((value[i + 1] + value[i]) / 2)
         popt, pocv = curve_fit(gauss_func, np.array(bin), num, p0=[100, 150, 10, 0])
-        x_ = np.arange(150, 2500)
+        x_ = np.arange(100, 2500)
         y_ = gauss_func(x_, popt[0], popt[1], popt[2], popt[3])
         self.distiribution = y_ / np.sum(y_)
 
