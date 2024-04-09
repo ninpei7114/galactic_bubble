@@ -29,7 +29,8 @@ class NonRing_sub(object):
             if i + 1 >= len(value):
                 break
             bin.append((value[i + 1] + value[i]) / 2)
-        popt, pocv = curve_fit(gauss_func, np.array(bin), num, p0=[100, 150, 10, 0])
+        # popt, pocv = curve_fit(gauss_func, np.array(bin), num, p0=[100, 150, 10, 0])
+        popt, pocv = curve_fit(log_normal_distribution, np.array(bin), num, p0=[40, 1, 10])
         x_ = np.arange(100, 2500)
         y_ = gauss_func(x_, popt[0], popt[1], popt[2], popt[3])
         self.distiribution = y_ / np.sum(y_)
@@ -37,7 +38,7 @@ class NonRing_sub(object):
     def calc_cut_pix(self):
         center_x = self.random_uni.integers(150, self.fits_data_shape_x - 150)
         center_y = self.random_uni.integers(150, self.fits_data_shape_y - 150)
-        random_Rout = self.random_uni.choice(np.arange(150, 2500), p=self.distiribution)
+        random_Rout = self.random_uni.choice(np.arange(100, 2500), p=self.distiribution)
         x_random_min = center_x - random_Rout - random_Rout / 50
         x_random_max = center_x + random_Rout + random_Rout / 50
         y_random_min = center_y - random_Rout - random_Rout / 50
@@ -99,3 +100,9 @@ class NonRing_sub(object):
 def gauss_func(x, a, mu, sigma, d):
     """ガウシアン（正規分布）"""
     return a * np.exp(-((x - mu) ** 2) / (2 * sigma**2)) + d
+
+
+def log_normal_distribution(x, a, sigma, myu):
+    exp = np.exp(-((np.log(x) - myu) ** 2) / 2 / sigma**2)
+    coefficient = 1 / ((2 * np.pi) ** 1 / 2 * sigma * x)
+    return a * coefficient * exp
