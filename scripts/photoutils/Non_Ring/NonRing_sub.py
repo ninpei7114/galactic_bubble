@@ -23,7 +23,7 @@ class NonRing_sub(object):
         CH["CH"] = CH.index
         CH.loc[CH["GLON"] >= 358.446500015535, "GLON"] -= 360
 
-        num, value = np.histogram(CH["Rout"] * 60 / header["PIXSCAL1"] + 145, bins=200)
+        num, value = np.histogram(CH["Rout"] * 60 / header["PIXSCAL1"] + 100, bins=200)
         bin = []
         for i, d in enumerate(value):
             if i + 1 >= len(value):
