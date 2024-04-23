@@ -146,8 +146,6 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
     </details>
 
 ### Acknowledgement
-I would like to thank the members of FUGIN-AI for their input on the research.This research is supported by the National Institutes of Natural Sciences (NINS), Japan, through the inter-disciplinary collaboration project ”Reconstruction and Elucidation of the 3-D Spatial Structure of the Milky Way Galaxy Using Large-scale Molecular Cloud Data and Machine Learning / Elucidation of the 3-D Spatial Structure of the Milky Way Galaxy Based on Machine Learning and Deep Learning”.
+I would like to thank the members of FUGIN-AI for their comments on this research. I am grateful to Nakatani Shuyo / Cybozu Labs Inc. for his careful assistance on this code.
 
-Furthermore, I am grateful to Nakatani Shuyo / Cybozu Labs Inc. for his careful guidance on the code for this study.
-
-
+This research is supported by the National Institutes of Natural Sciences (NINS), Japan, through the inter-disciplinary collaboration project ”Reconstruction and Elucidation of the 3-D Spatial Structure of the Milky Way Galaxy Using Large-scale Molecular Cloud Data and Machine Learning / Elucidation of the 3-D Spatial Structure of the Milky Way Galaxy Based on Machine Learning and Deep Learning”.
