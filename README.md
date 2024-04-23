@@ -31,56 +31,68 @@ To set up the Docker environment for this project, follow these steps:
 
 Make sure you have Docker installed on your machine before following these steps.
 
-## <span style="color: green; ">How to make Non-Ring data, Validation data</span>
+## <span style="color: green; ">Datasets</span>
 
-### Non-Ring data
+#### Make Non-Ring data
 To create Non-Ring data, you can refer to the `mak_circle_nan_fits.py` script in the `make_fits` folder. Follow these steps:
 
-1. Create fits where the spitzer bubble position is Nan to make Non-Ring data. Run the Python script using the following command. Replace `path_of_spitzer_data` with the path to your spitzer data, and `path_of_Nanfits_file` with the desired path for the output fits:
+1. **Create fits where the spitzer bubble position is Nan to make Non-Ring data**
+
+    Run the Python script using the following command. Replace `path_of_spitzer_data` with the path to your spitzer data, and `path_of_Nanfits_file` with the desired path for the output fits:
 
     ```bash
     python mak_circle_nan_fits.py path_of_spitzer_data path_of_Nanfits_file
     ```
     This will execute the script and generate fits where the spitzer bubble position is Nan.
 
-2. Change directory to the `photoutils` directory:
+2. **Change directory to the `photoutils` directory**
+
     ```bash
     cd ../photoutils
     ```
 
-3. Run the Python script using the following command. Replace `path_of_Nanfits_file` with created fits where the location of the spitzer bubble is Nan, and `path_of_output_file` with the desired path for the output Non-Ring data:
+3. **Run make_NonRing.py**
+
+    Run the Python script using the following command. Replace `path_of_Nanfits_file` with created fits where the location of the spitzer bubble is Nan, and `path_of_output_file` with the desired path for the output Non-Ring data:
+
     ```bash
     python make_NonRing.py path_of_Nanfits_file path_of_output_file
     ```
 
     <details><summary> <span style="color: blue; ">Non-Ring Clustering</span></summary>
 
-    1. **Copy the Non-Ring Data**: Start by making a copy of the Non-Ring data you created above. This is to ensure that the original data remains unchanged during the clustering process. You can do this using a command like:
+    1. **Copy the Non-Ring Data**
+
+        Start by making a copy of the Non-Ring data you created above. This is to ensure that the original data remains unchanged during the clustering process. You can do this using a command like:
 
         ```bash
         cp -r /path/to/original/Non_Ring /path/to/copy/Non_Ring
         ```
 
-    2. **Run the Clustering Script**: Run the clustering.py script to perform clustering on the Non-Ring data. The command might look something like this:
+    2. **Run clustering.py**
+
+        Run the clustering.py script to perform clustering on the Non-Ring data. The command might look something like this:
 
         ```python
         python clustering.py class_num model_version /path/to/copy/Non_Ring
         ```
     </details>
 
-### Validation data
+#### Make validation data
 
 To create Validation data, you can refer to the `make_val_data.py` script in the `photoutils/Val_data` directory. Follow these steps:
 
-1. **Run the Python script using the following command.** Replace `path_of_spitzer_data` with the path to your spitzer data, and `path_of_output_file` with the desired path for the output Validation data:
+1. **Run make_val_data.py**
+
+    Replace `path_of_spitzer_data` with the path to your spitzer data, and `path_of_output_file` with the desired path for the output Validation data:
     ```bash
     python make_val_data.py path_of_spitzer_data path_of_output_file
     ```
 
 
-## <span style="color: green; ">How to run our model</span>
+## <span style="color: green; ">Training model</span>
 
-1. **Run the Python script**
+1. **Run train_main.py**
 
     Run Python script using the following command. For spitzer_path, savedir_path, NonRing_data_path and validation_data_path, change the path to suit your environment accordingly:
 
@@ -105,7 +117,7 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
 
     if you run `photoutils_clustering` script, follow these steps:
 
-    1. **Run the `photoutils_clustering` script**:
+    1. **Run train_main.py in the `photoutils_clustering`**:
 
         Run the `photoutils_clustering` script using the following command. Replace `class_num` with the determined number of classes. `NonRing_remove_class_list` and `NonRing_aug_num` are also replaced with a predetermined value:
 
