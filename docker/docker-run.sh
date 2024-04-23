@@ -1,0 +1,1 @@
+docker run --gpus all -it --rm --memory=110gb --shm-size=23gb -v ~/jupyter:/home/elmegreen/jupyter -v ~/galactic_bubble:/home/elmegreen/galactic_bubble -v ~/einstein_ring:/home/elmegreen/einstein_ring cuda-python:12.1.1-3.8 bash
