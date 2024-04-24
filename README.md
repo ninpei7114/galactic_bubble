@@ -11,7 +11,7 @@ Paper URL : ~~
 ## <span style="color: green; ">Environment</span>
 To set up the Docker environment for this project, follow these steps:
 
-1. Git pull this repository.
+1. Git clone this repository.
 
 2. Build the Docker image by running the following command in the terminal:
 
