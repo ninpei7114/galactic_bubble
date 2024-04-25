@@ -5,7 +5,6 @@
 第2章SSDで実装した内容をまとめたファイル
 """
 
-# XMLをファイルやテキストから読み込んだり、加工したり、保存したりするためのライブラリ
 from itertools import product as product
 from math import sqrt as sqrt
 
@@ -15,7 +14,6 @@ import torch.nn.functional as F
 import torch.nn.init as init
 from torch.autograd import Function
 
-# フォルダ「utils」にある関数matchを記述したmatch.pyからimport
 from utils.match import match
 
 
