@@ -2,6 +2,8 @@
 
 Paper URL : ~~
 
+日本語話者の方は、japanese Branchを参照ください。
+
 ## Abstract
 
 我々は、近赤外線データから Spitzer Bubble を検出できる深層学習モデルを提案する。モデルは、Single Shot MultiBox Detector を使用し、学習データには Milky Way Project (MWP)の Spitzer Bubble を用いた。我々は、 開発したモデルを天の川銀河の観測領域や、Cygnus X・LMC に適用し、MWP の未検出 Bubble の検出を行っ た。その結果、開発したモデルは、MWP-Bubble の中でも 8μm が 24μm を内包した Bubble では98%の検出率となり、新たに Bubble と判断した天体においても Spitzer Bubble の特徴をよく捉えた天体であることが確認できた。また、検出時間も MWP と比較して非常に短い時間に短縮することができ、科学的発見のペースを加速する大きな機会を提供することができる。
