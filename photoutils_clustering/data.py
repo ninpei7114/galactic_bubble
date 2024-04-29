@@ -7,7 +7,7 @@ import torch
 import webdataset
 
 
-## webdatasetのために作成
+## Function for webdataset
 def od_collate_fn(batch):
     targets = []
     imgs = []
@@ -19,7 +19,7 @@ def od_collate_fn(batch):
     return imgs, targets
 
 
-## webdatasetのために作成
+## Function for webdataset
 def od_collate_fn_validation(batch):
     targets = []
     imgs = []
@@ -42,7 +42,7 @@ def od_collate_fn_validation(batch):
     return imgs, targets, offset, region_info
 
 
-## webdatasetのために作成
+## Function for webdataset
 def preprocess(sample):
     img, json = sample
     return np.array(img) / 255, [
@@ -50,7 +50,7 @@ def preprocess(sample):
     ]
 
 
-## webdatasetのためのval_preprocess
+## validation preprocess for webdataset
 def preprocess_validation(sample):
     img, json, key = sample
     return (
@@ -63,14 +63,14 @@ def preprocess_validation(sample):
     )
 
 
-# 無限イテレータ
+# Infinite Iterator
 def InfiniteIterator(loader):
     iter = loader.__iter__()
     while True:
         try:
             x = next(iter)
         except StopIteration:
-            iter = loader.__iter__()  # 終わっていたら最初に戻る
+            iter = loader.__iter__()  # If the iterator has no more items, reset it to the beginning
             x = next(iter)
         yield x
 
@@ -105,7 +105,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
 
 
 def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonring_num, NonRing_class):
-    ## Training Ring の Dataloader を作成
+    ## Create Dataloader for Training Ring Data
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
         .shuffle(10000000)
@@ -121,7 +121,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
         pin_memory=True,
     )
 
-    ## Training NonRing の Dataloader を作成
+    ## Create Dataloader for Training NonRing Data
     nonring_num = train_Ring_num // len(NonRing_class)
     aug_num = np.delete(np.array(args.NonRing_aug_num) + 1, args.NonRing_remove_class_list)
     NonRing_rsample = np.clip([round(nonring_num / e / a, 5) * 10 for e, a in zip(each_nonring_num, aug_num)], None, 1)
@@ -142,7 +142,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, each_nonr
         for nr_w_l, m_batch in zip(NonRing_web_list, mini_batch)
     ]
 
-    return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # NonRingを無限にループするイテレータへ
+    return dl_ring_train, [InfiniteIterator(dl) for dl in NonRing_dl_l]  # to infinite iterator for NonRing
 
 
 def make_validatoin_dataloader(Validation_data_path, args):

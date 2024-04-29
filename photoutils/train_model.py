@@ -11,26 +11,31 @@ from data import make_training_dataloader, make_validatoin_dataloader
 from make_data import make_training_val_data
 from make_figure import make_figure
 from numpy.random import default_rng
-from training_sub import (EarlyStopping_f1_score, EarlyStopping_loss,
-                          calc_fscore_val, management_loss, print_and_log,
-                          write_train_log)
+from training_sub import (
+    EarlyStopping_f1_score,
+    EarlyStopping_loss,
+    calc_fscore_val,
+    management_loss,
+    print_and_log,
+    write_train_log,
+)
 from utils.ssd_model import Detect
 
 
 def train_model(
     net, criterion, optimizer, num_epochs, f_log, augmentation_name, args, train_cfg, device, run, val_size
 ):
-    """モデルの学習を実行する関数
+    """Function to perform model training
 
     Args:
-        net (pytorch Modulelist): SSDネットワーク
-        criterion (MultiBoxLoss): 損失関数
-        optimizer (AdamW)       : 最適化手法
-        num_epochs (int)        : 最大epoch数
-        f_log (txt file)        : logファイル
-        augmentation_name (int) : どのaugmentationを使用したかの名前
-        args (args)             : argparseの引数
-        train_cfg (dictionary)  : augmentationのパラメータ
+        net (pytorch Modulelist): SSD network
+        criterion (MultiBoxLoss): Loss function
+        optimizer (AdamW)       : Optimization method
+        num_epochs (int)        : Maximum number of epochs
+        f_log (txt file)        : log file
+        augmentation_name (int) : Name of which augmentation was used
+        args (args)             : argparse
+        train_cfg (dictionary)  : Parameters for augmentation
         device (torch.device)   : GPU or CPU
     """
     NonRing_class = np.delete(np.arange(args.NonRing_class_num), args.NonRing_remove_class_list)
@@ -41,13 +46,14 @@ def train_model(
     early_stopping = EarlyStopping_f1_score(
         patience=15, verbose=True, path=augmentation_name + "/earlystopping.pth", flog=f_log
     )
-    detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.5)  # F1 scoreのconfの計算が0.3からなので、ここも0.3
+    # Since the calculation of conf for the F1 score starts from 0.5, here also 0.5
+    detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.5)
     save_training_val_loss = management_loss()
     logs, f_score_val_l = [], []
 
-    ##########################
-    ## Validation dataの作成 ##
-    ##########################
+    ##############################
+    ## Creating Validation Data ##
+    ##############################
     Make_data = make_training_val_data(augmentation_name, f_log, args)
     Validation_data_path, Val_num = Make_data.make_validation_data(val_size)
     dl_val = make_validatoin_dataloader(Validation_data_path, args)
@@ -57,25 +63,25 @@ def train_model(
     for epoch in range(num_epochs):
         start_time = time.time()
         iteration_train, iteration_val = 0, 0
-        save_training_val_loss()  # lossの初期化
+        save_training_val_loss()  # Initialise loss
         print_and_log(f_log, ["-------------", "Epoch {}/{}".format(epoch + 1, num_epochs), "-------------"])
 
-        ########################
-        ## Training dataの作成 ##
-        ########################
-        # png形式のRing画像とjson形式のlabelを作成
+        ############################
+        ## Creating Training Data ##
+        ############################
+        # Create Ring images in png format and labels in json format
         Training_data_path = Make_data.make_training_ring_data(train_cfg, epoch)
         train_Ring_num = Make_data.data_logger()
-        # Training Ring の Dataloader を作成
+        # Create Dataloader for Training Ring
         dl_ring_train, dl_nonring = make_training_dataloader(
             Training_data_path, train_Ring_num, args, NonRing_num_l, NonRing_class
         )
         dataloaders_dict = {"train": dl_ring_train, "val": dl_val}
         all_iter = int(int(train_Ring_num) / args.Ring_mini_batch)
 
-        #############
-        ## 学習開始 ##
-        #############
+        ####################
+        ## Start Training ##
+        ####################
         for phase in ["train", "val"]:
             if phase == "train":
                 print_and_log(f_log, f" ({phase}) ")
@@ -86,9 +92,9 @@ def train_model(
                 net.eval()
                 result, position, regions = [], [], []
 
-            ############################
-            ## データの整形とモデルに入力 ##
-            ############################
+            #####################################
+            ## Data Shaping and Input to Model ##
+            #####################################
             for _ in dataloaders_dict[phase]:
                 if phase == "train":
                     images, targets = _[0], _[1]
@@ -106,7 +112,7 @@ def train_model(
                 images = images.to(device, dtype=torch.float)
                 targets = [ann.to(device, dtype=torch.float) for ann in targets]  # リストの各要素のテンソルをGPUへ
 
-                # optimizerを初期化
+                # Initialize the optimizer
                 optimizer.zero_grad()
                 with torch.set_grad_enabled(phase == "train"):
                     outputs, decoded_box = net(images)
@@ -114,10 +120,10 @@ def train_model(
                     loss = loss_dic["loc_loss"] + loss_dic["conf_loss"]
 
                     if phase == "train":
-                        loss.backward()  # 勾配の計算
-                        # 勾配が大きくなりすぎると計算が不安定になるため、clipで最大でも勾配10.0に留める
+                        loss.backward()  # Calculate the gradient
+                        # To prevent the calculation from becoming unstable when the gradient becomes too large, clip it to a maximum gradient of 10.0
                         nn.utils.clip_grad_value_(net.parameters(), clip_value=10.0)
-                        optimizer.step()  # パラメータ更新
+                        optimizer.step()  # Update parameters
                         print("\r" + str(iteration_train) + "/" + str(all_iter) + " ", end="")
                         iteration_train += 1
                         save_training_val_loss.sum_iter_loss(loss_dic, "train")
@@ -129,16 +135,16 @@ def train_model(
                         regions.extend(region_info)
                         save_training_val_loss.sum_iter_loss(loss_dic, "val")
 
-        ###############
-        ## Lossの管理 ##
-        ###############
-        # loc, confのlossを出力
+        ###################
+        ## Managing Loss ##
+        ###################
+        # Output the loss of loc, conf
         loss_train = save_training_val_loss.output_each_loss("train", iteration_train)
         loss_val = save_training_val_loss.output_each_loss("val", iteration_val)
 
-        ##############################
-        ## Validation F1 scoreの計算 ##
-        ##############################
+        ########################################
+        ## Calculation of Validation F1 score ##
+        ########################################
         f_score_val, precision, recall, conf_threshold_val = calc_fscore_val(
             np.concatenate(result), np.array(position), regions, args
         )
@@ -158,12 +164,14 @@ def train_model(
             print_and_log(f_log, "Early_Stopping")
             break
 
-        # データの削除
+        # Delete data
         os.remove(f"{Training_data_path}/bubble_dataset_train_ring.tar")
         shutil.rmtree(args.savedir_path + "".join("dataset") + "/" + augmentation_name.split("/")[-1] + "/train")
 
-    ## lossの推移を描画する
+    ## Plotting the transition of loss
     loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s = save_training_val_loss.output_all_epoch_loss()
     make_figure(augmentation_name, loc_l_val_s, conf_l_val_s, loc_l_train_s, conf_l_train_s, f_score_val_l)
 
-    return df.iloc[df[f"val_{args.fscore}"].idxmax()]["val_conf_threshold"]  # Valのf1_scoreが最大の時のconf_thresholdを返す
+    return df.iloc[df[f"val_{args.fscore}"].idxmax()][
+        "val_conf_threshold"
+    ]  # Return the conf_threshold when the f1_score of Val is maximum

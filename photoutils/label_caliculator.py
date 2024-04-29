@@ -15,7 +15,7 @@ class label_caliculator(object):
 
     def all_star(self, dataframe):
         """
-        使用fits内にあるリングのpix情報を取得する。
+        Get the pix information of the bubble in the used fits.
         """
 
         self.star_dic = {}
@@ -29,10 +29,10 @@ class label_caliculator(object):
         for _, row in dataframe.iterrows():
             lmax = row["GLON"] + rout_num * row[self.Rout] / 60
             bmin = row["GLAT"] - rout_num * row[self.Rout] / 60
-            ## 右端
+            ## Right end
             lmin = row["GLON"] - rout_num * row[self.Rout] / 60
             bmax = row["GLAT"] + rout_num * row[self.Rout] / 60
-            ## これは、リングを切り取る範囲　　切り取る範囲はRoutの3倍
+            ## This is the range to cut out the ring. The range to cut out is three times the Rout
             x_pix_min, y_pix_min = self.world.all_world2pix(lmax, bmin, 0)
             x_pix_max, y_pix_max = self.world.all_world2pix(lmin, bmax, 0)
 
@@ -40,12 +40,12 @@ class label_caliculator(object):
 
     def calc_pix(self, row, GLON_min, GLON_max, GLAT_min, GLAT_max, scale):
         """
-        fitsデータから、学習データとして用いる画像の切り出す範囲を
-        ランダム（シード値固定）で決めていく。
+        Decide the range to cut out the image to be used as training data
+        randomly (with a fixed seed value) from the fits data.
         """
 
-        ## ccc, okは、切り出す範囲をうまく決められなかった時の
-        ## ループを抜ける条件として用いる
+        ## ccc, ok are used as conditions to break the loop
+        ## when the range to cut out could not be decided well
 
         ccc = 0
         ok = True
@@ -55,7 +55,7 @@ class label_caliculator(object):
 
             lmax = row["GLON"] + random_num * row[self.Rout] / 60
             bmin = row["GLAT"] - random_num * row[self.Rout] / 60
-            # 右端
+            # Right end
             lmin = row["GLON"] - random_num * row[self.Rout] / 60
             bmax = row["GLAT"] + random_num * row[self.Rout] / 60
             ccc += 1
@@ -66,7 +66,7 @@ class label_caliculator(object):
                 ok = False
                 flag = False
 
-        # これは、リングを切り取る範囲
+        # This is the range to cut out the ring
         x_min, y_min = self.world.all_world2pix(lmax, bmin, 0)
         x_max, y_max = self.world.all_world2pix(lmin, bmax, 0)
         width = x_max - x_min
@@ -84,12 +84,12 @@ class label_caliculator(object):
 
     def find_cover(self, trans_pix_info=None):
         """
-        切り出した画像の中に、他のリングが入っていないか確かめる。
-        入っていたら、ラベル付けする
-        star_dicはdictionaryで、中身は、x_pix_min, y_pix_min, x_pix_max, y_pix_maxという順になっている
+        Checks if other rings are present within the cropped image.
+        If present, labels them.
+        star_dic is a dictionary containing the following keys: x_pix_min, y_pix_min, x_pix_max, y_pix_max.
         """
-        ## x_pix_maxなどは、convolutionを考えて幅の1/4大きめに設定しているため
-        ## widthを計算して、正確な切り出し範囲を算出する
+        ## The x_pix_max values, etc., are set slightly larger to account for convolution.
+        ## Calculate the precise cropping range based on the width.
         if trans_pix_info is not None:
             self.x_pix_min = trans_pix_info["x_pix_min"]
             self.x_pix_max = trans_pix_info["x_pix_max"]
@@ -104,18 +104,18 @@ class label_caliculator(object):
         self.overlapp_name = []
 
         for d in self.star_dic.items():
-            ## 各リングの位置情報
+            # Position information for each ring
             star_xmin = d[1][0]
             star_xmax = d[1][2]
             star_ymin = d[1][1]
             star_ymax = d[1][3]
             xx = np.array([star_xmin, star_xmax])
             yy = np.array([star_ymin, star_ymax])
-            ## リングの本当の面積
+            ## Actual area of the ring
             star_area = (xx[1] - xx[0]) * (yy[1] - yy[0])
 
-            ## 切り出す範囲内での対象リングの面積
-            ## リングが切り出す範囲外なら、0になる
+            # Area of the target ring within the cropped region
+            # If the ring is outside the cropping range, the area is 0
             clip_xx = np.clip(xx, self.x_pix_min + extra_width, self.x_pix_max - extra_width)
             clip_yy = np.clip(yy, self.y_pix_min + extra_height, self.y_pix_max - extra_height)
             clip_width = clip_xx[1] - clip_xx[0] + 1e-9
@@ -126,8 +126,8 @@ class label_caliculator(object):
                 self.y_pix_max - self.y_pix_min - 2 * extra_height
             )
 
-            ## 場合分け、全体に対してringが1/3以上入っていないといけない
-            ## width/height比が1/3以上でないとlabel付けしない
+            # Conditions: The entire ring must be at least 1/3 inside the overall area,
+            # and the width/height ratio must be at least 1/3 for labeling.
             if (
                 clip_area >= star_area * 3 / 5
                 and clip_height / (clip_width + 1e-9) > 1 / 3
@@ -141,8 +141,8 @@ class label_caliculator(object):
 
     def judge_01(self, number):
         """
-        label付けする際に、位置labelの範囲が0-1になっていないといけない
-        この関数は、位置labelを0-1の範囲に収めるための関数
+        When labeling, the range of the position label must be 0-1.
+        This function is for confining the position label to the range of 0-1.
         """
         if number > 1:
             return 1
@@ -153,9 +153,9 @@ class label_caliculator(object):
 
     def make_label(self, Ring_catalogue):
         """
-        sは、主体となるringの位置情報
-        x_pix_min, y_pix_min,x_pix_max, y_pix_maxは、切り出す画像のサイズ
-        主体となるringに重なっているringのindex情報、重なったringの情報はstar_listの中にある。
+        The variable 's' contains the position information of the main ring.
+        'x_pix_min', 'y_pix_min', 'x_pix_max', and 'y_pix_max' represent the dimensions of the cropped image.
+        The index information of rings overlapping with the main ring, along with their details, is stored in the 'star_list'.
         """
 
         self.xmin_list = []
@@ -166,9 +166,9 @@ class label_caliculator(object):
         Ring_catalogue_name_select = Ring_catalogue.index.tolist()
 
         #############################################
-        ## 主体となるRing と それ以外のRing のlabel付け ##
+        ## Labeling for the Main Bubble and Others ##
         #############################################
-        ## overlapp_listには主体となるRingとそれ以外のRingが入っている。
+        ## oThe 'overlapp_list' contains both the main ring and other rings.
         if len(self.overlapp_list) == 0:
             # self.flag = False
             pass
@@ -176,17 +176,16 @@ class label_caliculator(object):
             # assert len(self.overlapp_list) == 0
             # self.flag = True
             for p, n in zip(self.overlapp_list, self.overlapp_name):
-                ## pの中身は、以下のような天体名と[xmin, ymin, xmax, ymax]が入っている
+                ## The contents of 'p' include the celestial body name and [xmin, ymin, xmax, ymax].
                 ## ('2G0020120-0068213',
                 ## [array(7573.50002914), array(4663.19997904), array(7673.50003014), array(4763.19998004)])
                 if p[0] in Ring_catalogue_name_select:
-                    ######################################################
-                    ## モデルに入力するために、pix情報を0~1のlabelに変換させる ##
-                    ######################################################
+                    ##########################################################################
+                    ## Convert pixel information to labels in the range 0~1 for model input ##
+                    ##########################################################################
 
-                    ## p[1][0]は天体の位置であり、x_pix_minはfitsから切り出すpix情報
-                    ## width/4を足しているのは、画像処理の際に行うconvolutionにより耳ができるため
-                    ## 余分に大きく切り出しているため
+                    ## 'p[1][0]' represents the celestial body position, and 'x_pix_min' is the pixel information cropped from the FITS file.
+                    ## Adding 'width/4' accounts for convolution, which can create artifacts.
 
                     xmin_c = p[1][0] - (self.x_pix_min + self.width / 52)
                     ymin_c = p[1][1] - (self.y_pix_min + self.height / 52)
@@ -200,15 +199,14 @@ class label_caliculator(object):
 
     def check_list(self):
         """
-        回転や反転などaugmentationのバグなどで、
-        xminとxmax、yminとymaxの大小が反転してしまっている時がある。
-        その場合、モデル学習時にエラーが発生するため、その対処として行う。
+        There are times when the sizes of xmin and xmax, ymin and ymax are reversed due to bugs in augmentations such as rotation and inversion.
+        In that case, an error occurs during model training, so this is done as a countermeasure.
         """
         xmin_list_, ymin_list_, xmax_list_, ymax_list_, name_list_ = [], [], [], [], []
         for xy_num in range(len(self.xmin_list)):
-            #####################################
-            ## xminとxmax, yminとymaxの大小を調査 ##
-            #####################################
+            ##########################################################
+            ## Investigate the size of xmin and xmax, ymin and ymax ##
+            ##########################################################
 
             assert self.xmax_list[xy_num] > self.xmin_list[xy_num] and self.ymax_list[xy_num] > self.ymin_list[xy_num]
             xmin_list_.append(self.xmin_list[xy_num])

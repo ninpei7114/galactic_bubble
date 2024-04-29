@@ -150,7 +150,7 @@ class EarlyStopping_loss:
 
 
 def weights_init(m):
-    """モデルのパラメーターを初期化する
+    """Initialize the parameters of the model
 
     Args:
         m (_type_): _description_
@@ -162,18 +162,18 @@ def weights_init(m):
 
 
 def calc_location_each_region(detections, position, regions, conf_thre):
-    """bboxを全体マップでの座標に変換する
+    """Convert bbox to coordinates on the overall map
 
     Args:
-        detections (numpy array): モデルの出力にDetect関数を適用したもの
-        position (numpy array): 画像を切り出した際のpixel座標
-        regions (list): どのfitsファイルかを示すstrのlist
-        conf_thre (float): 0.3~0.8の数字
+        detections (numpy array) : The output of the model to which the Detect function has been applied
+        position (numpy array)   : Pixel coordinates when the image was cropped
+        regions (list)           : List of strings indicating which fits file it is
+        conf_thre (float)        : A number between 0.3 and 0.8
 
     Returns:
-        predict_bbox (list): bboxと切り出し座標から補正したマップ上の検出リング座標
-        scores (list): 検出リングのscore
-        wcs_regions (list): どのfitsファイルかを示すstrのlist
+        predict_bbox (list) : Detected bubble coordinates on the map corrected from bbox and cropping coordinates
+        scores (list)       : Score of the detected bubble
+        wcs_regions (list)  : List of strings indicating which fits file it is
     """
     predict_bbox = []
     scores = []
@@ -197,13 +197,13 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
     """_summary_
 
     Args:
-        region_dict (dictionary): 領域ごとのマップ上のリング位置情報とscoreを格納した辞書
-        Ring_CATALOGUE (pandas dataframe): MWPリングのカタログ
-        args (args): argparseの引数
+        region_dict (dictionary): A dictionary storing ring position information and score on the map for each region
+        Ring_CATALOGUE (pandas dataframe): MWP Catalog
+        args (args): argparse
 
     Returns:
-        mwp (pandas dataframe): Validation領域内のMWPリングカタログ
-        catalogue (pandas dataframe): wcs座標系に変換した検出リングの位置座標
+        mwp (pandas dataframe): Catalog of MWP rings within the validation region
+        catalogue (pandas dataframe): Position coordinates of detected rings converted to wcs coordinate system
     """
     target_catalogue = []
     target_catalogue_fits_path = []
@@ -247,16 +247,16 @@ def make_catalogue(region_dict, Ring_CATALOGUE, args):
 
 
 def calc_TP_FP_FN(target_catalogue, infer_catalogue, Rout, val_ring_catalogue, world="Galactic"):
-    """TP, FP, FNを計算する
+    """Calculate TP, FP, FN
 
     Args:
-        mwp (pandas dataframe): Validation領域内のMWPリングカタログ
-        infer (pandas dataframe): wcs座標系に変換した検出リングの位置座標
+        mwp (pandas dataframe): MWP catalog within the validation region
+        infer (pandas dataframe): Position coordinates of detected bubbles converted to wcs coordinate system
 
     Returns:
         TP (list): True Positive
         FP (list): False Positive
-        mwp_mask (list): MWPリングカタログのうち、検出されたものをTrueとしたリスト
+        mwp_mask (list): List where detected items from the MWP catalog are marked as True
     """
     TP = []
     FP = []
@@ -307,10 +307,10 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
     """推論結果を保存する関数
 
     Args:
-        args (args): argparseの引数
-        frame (pandas dataframe): 推論結果
-        save_name (str): 保存するファイル名
-        infer_result (bool, optional): 推論結果の場合はTrue. Defaults to False.
+        args (args)                   : Arguments from argparse
+        frame (pandas dataframe)      : Inference results
+        save_name (str)               : Filename to save
+        infer_result (bool, optional) : If it's an inference result, set to True. Defaults to False.
 
     """
     sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
@@ -386,24 +386,24 @@ def imaging_infer_result(args, frame, save_name, Rout, infer_result=False):
         data_view_rectangl(10, data_list).save(save_name)
 
 
-## Milky Way Projectのリングカタログと比較し、F1scoreを算出する
+## Compare with the ring catalog of the Milky Way Project and calculate the F1 score
 def calc_fscore_val(detections, position, regions, args, threshold=None, save=False, save_path=None):
-    """f1scoreを計算する
+    """Calculate the f1 score
 
     Args:
-        detections (numpy array): モデルの出力にDetect関数を適用したもの
-        position (numpy array): 画像を切り出した際のpixel座標
-        regions (list): どのfitsファイルかを示すstrのlist
-        args (args): argparseの引数
-        threshold (float, optional): 0.3~0.8の数字. Defaults to None.
-        save (bool, optional): Trueにすると推論結果を保存する. Defaults to False.
-        save_path (str, optional): 推論結果を保存するパス. Defaults to None.
+        detections (numpy array)    : The result of applying the Detect function to the model output
+        position (numpy array)      : Pixel coordinates when cropping the image
+        regions (list)              : A list of strings indicating which fits file
+        args (args)                 : Arguments from argparse
+        threshold (float, optional) : A number between 0.3 and 0.8. Defaults to None.
+        save (bool, optional)       : If True, it saves the inference results. Defaults to False.
+        save_path (str, optional)   : The path to save the inference results. Defaults to None.
 
     Returns:
-        F_score (float): f1score
-        Precision (float): Precision
-        Recall (float): Recall
-        conf_thre (float): 0.3~0.8の数字
+        F_score (float)    : f1score
+        Precision (float)  : Precision
+        Recall (float)     : Recall
+        conf_thre (float)  : A number between 0.3 and 0.8
     """
     if threshold is None:
         thresholds = np.arange(0.5, 0.96, 0.01)
@@ -420,12 +420,12 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
     for conf_thre_ in thresholds:
         predict_bbox, scores, wcs_regions = calc_location_each_region(detections, position, regions, conf_thre_)
         if len(predict_bbox) > 0:
-            ## 領域ごとの位置情報とscoreを格納する辞書を作成
+            ## Create a dictionary to store the location information and score for each region
             region_dict = {}
             for i in list(collections.Counter(wcs_regions).keys()):
                 region_dict[i] = [[], []]
 
-            ## 領域ごとのbboxとscoreを格納
+            ## Store the bbox and score for each region
             for p, s, w in zip(predict_bbox, scores, wcs_regions):
                 region_dict[w][0].append(p)
                 region_dict[w][1].append(s)
@@ -465,11 +465,11 @@ def calc_fscore_val(detections, position, regions, args, threshold=None, save=Fa
 
 
 def print_and_log(f, moji):
-    """printとlogを同時に行う
+    """Performs print and log simultaneously
 
     Args:
-        f (txtファイル): logを保存するファイル
-        moji (str): printとlogに出力する文字列
+        f (txt file) : File to save the log
+        moji (str)   : String to output to print and log
     """
     if isinstance(moji, list):
         for i in moji:
@@ -481,7 +481,7 @@ def print_and_log(f, moji):
 
 
 class management_loss:
-    """lossの管理を行うクラス"""
+    """This class manages loss"""
 
     def __init__(self):
         self.loc_l_val_s, self.conf_l_val_s = [], []
@@ -543,20 +543,20 @@ def write_train_log(
     epoch_start_time,
     args,
 ):
-    """epochごとのlogを出力する
+    """Output the log for each epoch
     Args:
-        f_log (txtファイル): logを保存するファイル
-        epoch (int): epoch数
-        each_loss_train (dictionary): trainのloc_lossとconf_loss
-        each_loss_val (dictionary): valのloc_lossとconf_loss
-        val_f1_score (float): valのf1_score
-        Precision (float): valのPrecision
-        Recall (float): valのRecall
-        val_conf_threshold (float): valのconf_threshold
-        epoch_start_time (float): epochの開始時間
+        f_log (txt file)             : File to save the log
+        epoch (int)                  : Number of epochs
+        each_loss_train (dictionary) : loc_loss and conf_loss of training
+        each_loss_val (dictionary)   : loc_loss and conf_loss of validation
+        val_f1_score (float)         : f1_score of validation
+        Precision (float)            : Precision of validation
+        Recall (float)               : Recall of validation
+        val_conf_threshold (float)   : conf_threshold of validation
+        epoch_start_time (float)     : Start time of the epoch
 
     Returns:
-        log_epoch (dictionary): epochごとのlog
+        log_epoch (dictionary): Log for each epoch
     """
     epoch_finish_time = time.time()
     avg_train_loss = each_loss_train["loc_loss"] + each_loss_train["conf_loss"]

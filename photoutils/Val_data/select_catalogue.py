@@ -6,10 +6,6 @@ import astroquery.vizier
 import numpy as np
 import pandas as pd
 
-"""
-リングのaugmentationパターンを作成するスクリプト
-"""
-
 
 def catalogue(choice, ring_select):
     if choice == "CH":

@@ -12,7 +12,7 @@ from utils.ssd_model import SSD, Detect
 
 
 def infer_test(model_path, args, val_size, val_best_confthre):
-    """l18の推論を行う関数
+    """Functions for l18 reasoning
 
     Args:
         model_path (str): path of the model to infer
@@ -31,7 +31,7 @@ def infer_test(model_path, args, val_size, val_best_confthre):
     detect = Detect(nms_thresh=0.45, top_k=500, conf_thresh=0.3)
 
     ################
-    ## データの作成 ##
+    ## Create Data ##
     ################
     if os.path.exists(f"{save_data_path}/bubble_dataset_test.tar"):
         os.remove(f"{save_data_path}/bubble_dataset_test.tar")
@@ -67,9 +67,9 @@ def infer_test(model_path, args, val_size, val_best_confthre):
         pin_memory=True,
     )
 
-    ##############
-    ## l18の推論 ##
-    ##############
+    ##########################
+    ## Infer of Test Region ##
+    ##########################
     net = SSD()
     net_weights = torch.load(model_path + "/earlystopping.pth")
     net.load_state_dict(net_weights["model_state_dict"])

@@ -66,11 +66,11 @@ class NonRing_sub(object):
 
         return cut_data_random_
 
-    # fitsの場所をnanにしたfitsを使う
+    # Use fits where the location of fits is set to nan
     def no_nan_ring(self):
         """
-        このすぐ下にcut_no_ring関数を使っている
-        というのも、この関数はnan判定するための物だから
+        この関数はnan判定する
+        上記のcut_no_ring関数と併用する
         """
 
         while True:
@@ -81,21 +81,6 @@ class NonRing_sub(object):
                 break
 
         return cut_data_random
-
-    ### nan処理をする
-    ### cut_no_ring関数と併用するため、importする時はno_nan関数とcut_no_ring関数を同時にする必要がある
-    ### no_nan関数で出てくるarrayは一つだけだから、for 文の中にこの関数を入れて使用する
-
-    # def GLON_LAT(self):
-    #     self.GLON_min, self.GLAT_min = self.w.all_pix2world(self.fits_data_shape_x, 0, 0)
-    #     self.GLON_max, self.GLAT_max = self.w.all_pix2world(0, self.fits_data_shape_y, 0)
-
-    #     # 主に銀中のfitsを扱う為の処理
-    #     # cut_no_ring関数でrandom uniformをするのだが、その時に大小関係をつける為に必要な処理
-    #     if self.GLON_min >= 358.0:
-    #         self.GLON_min = self.GLON_min - 360
-    #     else:
-    #         pass
 
 
 def gauss_func(x, a, mu, sigma, d):

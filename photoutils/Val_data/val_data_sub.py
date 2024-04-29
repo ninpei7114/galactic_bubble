@@ -3,16 +3,10 @@ import json
 import warnings
 import sys
 
-import cv2
 import numpy as np
 import pandas as pd
-import scipy.ndimage
-import torch
-from astropy.stats import sigma_clipped_stats
-from photutils.detection import DAOStarFinder
+
 from PIL import Image, ImageDraw
-from scipy import signal
-from torch.nn import functional as F
 
 sys.path.append("../")
 import processing

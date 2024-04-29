@@ -33,8 +33,8 @@ def norm_rp(data, nan_data_dim=None):
 
 def normalize_rp(array, r_header, g_header):
     """
-    入力: (y, x, 2 or 3)
-    出力: (y ,x, 2 or 3)
+    Input : (y, x, 2 or 3)
+    Output: (y ,x, 2 or 3)
     """
     gauss_list = []
     dims = array.shape[2]
@@ -78,10 +78,10 @@ def remove_peak(array, dim, r_resolution, g_resolution):
 
 def resize(data, size):
     """
-    sizeは、自由
-    今はy ,xは同じサイズだが、違うサイズにしたければ、タプルでsizeを入力するとよい
-    入力データ:（y, x, 2 or 3）
-    出力:（size ,size, 2 or 3）
+    Resize data to the specified size.
+
+    Input  :（y, x, 2 or 3）
+    Output :（size ,size, 2 or 3）
     """
     cut_data = np.swapaxes(data, 1, 2)
     cut_data = np.swapaxes(cut_data, 0, 1)
@@ -97,8 +97,8 @@ def resize(data, size):
 
 def norm_res(data, r_header, g_header):
     """
-    データを切り取り、
-    normalizeとresizeをする。
+    Cuts the data,
+    and performs normalization and resizing.
     """
     # shape_y = data.shape[0]
     # shape_x = data.shape[1]
@@ -112,12 +112,12 @@ def norm_res(data, r_header, g_header):
 
 def conv(obj_size, obj_sig, data):
     """
-    dataの入力サイズ↓
-    入力:（y ,x, 2 or 3）
-    出力:（size ,size, 2 or 3）
+    Input size of data↓
+    Input: (y, x, 2 or 3)
+    Output: (size, size, 2 or 3)
     -------------------------------
-    切り出したデータがobj_sizeより大きければ、smoothingをする
-    小さければ、そのまま返す。
+    If the cut-out data is larger than obj_size, perform smoothing.
+    If it's smaller, return it as is.
     """
 
     if data.shape[0] > obj_size:
@@ -141,7 +141,7 @@ def conv(obj_size, obj_sig, data):
 
 
 def remove_nan(data1):
-    # fits???????????????max?????s
+
     mask1_10 = data1 == data1
     mask1_1010 = np.where(mask1_10, 0, 1)
     label1, name1 = scipy.ndimage.label(mask1_1010)

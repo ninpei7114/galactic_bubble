@@ -15,16 +15,16 @@ from PIL import Image
 
 
 def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_data_path):
-    """trainingに使用するRingを作成する関数
+    """Function to create Ring data for training.
 
     Args:
-        savedir_name (str): labelとring_pdfを保存するpath
-        train_cfg (dictionary): augmentationの種類
-        args (args): args
-        train_l (list): trainingに使用するfitsのリスト
-        trans_rng (numpy default_rng): numpy default_rng
-        epoch (int): epochの上限
-        save_data_path (str): 学習データを保存するpath
+        savedir_name (str)            : Path to save labels and ring PDFs.
+        train_cfg (dictionary)        : Types of augmentations.
+        args (args)                   : args
+        train_l (list)                : List of FITS files for training.
+        trans_rng (numpy default_rng) : numpy default_rng
+        epoch (int)                   : Maximum epoch.
+        save_data_path (str)          : Path to save training data.
 
     Returns:
         None
@@ -56,9 +56,9 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
             axis=2,
         )
 
-        #####################################
-        ## fits範囲のChurchwellカタログを取得 ##
-        #####################################
+        ##############################################
+        ## Obtain MWP catalog within the fits range ##
+        ##############################################
         a = data.shape[0]
         b = data.shape[1]
         w = astropy.wcs.WCS(spitzer_rfits.header)
@@ -73,7 +73,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
             x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
                 row, GLON_min, GLON_max, GLAT_min, GLAT_max, 1.7
             )
-            if flag and x_pix_min >= 0 and y_pix_min >= 0:  # calc_pix時に100回試行してもできなかった場合の場合分け
+            if flag and x_pix_min >= 0 and y_pix_min >= 0:  # Handle cases where calc_pix fails even after 100 attempts
                 label_cal.find_cover()
                 label_cal.make_label(Ring_catalogue)
 
@@ -88,9 +88,9 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                 if np.isnan(res_data.sum()) or np.std(res_data[:, :, 0]) < 1e-9:
                     pass
                 else:
-                    ########################
-                    ## 普通に切り出したリング ##
-                    ########################
+                    ############################
+                    ## Regularly cropped ring ##
+                    ############################
                     info = label_cal.check_list()
                     info["fits"] = fits_path
                     count = make_png_and_json(
@@ -119,11 +119,11 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                         "trans_rg": trans_rng,
                     }
 
-                    ###### 並行移動 ######
+                    ###### translation ######
                     if translation:
                         fl, trans_data, trans_info = ring_augmentation.translation(**trans_params)
-                        ## データやlabelの作成に不備があれば、fl=False(例えば、xmin<0や、xmin=xmaxなど)
-                        ## 問題がなければ、fl=True
+                        ## If there are issues with creating data or labels (e.g., xmin < 0 or xmin = xmax),
+                        ## set fl=False. Otherwise, set fl=True.
                         if fl:
                             trans_data_ = trans_data.copy()
                             count = make_png_and_json(
@@ -133,7 +133,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                 trans_info,
                             )
                             frame_mwp_train.append(trans_info)
-                    ###### 回転 ######
+                    ###### rotate ######
                     if rot:
                         if translation:
                             if fl:
@@ -158,7 +158,7 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                                     rotate_info,
                                 )
                                 frame_mwp_train.append(rotate_info)
-                    ###### 上下反転 ######
+                    ###### flip ######
                     if flip:
                         if translation:
                             if fl:
@@ -198,9 +198,9 @@ def make_ring(savedir_name, train_cfg, args, train_l, trans_rng, epoch, save_dat
                             frame_mwp_train.append(lr_info)
                             frame_mwp_train.append(ud_info)
 
-    ##################################
-    ## 学習に用いるリングのpdf画像を作成 ##
-    ##################################
+    ###############################################################
+    ## Create a pdf image of the ring to be used in the training ##
+    ###############################################################
     frame_mwp_train = pd.DataFrame(frame_mwp_train)
     frame_mwp_train["id"] = [i for i in range(len(frame_mwp_train))]
     choice_ind = np.sort(trans_rng.choice(count, size=90, replace=False))

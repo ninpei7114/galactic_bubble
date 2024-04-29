@@ -37,7 +37,7 @@ def append_data(data, info, data_list, frame):
 
 
 def main(args):
-    """Validationデータを作成する
+    """Create validation data
 
     Args:
         args (argparser): argparser
@@ -45,8 +45,8 @@ def main(args):
     example command:
     >>> python make_val_data.py /dataset/spitzer_data/
     """
-    ## 各領域ごとにVal-Ringを作成する
-    ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+    ## Create Val-Ring for each region
+    ## 'spitzer_29400+0000_rgb' is not used because there is hardly any 8µm data
     # fmt: off
     val_l = [
     'spitzer_00300+0000_rgb','spitzer_00600+0000_rgb','spitzer_00900+0000_rgb','spitzer_01200+0000_rgb',
@@ -65,14 +65,14 @@ def main(args):
     os.makedirs(f"{args.savedir_name}/cut_val_png/", exist_ok=True)
     os.makedirs(f"{args.savedir_name}/cut_val_png/region_val_png", exist_ok=True)
 
-    ## choice catalogue from 'CH' or 'MWP'
+    ## Choose catalogue from 'CH' or 'MWP'
     choice = "MWP"
     Ring_CATALOGUE = select_catalogue.catalogue(choice, ring_select=True)
     obj_sig = 1 / (2 * (np.log(2)) ** (1 / 2))
 
-    #####################
-    ## Val-Ring作成開始 ##
-    #####################
+    #############################
+    ## Start creating Val-Ring ##
+    #############################
     pbar = tqdm(range(len(val_l)))
     for i in pbar:
         fits_path = val_l[i]
@@ -123,9 +123,9 @@ def main(args):
         for kk in range(len(size_list)):
             size = size_list[kk]
 
-            ################
-            ## indexの計算 ##
-            ################
+            #####################
+            ## Calculate index ##
+            #####################
             cut_shape = (size, size)
             slide_pix = (int(round(cut_shape[0] / fragment)), int(round(cut_shape[1] / fragment)))
             shape = data.shape
@@ -140,9 +140,9 @@ def main(args):
                 ind_array.append([y, x])
             ind_array = np.array(ind_array)
 
-            ##########################
-            ## Validationデータの作成 ##
-            ##########################
+            #############################
+            ## Create Validation Data  ##
+            #############################
             ring_data, ring_info = imaging_validation.cut_data(ind_array, cut_shape[0])
             if len(ring_info) > 0:
                 all_size_ring.append(ring_data)

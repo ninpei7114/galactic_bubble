@@ -66,9 +66,9 @@ def parse_args():
     return parser.parse_args()
 
 
-# SSDの学習
+# Training of SSD
 def main(args):
-    """SSDの学習を行う。
+    """Perform training of SSD.
 
     :Example command:
     >>> python train_main.py /dataset/spitzer_data --savedir_path /workspace/webdataset_weights/Ring_selection_compare/ \
@@ -90,7 +90,7 @@ def main(args):
     for remove_size in args.Val_remove_size_list:
         default_val_size = default_val_size[default_val_size != remove_size]
 
-    ## 上下反転、回転、縮小、平行移動の4パターンの組み合わせでaugmentationをする。
+    ## Perform augmentation by combining 4 patterns of flipping, rotating, scaling, and translating.
     flip_list = [True]  # , False]
     rotate_list = [True]  # , False]
     scale_list = [False]
@@ -147,7 +147,7 @@ def main(args):
         print_and_log(f_log, f"使用デバイス： {device}")
 
         net = SSD()
-        ## パラメータを初期化
+        ## Initialise parameters
         for net_sub in [net.vgg, net.extras, net.loc, net.conf]:
             net_sub.apply(weights_init)
         net.to(device)
@@ -175,7 +175,7 @@ def main(args):
         ####################
         val_best_confthre = train_model(**train_model_params)
 
-        # l18領域の推論
+        # Infer the Test region.
         if args.test_infer_false:
             f_score, pre, re, conf_thre = test_infer.infer_test(name, args, default_val_size, val_best_confthre)
             print_and_log(

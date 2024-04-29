@@ -3,56 +3,63 @@ import copy
 import astroquery.vizier
 import numpy as np
 import pandas as pd
+import processing
 from skimage import transform
 
-import processing
-
 """
-リングのaugmentationパターンを作成するスクリプト
+Script to create ring augmentation patterns
 """
 
 
 def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_catalogue, data, label_cal, trans_rg):
     """
-    並行移動augmentationに用いる関数
-    画像内でランダムな位置（シード値固定）にRingが入るように切り出す。
+    Function used for parallel translation augmentation.
+    Cuts out so that the Ring is in a random position (seed value fixed) within the image.
 
-    (引数)
-    GLON_new_min, GLON_new_max, GLAT_min, GLAT_max : 使用するfitsの両端の銀径銀緯座標
-    Ring_catalogue       : fits内 の Ringのカタログ (Milky Way Project か Chuchwell のどちらか)
-    data      : fitsのデータ
-    label_cal : labelを求めるための関数（事前にインスタンス化している）
-    m2_size   : カタログに登録されている Ringの半径 の 何倍で切り出すかのランダム値
-    trans_rg  : default_rng
+    Parameters
+    ----------
+    row : row of the Ring catalogue
+    fits_path : path to the fits file
+    GLON_min, GLON_max, GLAT_min, GLAT_max : Galactic longitude and latitude coordinates at both ends of the fits to be used
+    Ring_catalogue : Ring catalogue in fits (either Milky Way Project or Churchwell)
+    data : fits data
+    label_cal : function to calculate the label (pre-instantiated)
+    trans_rg : default_rng
+
+    Returns
+    -------
+    True, pi_conv, info : if the Ring is successfully cut out
+    False, 0, 0 : if the Ring is not successfully cut out
+
     """
 
-    ####################################################################
-    ## カタログに登録されている中心座標から半径の何倍で切り出すかをランダムに計算 ##
-    ####################################################################
-    ## カタログに登録されている情報は銀径銀緯なため、
-    ## pix情報に変換する必要がある。
-    ## ↓ この状態では、Ringは画像の中心に位置したまま。
+    ###################################################################################################################
+    ## Randomly calculate how many times the radius from the center coordinates registered in the catalog to cut out ##
+    ###################################################################################################################
+    ## The information registered in the catalog is in galactic longitude and latitude,
+    ## so it needs to be converted to pix information.
+    ## ↓ In this state, the bubble is still located in the center of the image.
 
     random_num = 1 / trans_rg.uniform(0.17, 0.58)
     x_pix_min, y_pix_min, x_pix_max, y_pix_max, flag = label_cal.calc_pix(
         row, GLON_min, GLON_max, GLAT_min, GLAT_max, random_num
     )
 
-    ################################################
-    ## Ringを300 x 300の画像内に、ランダムに移動させる ##
-    ################################################
-    ## calc_pix時に400回試行してもできなかった場合の場合分け
-    ## 例えば、Ringがfitsの端に位置する場合は、上手く切り取れない場合がある。
+    #####################################################
+    ## Move the Ring randomly within a 300 x 300 image ##
+    #####################################################
+    ## Case differentiation when it was not possible to do it even after 400 trials at the time of calc_pix
+    ## For example, if the Ring is located at the edge of the fits, it may not be able to cut out well.
 
     if flag:
-        ## 画像処理のconvolutionをする際に耳ができるため、
-        ## 左右上下にwidth, heightの半分の大きさ分を余分に切り出している
+        ## Because ears can be created when doing image processing convolution,
+        ## it cuts out an extra half the size of width, height on the left, right, top, and bottom
         extra_width = (x_pix_max - x_pix_min) * 2 / 52
-        ## rはRingの半径pixを求めている
+        ## r is finding the radius pix of the Ring
         r = int(((x_pix_max - extra_width) - (x_pix_min + extra_width)) / (2 * random_num))
 
-        ## Ringが画像にはみ出さないように、切り出す位置をずらし、
-        ## 画像内のRingの位置を変える。
+        ## So that the Ring does not protrude from the image, shift the position to cut out,
+        ## Change the position of the Ring in the image.
         x_offset = trans_rg.uniform(-(random_num - 1) * r, (random_num - 1) * r)
         y_offset = trans_rg.uniform(-(random_num - 1) * r, (random_num - 1) * r)
         x_pix_min = x_pix_min + int(x_offset)
@@ -65,10 +72,10 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
 
         else:
             ##################################################
-            ## 切り出す範囲にある他のRingのlabelとデータの画像処理 ##
+            ## Image processing of other bubble's label and data in the range to cut out ##
             ##################################################
 
-            ## 切り出す範囲にある他のRingを見つける
+            ## Find other Rings in the range to cut out
             pix_info = {
                 "x_pix_min": x_pix_min,
                 "x_pix_max": x_pix_max,
@@ -78,7 +85,7 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
             label_cal.find_cover(pix_info)
             sig1 = 1 / (2 * (np.log(2)) ** (1 / 2))
 
-            ## データを切り出し、conv → normalize → resize
+            ## Cut out the data, conv → normalize → resize
             c_data = data[int(y_pix_min) : int(y_pix_max), int(x_pix_min) : int(x_pix_max)].view()
             cut_data = c_data.copy()
             pi = processing.conv(300, sig1, cut_data)
@@ -93,7 +100,7 @@ def translation(row, fits_path, GLON_min, GLON_max, GLAT_min, GLAT_max, Ring_cat
                 return False, 0, 0
 
             else:
-                ## 学習データに用いるlabelを作成する。
+                ## Create a label to be used for training data.
                 label_cal.make_label(Ring_catalogue)
                 info = label_cal.check_list()
                 info["fits"] = fits_path
@@ -140,12 +147,13 @@ def rotate_data(deg, trans_data, trans_info):
 
 def flip_data(trans_data, trans_info):
     """
-    リングを上下左右反転させる。
-    ターゲットのリング以外の割り込みリングもあるため、
-    flipもラベルの修正が必要
+    Flip the rings vertically and horizontally.
+    While the labels remain unchanged for the target ring when flipped vertically,
+    there are also interfering rings other than the target ring,
+    so label adjustments are necessary for flips.
     """
 
-    ## 上下
+    ## Vertical flip
     tempo = copy.deepcopy(trans_data)
     ud = np.flipud(tempo)
 
@@ -178,7 +186,7 @@ def flip_data(trans_data, trans_info):
         "ymax": ud_ymax_list,
     }
 
-    ## 左右
+    ## Horizontal flip
     tempo = copy.deepcopy(trans_data)
     lr = np.fliplr(tempo)
 

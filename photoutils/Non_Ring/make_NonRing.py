@@ -16,8 +16,8 @@ sys.path.append("../")
 import processing
 
 """
-webdatasetを使用するための、Non-Ringのpng画像を作成する
-さらに、json形式のlabelも作成する
+Create Non-Ring png images for use with webdataset
+Also, create labels in json format
 
 example command:
 python make_NonRing.py /home/cygnus/jupyter/リング研究/fits_data/ring_to_circle_nan_fits_CHrank3/ /home/cygnus/jupyter/workspase/
@@ -35,7 +35,7 @@ def parse_args():
 
 
 def main(args):
-    """Non-Ringのpng画像を作成する
+    """Create Non-Ring png images
 
     Args:
         args (argparse): argparse
@@ -43,11 +43,9 @@ def main(args):
     example command:
     >>> python make_NonRing.py /workspace/fits_data/ring_to_circle_nan_fits /workspace/
     """
-    ################################################
-    ## 領域ごとに作るのか、デフォルトの領域で作るのか選択 ##
-    ################################################
-    ## 各領域ごとにNon-Ringを作成する
-    ## 'spitzer_29400+0000_rgb'は、8µmのデータが全然ないため使用しない
+
+    ## Create Non-Ring for each region
+    ## 'spitzer_29400+0000_rgb' is not used because there is hardly any 8µm data
     # fmt: off
     all_l = [
         "spitzer_00300+0000_rgb", "spitzer_00600+0000_rgb", "spitzer_00900+0000_rgb", "spitzer_01200+0000_rgb",
@@ -70,9 +68,9 @@ def main(args):
     iter = 3000
     fits_path = pathlib.Path(args.fits_path)
     pbar = tqdm(range(len(all_l)))
-    #####################
-    ## Non-Ring作成開始 ##
-    #####################
+    #############################
+    ## Start creating Non-Ring ##
+    #############################
     start = time.time()
     for k in pbar:
         path = all_l[k]
@@ -88,8 +86,6 @@ def main(args):
         )
 
         NonRing_sub_c = NonRing_sub.NonRing_sub(header, data, random_uni)
-        # GLON_LAT関数でGLON_new_min1, GLON_new_max1, GLAT_new_min1, GLAT_new_max1を出す
-        # NonRing_sub_c.GLON_LAT(header)
 
         for i in range(iter):
             cut_data = NonRing_sub_c.no_nan_ring()
@@ -104,10 +100,9 @@ def main(args):
             )
             pil_image = Image.fromarray(np.uint8(res_data * 255))
 
-            #########################
-            ## 保存ディレクトリを選択 ##
-            #########################
-            ## 領域ごとに保存していく
+            ############################################
+            ## Save images and labels for each region ##
+            ############################################
             pil_image.save(f"{savedir_name}/{path}/NonRing_{k * iter + i}.png")
             with open(f"{savedir_name}/{path}/NonRing_{k * iter + i}.json", "w") as f:
                 json.dump([], f, indent=4)

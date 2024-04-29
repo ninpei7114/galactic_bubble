@@ -7,7 +7,7 @@ import torch
 import webdataset
 
 
-## webdatasetのために作成
+## Function for webdataset
 def od_collate_fn(batch):
     targets = []
     imgs = []
@@ -19,7 +19,7 @@ def od_collate_fn(batch):
     return imgs, targets
 
 
-## webdatasetのために作成
+## Function for webdataset
 def od_collate_fn_validation(batch):
     targets = []
     imgs = []
@@ -42,7 +42,7 @@ def od_collate_fn_validation(batch):
     return imgs, targets, offset, region_info
 
 
-## webdatasetのために作成
+## Function for webdataset
 def preprocess(sample):
     img, json = sample
     return np.array(img) / 255, [
@@ -50,7 +50,7 @@ def preprocess(sample):
     ]
 
 
-## webdatasetのためのval_preprocess
+## validation preprocess for webdataset
 def preprocess_validation(sample):
     img, json, key = sample
     return (
@@ -63,14 +63,14 @@ def preprocess_validation(sample):
     )
 
 
-# 無限イテレータ
+# Infinite Iterator
 def InfiniteIterator(loader):
     iter = loader.__iter__()
     while True:
         try:
             x = next(iter)
         except StopIteration:
-            iter = loader.__iter__()  # 終わっていたら最初に戻る
+            iter = loader.__iter__()  # If the iterator has no more items, reset it to the beginning
             x = next(iter)
         yield x
 
@@ -105,7 +105,7 @@ class NegativeSampler(torch.utils.data.sampler.Sampler):
 
 
 def make_training_dataloader(Training_data_path, train_Ring_num, args, nonring_num, NonRing_class):
-    ## Training Ring の Dataloader を作成
+    ## Create Dataloader for Training Ring Data
     Training_Ring_web = (
         webdataset.WebDataset(f"{Training_data_path}/bubble_dataset_train_ring.tar")
         .shuffle(10000000)
@@ -121,7 +121,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, nonring_n
         pin_memory=True,
     )
 
-    ## Training NonRing の Dataloader を作成
+    ## Create Dataloader for Training NonRing Data
     # aug_num = np.array(args.NonRing_aug_num) + 1
     NonRing_rsample = train_Ring_num / nonring_num
     NonRing_web_list = (
@@ -137,7 +137,7 @@ def make_training_dataloader(Training_data_path, train_Ring_num, args, nonring_n
         NonRing_web_list, collate_fn=od_collate_fn, batch_size=args.NonRing_mini_batch, num_workers=2, pin_memory=True
     )
 
-    return dl_ring_train, NonRing_dl_l  # NonRingを無限にループするイテレータへ
+    return dl_ring_train, NonRing_dl_l  # to infinite iterator for NonRing
 
 
 def make_validatoin_dataloader(Validation_data_path, args):
