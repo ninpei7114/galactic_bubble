@@ -124,7 +124,7 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
 
     1. **Run train_main.py in the `photoutils_clustering`**:
 
-        Run the `train_main.py`. Replace `class_num` with the determined number of classes. `NonRing_remove_class_list` and `NonRing_aug_num` are also replaced with a predetermined value:
+        Replace `class_num` with the determined number of classes. `NonRing_remove_class_list` and `NonRing_aug_num` are also replaced with a predetermined value:
 
         ```bash
         cd photoutils_clustering
