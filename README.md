@@ -47,21 +47,24 @@ To create Non-Ring data, you can refer to the `mak_circle_nan_fits.py` script in
 
 1. **Create fits where the spitzer bubble position is Nan to make Non-Ring data**
 
-    Run `mak_circle_nan_fits.py`. Replace `path_of_spitzer_data` with the path to your spitzer data, and `path_of_Nanfits_file` with the desired path for the output fits:
+    Run `mak_circle_nan_fits.py`. Replace `PATH_TO_SPITZER_DATA` with the path to your spitzer data, and `PATH_TO_NANFITS_FILE` with the desired path for the output fits:
 
     ```bash
     cd make_fits
-    python mak_circle_nan_fits.py path_of_spitzer_data path_of_Nanfits_file
+    export PATH_TO_SPITZER_DATA = /home/filament/jupyter/fits_data/spitzer_data
+    export PATH_TO_NANFITS_FILE = /home/filament/jupyter/fits_data/ring_to_circle_nan_fits
+    python mak_circle_nan_fits.py $PATH_TO_SPITZER_DATA $PATH_TO_NANFITS_FILE
     ```
     This will execute the script and generate fits where the spitzer bubble position is Nan.
 
 2. **Create NonRing data**
 
-    Run `make_NonRing.py`. Replace `path_of_Nanfits_file` with path of created fits where the location of the spitzer bubble is Nan, and `path_of_output_file` with the desired path for the output Non-Ring data:
+    Run `make_NonRing.py`. Replace `PATH_TO_NANFITS_FILE` with path of created fits where the location of the spitzer bubble is Nan, and `PATH_TO_OUTPUT_NONRING_DATA` with the desired path for the output Non-Ring data:
 
     ```bash
     cd photoutils/Non_Ring
-    python make_NonRing.py path_of_Nanfits_file path_of_output_file
+    export PATH_TO_OUTPUT_NONRING_DATA = /home/filament/jupyter/workspace/NonRing_png
+    python make_NonRing.py $PATH_TO_NANFITS_FILE $PATH_TO_OUTPUT_NONRING_DATA
     ```
 
     <details><summary> <span style="color: blue; ">Non-Ring Clustering</span></summary>
@@ -71,15 +74,16 @@ To create Non-Ring data, you can refer to the `mak_circle_nan_fits.py` script in
         Start by making a copy of the Non-Ring data you created above. This is to ensure that the original data remains unchanged during the clustering process. You can do this using a command like:
 
         ```bash
-        cp -r /path/to/original/Non_Ring /path/to/copy/Non_Ring
+        export PATH_TO_NONRING_DATA_COPY = /home/filament/jupyter/workspace/NonRing_png_copy
+        cp -r $PATH_TO_OUTPUT_NONRING_DATA $PATH_TO_NONRING_DATA_COPY
         ```
 
     2. **NonRing clustering**
 
         Run the clustering.py script to perform clustering on the Non-Ring data:
 
-        ```python
-        python clustering.py class_num model_version /path/to/copy/Non_Ring
+        ```bash
+        python clustering.py class_num model_version $PATH_TO_NONRING_DATA_COPY
         ```
     </details>
 
@@ -89,9 +93,10 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
 
 1. **Create Validation data**
 
-    Run `make_val_data.py`. Replace `path_of_spitzer_data` with the path to your spitzer data, and `path_of_output_file` with the desired path for the output Validation data:
+    Run `make_val_data.py`. Replace `PATH_TO_SPITZER_DATA` with the path to your spitzer data, and `PATH_TO_OUTPUT_VALIDATION_DATA` with the desired path for the output Validation data:
     ```bash
-    python make_val_data.py path_of_spitzer_data path_of_output_file
+    export PATH_TO_OUTPUT_VALIDATION_DATA = /home/filament/jupyter/workspace/cut_val_png
+    python make_val_data.py $PATH_TO_SPITZER_DATA $PATH_TO_OUTPUT_VALIDATION_DATA
     ```
 
 
