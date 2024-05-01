@@ -1,6 +1,7 @@
 # 深層学習を用いた Spitzer bubble の検出
 
 Paper URL : ~~
+
 日本語話者の方は、japanese Branchを参照ください。
 
 <p style="display: inline">
