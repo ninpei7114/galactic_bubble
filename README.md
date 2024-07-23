@@ -17,7 +17,7 @@ We propose a deep learning model that can detect Spitzer bubbles comprehensively
 
 
 ## <span style="color: green; ">Environment</span>
-To set up the Docker environment for this project, follow these steps:
+To establish the Docker environment for this project, follow these steps:
 
 1. **Git clone this repository**
 
@@ -29,7 +29,7 @@ To set up the Docker environment for this project, follow these steps:
 
     This will create a Docker image with the tag `cuda-python`.
 
-3. **Run a Docker container based on the image you just built. Change pathes of `docker-run.sh`.**
+3. **Run a Docker container based on the image you just built. Change pathes in `docker-run.sh`.**
 
     ```bash
     ./docker-run.sh
