@@ -1,4 +1,4 @@
-# 深層学習を用いた Spitzer bubble の検出
+# Detection of Spitzer Bubbles Using Deep Learning
 
 Paper URL : ~~
 
@@ -13,8 +13,7 @@ Paper URL : ~~
 
 ## Abstract
 
-我々は、近赤外線データから Spitzer Bubble を検出できる深層学習モデルを提案する。モデルは、Single Shot MultiBox Detector を使用し、学習データには Milky Way Project (MWP)の Spitzer Bubble を用いた。我々は、 開発したモデルを天の川銀河の観測領域や、Cygnus X・LMC に適用し、MWP の未検出 Bubble の検出を行っ た。その結果、開発したモデルは、MWP-Bubble の中でも 8μm が 24μm を内包した Bubble では98%の検出率となり、新たに Bubble と判断した天体においても Spitzer Bubble の特徴をよく捉えた天体であることが確認できた。また、検出時間も MWP と比較して非常に短い時間に短縮することができ、科学的発見のペースを加速する大きな機会を提供することができる。
-
+We propose a deep learning model that can detect Spitzer bubbles comprehensively using two-wavelength near-infrared data acquired by the Spitzer Space Telescope. The model is based on the Single Shot MultiBox Detector as the object detection model and uses Spitzer bubbles detected by the Milky Way Project (MWP-Bubble) as the training and validation data. We found that only MWP bubbles with clear bubble structures should be used for the training data to improve the performance, and these data are subjected to normalization and data augmentation. We also use the data without bubbles to reduce the bias in the dataset by combining two methods: negative sampling and clustering. The model was optimized by hyperparameter search using Bayesian optimization. Applying this model to a test region of the galactic plane resulted in a 98 % detection rate for MWP-bubbles with 8 µm emission clearly encompassing 24 µm emission. In addition, we also tried to detect bubbles in the wide area of 1° ≦ |l| ≦ 65°, |b| ≦ 1°, including the training and validation regions, and the model detected 3006 bubbles, of which 1413 were newly detected. We also attempted to detect bubbles in the high-mass star-forming region Cygnus $X$ and in the external galaxies Large Magellanic Cloud (LMC) and NGC 628.  As a result, the model proved to be effective for detecting Spitzer bubbles in external galaxies, while it also detected Mira-type variable stars and other objects that are difficult to distinguish from Spitzer bubbles for compact sources. The detection process takes only a few hours, demonstrating the efficiency of the model in detecting bubble structures. The method used for the Spitzer bubble detection is also applied to detect shell-like structures observed only in the 8 µm emission band, and we detected 469 shell-like structures in the LMC and 143 in NGC 628.
 
 
 ## <span style="color: green; ">Environment</span>
