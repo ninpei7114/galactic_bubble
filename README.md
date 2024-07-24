@@ -41,10 +41,12 @@ Make sure you have Docker installed on your machine before following these steps
 
 ## <span style="color: green; ">Datasets</span>
 
-#### Make Non-Ring data
-To create Non-Ring data, you can refer to the `mak_circle_nan_fits.py` script in the `make_fits` folder. Follow these steps:
+#### Make Non-Bubble data
+About Non-Bubble data, see subsection 3.2 in the paper.
 
-1. **Create fits where the spitzer bubble position is Nan to make Non-Ring data**
+To create Non-Bubble data, please run `mak_circle_nan_fits.py` script in the `make_fits` folder following these steps.
+
+1. **Create fits where the Spitzer bubble position is Nan to make Non-Bubble data**
 
     Run `mak_circle_nan_fits.py`. Replace `PATH_TO_SPITZER_DATA` with the path to your spitzer data, and `PATH_TO_NANFITS_FILE` with the desired path for the output fits:
 
@@ -56,30 +58,30 @@ To create Non-Ring data, you can refer to the `mak_circle_nan_fits.py` script in
     ```
     This will execute the script and generate fits where the spitzer bubble position is Nan.
 
-2. **Create NonRing data**
+2. **Create Non-Bubbl data**
 
-    Run `make_NonRing.py`. Replace `PATH_TO_NANFITS_FILE` with path of created fits where the location of the spitzer bubble is Nan, and `PATH_TO_OUTPUT_NONRING_DATA` with the desired path for the output Non-Ring data:
+    Run `make_NonRing.py`. Replace `PATH_TO_NANFITS_FILE` with path of created fits where the location of the spitzer bubble is Nan, and `PATH_TO_OUTPUT_NONBUBBLE_DATA` with the desired path for the output Non-Bubble data:
 
     ```bash
     cd photoutils/Non_Ring
-    export PATH_TO_OUTPUT_NONRING_DATA = /home/filament/jupyter/workspace/NonRing_png
-    python make_NonRing.py $PATH_TO_NANFITS_FILE $PATH_TO_OUTPUT_NONRING_DATA
+    export PATH_TO_OUTPUT_NONBUBBLE_DATA = /home/filament/jupyter/workspace/NonRing_png
+    python make_NonRing.py $PATH_TO_NANFITS_FILE $PATH_TO_OUTPUT_NONBUBBLE_DATA
     ```
 
-    <details><summary> <span style="color: blue; ">Non-Ring Clustering</span></summary>
+    <details><summary> <span style="color: blue; ">Non-Bubble Clustering</span></summary>
 
-    1. **Copy the NonRing data**
+    1. **Copy the Non-Bubble data**
 
-        Start by making a copy of the Non-Ring data you created above. This is to ensure that the original data remains unchanged during the clustering process. You can do this using a command like:
+        Start by making a copy of the Non-Bubble data you created above. This is to ensure that the original data remains unchanged during the clustering process. You can do this using a command like:
 
         ```bash
-        export PATH_TO_NONRING_DATA_COPY = /home/filament/jupyter/workspace/NonRing_png_copy
-        cp -r $PATH_TO_OUTPUT_NONRING_DATA $PATH_TO_NONRING_DATA_COPY
+        export PATH_TO_NONBUBBLE_DATA_COPY = /home/filament/jupyter/workspace/NonRing_png_copy
+        cp -r $PATH_TO_OUTPUT_NONRING_DATA $PATH_TO_NONBUBBLE_DATA_COPY
         ```
 
-    2. **NonRing clustering**
+    2. **Non-Bubble clustering**
 
-        Run the clustering.py script to perform clustering on the Non-Ring data:
+        Run the clustering.py script to perform clustering on the Non-Bubble data:
 
         ```bash
         python clustering.py class_num model_version $PATH_TO_NONRING_DATA_COPY
@@ -157,6 +159,6 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
     </details>
 
 ### Acknowledgement
-I would like to thank the members of FUGIN-AI for their comments on this research. I am grateful to Nakatani Shuyo / Cybozu Labs Inc. for his careful assistance on this code.
+I would like to thank all the FUGIN-AI members who were involved in this study, and I would also like to thank Shota Ueda for his generous support. I am grateful to Nakatani Shuyo / Cybozu Labs Inc. for his careful assistance on this code.
 
-This research is supported by the National Institutes of Natural Sciences (NINS), Japan, through the inter-disciplinary collaboration project ”Reconstruction and Elucidation of the 3-D Spatial Structure of the Milky Way Galaxy Using Large-scale Molecular Cloud Data and Machine Learning / Elucidation of the 3-D Spatial Structure of the Milky Way Galaxy Based on Machine Learning and Deep Learning”.
+This work was supported by the 'Young interdisciplinary collaboration project' in the National Institutes of Natural Sciences (NINS), Japan. This work was also supported by JST SPRING, Grant Number JPMJSP2139.
