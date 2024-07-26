@@ -50,7 +50,7 @@ To create Non-Bubble data from Fits data, it is first necessary to generate fits
 
 1. **Create fits where the area the MWP-Bubble exists is filled with NaN**
 
-    Run `mak_circle_nan_fits.py`. Please change `PATH_TO_SPITZER_DATA` to the path of your spitzer data, and `PATH_TO_NANFITS_FILE` to the folder where the new fits will be created. If you do not have the Spitzer data, please contact us at the e-mail address in the paper.
+    Run `mak_circle_nan_fits.py`. Please replace `PATH_TO_SPITZER_DATA` with the path of your spitzer data, and `PATH_TO_NANFITS_FILE` with the folder where the new fits will be created. If you do not have the Spitzer data, please contact us at the e-mail address in the paper.
 
     ```bash
     cd make_fits
@@ -62,7 +62,7 @@ To create Non-Bubble data from Fits data, it is first necessary to generate fits
 
 2. **Create Non-Bubble data**
 
-    Run `make_NonRing.py`. Please change `PATH_TO_NANFITS_FILE` to the path of the fits filled with NaN in the area of the MWP-Bubble, and `PATH_TO_OUTPUT_NONBUBBLE_DATA` to the folder where the created Non-Bubble data is saved, respectively.
+    Run `make_NonRing.py`. Please replace `PATH_TO_NANFITS_FILE` with the path of the fits filled with NaN in the area of the MWP-Bubble, and `PATH_TO_OUTPUT_NONBUBBLE_DATA` with the folder where the created Non-Bubble data is saved, respectively.
 
     ```bash
     cd photoutils/Non_Ring
@@ -72,9 +72,10 @@ To create Non-Bubble data from Fits data, it is first necessary to generate fits
 
     <details><summary> <span style="color: blue; ">Non-Bubble Clustering</span></summary>
 
-    1. **Copy the Non-Bubble data**
+    Please refer to subsection 4.3 of the paper for more details on clusterstering.
+    1. **Copy the created Non-Bubble data**
 
-        Start by making a copy of the Non-Bubble data you created above. This is to ensure that the original data remains unchanged during the clustering process. You can do this using a command like:
+        Make a copy of the Non-Bubble data created above, to ensure that the original data is not altered by clustering. If your OS is Linux, you can do this with the cp command.
 
         ```bash
         export PATH_TO_NONBUBBLE_DATA_COPY = /home/filament/jupyter/workspace/NonRing_png_copy
@@ -83,7 +84,7 @@ To create Non-Bubble data from Fits data, it is first necessary to generate fits
 
     2. **Non-Bubble clustering**
 
-        Run the clustering.py script to perform clustering on the Non-Bubble data:
+        Run `clustering.py`. Please specify in `PATH_TO_NONRING_DATA_COPY` the path of the Non-Bubble data that you have just copied.
 
         ```bash
         python clustering.py class_num model_version $PATH_TO_NONRING_DATA_COPY
@@ -92,11 +93,12 @@ To create Non-Bubble data from Fits data, it is first necessary to generate fits
 
 #### Make validation data
 
-To create Validation data, you can refer to the `make_val_data.py` script in the `photoutils/Val_data` directory. Follow these steps:
+Please refer to sub-subsection 3.2.2 of the paper for more details on validation data. To create validation data, use `make_val_data.py` in the `photoutils/Val_data` folder.
 
 1. **Create Validation data**
 
-    Run `make_val_data.py`. Replace `PATH_TO_SPITZER_DATA` with the path to your spitzer data, and `PATH_TO_OUTPUT_VALIDATION_DATA` with the desired path for the output Validation data:
+    Run `make_val_data.py`. Please replace `PATH_TO_SPITZER_DATA` with the path where the spitzer data is located and `PATH_TO_OUTPUT_VALIDATION_DATA` with the folder where the created Validation data will be saved.
+    
     ```bash
     export PATH_TO_OUTPUT_VALIDATION_DATA = /home/filament/jupyter/workspace/cut_val_png
     python make_val_data.py $PATH_TO_SPITZER_DATA $PATH_TO_OUTPUT_VALIDATION_DATA
@@ -107,7 +109,7 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
 
 1. **Start learning**
 
-    Run `train_main.py`. For spitzer_path, savedir_path, NonRing_data_path and validation_data_path, change the path to suit your environment accordingly:
+    Run `train_main.py`. Please replace as appropriate for your environment regarding `spitzer_path`, `savedir_path`, `NonRing_data_path` and `validation_data_path`.
 
     ```bash
     cd photoutils
@@ -129,11 +131,11 @@ To create Validation data, you can refer to the `make_val_data.py` script in the
 
     <details><summary> <span style="color: blue; ">Run photoutils_clustering</span></summary>
 
-    if you run `photoutils_clustering` script, follow these steps:
+    Run `train_main.py` in the `photoutils_clustering` folder. The command options are almost the same, but there are two different options.
 
     1. **Run train_main.py in the `photoutils_clustering`**:
-
-        Replace `class_num` with the determined number of classes. `NonRing_remove_class_list` and `NonRing_aug_num` are also replaced with a predetermined value:
+        
+        Please set `class_num` to the number of classes you have clustered Non-Bubble data. Please set `NonRing_remove_class_list` to the classes with Spitzer bubble characteristics and `NonRing_aug_num` to 0 for the classes in the NonRing_remove_class_list and 1 for the others. *It does not necessarily have to be 0 or 1, increase the number as much as you want to increase it. 
 
         ```bash
         cd photoutils_clustering
