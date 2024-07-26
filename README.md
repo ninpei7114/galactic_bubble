@@ -158,7 +158,7 @@ Please refer to sub-subsection 3.2.2 of the paper for more details on validation
         --NonRing_aug_num 1 1 1 1 1 0 1 1 1 0
         ```
 
-        **Note**: Before executing the command, the clustered Non-Ring must be formed.
+        **Note**: Before running the command, the clustered Non-Ring must be formed.
 
     </details>
 
