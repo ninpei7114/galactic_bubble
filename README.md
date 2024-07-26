@@ -17,38 +17,40 @@ We propose a deep learning model that can detect Spitzer bubbles comprehensively
 
 
 ## <span style="color: green; ">Environment</span>
-To establish the Docker environment for this project, follow these steps:
+Follow the steps below to build the Docker environment for training the models used in this study.
 
 1. **Git clone this repository**
 
-2. **Build the Docker image by running the following command in the terminal**
+2. **Run the following command in terminal to build the Docker image.**
 
     ```bash
     ./build.sh
     ```
 
-    This will create a Docker image with the tag `cuda-python`.
+    As a result of executing this command, a Docker image with the tag `cuda-python` is generated.
 
-3. **Run a Docker container based on the image you just built. Change pathes in `docker-run.sh`.**
+3. **Next, create a Docker container from the image you have just built.**
+    Run `docker-run.sh`, but you need to rewrite the path of the folder to be referenced to suit your own environment. The docker environment is then built by running the following command.
 
     ```bash
     ./docker-run.sh
     ```
 
-    This will start a container and run your project inside it.
+    Note: The above example assumes that Docker has been installed. Please refer to the various articles on how to install docker.
 
-Make sure you have Docker installed on your machine before following these steps.
 
 ## <span style="color: green; ">Datasets</span>
+
+Non-Bubble data and validation data need to be created in advance of the training.
 
 #### Make Non-Bubble data
 About Non-Bubble data, see subsection 3.2 in the paper.
 
-To create Non-Bubble data, please run `mak_circle_nan_fits.py` script in the `make_fits` folder following these steps.
+To create Non-Bubble data from Fits data, it is first necessary to generate fits where the area the MWP-Bubble exists is filled with NaN. Run the file `mak_circle_nan_fits.py` in the `make_fits` folder as following steps.
 
-1. **Create fits where the Spitzer bubble position is Nan to make Non-Bubble data**
+1. **Create fits where the area the MWP-Bubble exists is filled with NaN**
 
-    Run `mak_circle_nan_fits.py`. Replace `PATH_TO_SPITZER_DATA` with the path to your spitzer data, and `PATH_TO_NANFITS_FILE` with the desired path for the output fits:
+    Run `mak_circle_nan_fits.py`. Please change `PATH_TO_SPITZER_DATA` to the path of your spitzer data, and `PATH_TO_NANFITS_FILE` to the folder where the new fits will be created. If you do not have the Spitzer data, please contact us at the e-mail address in the paper.
 
     ```bash
     cd make_fits
@@ -56,11 +58,11 @@ To create Non-Bubble data, please run `mak_circle_nan_fits.py` script in the `ma
     export PATH_TO_NANFITS_FILE = /home/filament/jupyter/fits_data/ring_to_circle_nan_fits
     python mak_circle_nan_fits.py $PATH_TO_SPITZER_DATA $PATH_TO_NANFITS_FILE
     ```
-    This will execute the script and generate fits where the spitzer bubble position is Nan.
 
-2. **Create Non-Bubbl data**
 
-    Run `make_NonRing.py`. Replace `PATH_TO_NANFITS_FILE` with path of created fits where the location of the spitzer bubble is Nan, and `PATH_TO_OUTPUT_NONBUBBLE_DATA` with the desired path for the output Non-Bubble data:
+2. **Create Non-Bubble data**
+
+    Run `make_NonRing.py`. Please change `PATH_TO_NANFITS_FILE` to the path of the fits filled with NaN in the area of the MWP-Bubble, and `PATH_TO_OUTPUT_NONBUBBLE_DATA` to the folder where the created Non-Bubble data is saved, respectively.
 
     ```bash
     cd photoutils/Non_Ring
