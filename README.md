@@ -74,7 +74,7 @@ FitsデータからNon-Bubble data作成のためには、まずMWP-Bubbleが存
     ```
 
     <details><summary> <span style="color: blue; ">Non-Bubble dataのclustering</span></summary>
-    clusterinの詳細については、論文の subsection 4.3 をご参照ください.
+    clusteringの詳細については、論文の subsection 4.3 をご参照ください.
 
     1. **作成したNon-Bubble dataをコピーする**
 
