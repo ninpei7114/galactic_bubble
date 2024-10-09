@@ -163,6 +163,6 @@ Please refer to sub-subsection 3.2.2 of the paper for more details on validation
     </details>
 
 ### Acknowledgement
-I would like to thank all the FUGIN-AI members who were involved in this study, and I would also like to thank Shota Ueda for his generous support. I am grateful to Nakatani Shuyo / Cybozu Labs Inc. for his careful assistance on this code.
+I would like to thank all the FUGIN-AI members who were involved in this study, and I would also like to thank Shota Ueda and Shuyo Nakatani (Cybozu Labs Inc.) for their generous support and careful assistance on this code.
 
 This work was supported by the 'Young interdisciplinary collaboration project' in the National Institutes of Natural Sciences (NINS), Japan. This work was also supported by JST SPRING, Grant Number JPMJSP2139.
