@@ -95,7 +95,7 @@ def main(args):
         if region == "Cygnus":
             hdu_r = astropy.io.fits.open(args.Cygnus_path + "/" + "M1_fits_file/M1_cygnus_2.4.fits")[0]
             hdu_g = astropy.io.fits.open(args.Cygnus_path + "/" + "I4_fits_file/I4_2.4_reg.fits")[0]
-            hdu_b = astropy.io.fits.open(args.Cygnus_path + "/" + "I1_fits_file/I1_2.4_reg.fits")[0].data
+            hdu_b = astropy.io.fits.open(args.Cygnus_path + "/" + "I1_fits_file/I1_2.4_reg.fits")[0]
             savedir_name = f"{args.save_dir}/Cygnus_LMC_SMC_png/{region}"
             r_resolution = hdu_r.header["CDELT2"] * 3600
             g_resolution = hdu_g.header["CDELT2"] * 3600
